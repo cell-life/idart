@@ -34,6 +34,7 @@ public class DatabaseTools {
 
 	private static final String SOUTH_AFRICA_CLINICS = "org/celllife/idart/database/changelog-South_Africa_clinics.xml";
 	private static final String NIGERIA_CLINICS = "org/celllife/idart/database/changelog-Nigeria_clinics.xml";
+	private static final String NIGERIA_FGHIN_CLINICS = "org/celllife/idart/database/changelog-Nigeria_FGHIN_clinics.xml";
 
 	private static Logger log = Logger.getLogger(DatabaseTools.class);
 
@@ -270,6 +271,7 @@ public class DatabaseTools {
 			update(SOUTH_AFRICA_CLINICS);
 		} else if(iDartProperties.country.equalsIgnoreCase("Nigeria")) {
 			update(NIGERIA_CLINICS);
+			update(NIGERIA_FGHIN_CLINICS);
 		}
 	}
 

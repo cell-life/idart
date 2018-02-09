@@ -70,14 +70,12 @@ public class ExcelReportManager {
 			Connection db = JDBCUtil.currentSession();
 			Statement sql = db.createStatement();
 
-			String query = "select distinct d.id, d.name, d.packsize, a.code as atccode, d.stockcode "
-					+ "from drug as d "
-                    + "left outer join stock as s on s.drug = d.id "
-                    + "left outer join atccode as a on d.atccode_id = a.id "
-					+ "where s.pharmacy = "
+			String query = "select distinct d.id, d.name, d.packsize, d.nsncode,d.stockcode "
+					+ "from drug as d, stock as s "
+					+ "where s.drug = d.id "
+					+ "and s.pharmacy = "
 					+ stockCenter.getId()
-					+ "and d.sidetreatment = 'F' "
-                    + "order by d.name asc";
+					+ "and d.sidetreatment = 'F' " + "order by d.name asc";
 
 			ResultSet drugs = sql.executeQuery(query);
 

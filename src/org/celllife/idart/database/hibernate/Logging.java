@@ -168,11 +168,4 @@ public class Logging {
 		this.iDart_User = iDart_User;
 	}
 
-	@Override
-	public String toString() {
-		return "Logging [id=" + id + ", transactionDate=" + transactionDate
-				+ ", iDart_User=" + iDart_User + ", transactionType="
-				+ transactionType + ", itemId=" + itemId + ", modified="
-				+ modified + ", message=" + message + "]";
-	}
 }

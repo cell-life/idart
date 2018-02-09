@@ -33,16 +33,11 @@
 	</path>
 
 	<if>
-        <or>
-            <equals arg1="${os.name.override}" arg2="Windows" />
-            <equals arg1="${os.name}" arg2="Windows" />
-        </or>
-        <then>
-            <echo message="Using Windows SWT Libraries"/>
+		<equals arg1="${os.name}" arg2="Windows" />
+		<then>
 			<property name="os" value="win" />
 		</then>
 		<else>
-            <echo message="Using GTK SWT Libraries"/>
 			<property name="os" value="gtk" />
 		</else>
 	</if>
@@ -69,8 +64,7 @@
 		<mkdir dir="${stats.dir}" />
 
 		<!-- Discover code and database versions via regular expressions -->
-        <!-- SVN post 1.7 uses this -->
-        <exec executable="svnversion" outputproperty="svnversion" />
+<exec executable="svnversion" outputproperty="svnversion" />
         <propertyregex property="idart.version.build" input="${svnversion}" regexp="^([^:]+)" select="\1" defaultValue="unknown" />
 		<loadfile srcfile="${idart.version.revision.filename}" property="repositoryFileInput" failonerror="false" />
 		<if>
@@ -269,9 +263,9 @@
 	<target name="prepareRelease" depends="init">
 		<mkdir dir="${release.dir}" />
 
-		<get dest="${release.dir}/iDART_Quick_Reference_Guide.pdf" src="http://svn.cell-life.org/svn/docs/iDART/iDART%20Support%20Documents/User%20Manuals/iDART%203.7%20Quick%20Reference%20Guide.pdf" username="build" password="clbuild" />
+		<get dest="${release.dir}/iDART_Support_manual.pdf" src="http://svn.cell-life.org/svn/docs/iDART/iDART%20Support%20Documents/Support%20Manual/iDART%20Support%20Manual.pdf" username="build" password="clbuild" />
 
-		<get dest="${release.dir}/iDART_User_Guide.pdf" src="http://svn.cell-life.org/svn/docs/iDART/iDART%20Support%20Documents/User%20Manuals/iDART%203%207%20User%20Guide.pdf" username="build" password="clbuild" />
+		<get dest="${release.dir}/iDART_User_manual.pdf" src="http://svn.cell-life.org/svn/docs/iDART/iDART%20Support%20Documents/User%20Manuals/iDART%203.4%20User%20Manual.pdf" username="build" password="clbuild" />
 
 		<copy file="${installer.name}" tofile="${release.dir}/${release.installer.name}" />
 		<copy todir="${release.dir}">
@@ -280,26 +274,62 @@
 			</fileset>
 		</copy>
 
-		<replaceregexp file="${release.dir}/readme.md" match="\$idartVersion" replace="${idart.version.major}.${idart.version.minor}.${idart.version.revision}" byline="true" />
+		<mkdir dir="${release.dir}/updateScripts" />
+		<copy todir="${release.dir}/updateScripts">
+			<fileset dir="${update.script.dir}">
+				<include name="idart_*_to*-sqldiff.sql" />
+			</fileset>
+		</copy>
+
+		<replaceregexp file="${release.dir}/readme.txt" match="\$idartVersion" replace="${idart.version.major}.${idart.version.minor}.${idart.version.revision}" byline="true" />
 	</target>
 
 	<target name="zipRelease">
-		<loadfile srcfile="${release.dir}/readme.md" property="readme" />
+		<loadfile srcfile="${release.dir}/readme.txt" property="readme" />
 		<if>
-			<or>
-				<contains string="${readme}" substring="INSERT CHANGELOG HERE" casesensitive="false" />
-				<contains string="${readme}" substring="INSERT UPGRADE NOTES HERE" casesensitive="false" />
-			</or>
+			<contains string="${readme}" substring="INSERT CHANGELOG HERE" casesensitive="false" />
 			<then>
-				<fail>Add the changelog and update notes to the readme.md file before continuing.</fail>
+				<fail>Add the changelog to the readme.txt file before continuing.</fail>
 			</then>
 		</if>
 
 		<zip destfile="${release.dir}.zip">
-			<zipfileset dir="${release.dir}" prefix="${release.dir}">
-				<exclude name="readme.md" />
-			</zipfileset>
+			<zipfileset dir="${release.dir}" prefix="${release.dir}" />
 		</zip>
+	</target>
+
+	<!-- *****************************************************************-->
+	<!-- **          Upload release files to Sourceforge	            **-->
+	<!-- *****************************************************************-->
+	<target name="upload_release_to_sf">
+		<if>
+			<not>
+				<available file="${user.home}/.ant/lib/jsch-0.1.44.jar" />
+			</not>
+			<then>
+				<copy todir="${user.home}/.ant/lib" file="${build.tools.dir}/jsch/jsch-0.1.44.jar" />
+				<fail>You will need to restart Eclipse to use this task</fail>
+			</then>
+		</if>
+
+		<loadfile srcfile="${release.dir}/readme.txt" property="readme" />
+		<if>
+			<contains string="${readme}" substring="INSERT CHANGELOG HERE" casesensitive="false" />
+			<then>
+				<fail>Add the changelog to the readme.txt file before continuing.</fail>
+			</then>
+		</if>
+
+		<input message="Please enter SourceForge username:" addproperty="sf.user" />
+		<input message="Please enter SourceForge password:" addproperty="sf.password" />
+		<property name="versionlong" value="${idart.version.major}.${idart.version.minor}.${idart.version.revision}" />
+		<sshexec host="frs.sourceforge.net" username="${sf.user},idart" password="${sf.password}" command="mkdir -p iDART-${versionlong}" />
+
+		<scp localFile="${release.dir}/readme.txt" remoteTofile="${sf.user},idart@frs.sourceforge.net:/home/frs/project/i/id/idart/idart/iDART-${versionlong}/readme.rst" password="${sf.password}" trust="true" />
+		<scp localFile="${release.dir}/iDART_User_manual.pdf" todir="${sf.user},idart@frs.sourceforge.net:/home/frs/project/i/id/idart/idart/iDART-${versionlong}" password="${sf.password}" trust="true" />
+		<scp localFile="${release.dir}/iDART_Support_manual.pdf" todir="${sf.user},idart@frs.sourceforge.net:/home/frs/project/i/id/idart/idart/iDART-${versionlong}" password="${sf.password}" trust="true" />
+		<scp localFile="${release.dir}/${release.dir}.zip" todir="${sf.user},idart@frs.sourceforge.net:/home/frs/project/i/id/idart/idart/iDART-${versionlong}" password="${sf.password}" trust="true" />
+		<echo>DON'T FORGET TO LOG IN TO SOURCEFORGE AND SET THE DEFAULT DOWNLOAD TO THE NEW RELEASE</echo>
 	</target>
 
 	<!-- *****************************************************************-->
@@ -334,13 +364,10 @@
 			<src path="testGui" />
 		</javac>
 	</target>
-	
-	<target name="generate-test-properties">
-			<property name="useTestDatabase" value="true" />
-			<antcall target="generateProperties" />
-	</target>
 
-	<target name="test" depends="generate-test-properties, compile-tests" description="Runs the unit tests">
+	<target name="test" depends="compile-tests" description="Runs the unit tests">
+		<property name="useTestDatabase" value="true" />
+		<antcall target="generateProperties" />
 		<testng outputDir="${testng.report.dir}" haltOnfailure="true" listeners="org.celllife.idart.test.LoggingTestListener">
 			<classpath>
 				<path refid="Run.ClassPath" />
@@ -455,7 +482,7 @@
 			<arg value="Reports/" />
 		</java>
 	</target>
-
+	
 	<!-- *****************************************************************-->
 	<!-- **                        DOCUMENTATION                        **-->
 	<!-- *****************************************************************-->

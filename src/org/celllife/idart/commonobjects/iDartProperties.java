@@ -1,20 +1,18 @@
 package org.celllife.idart.commonobjects;
 
-import org.apache.log4j.Logger;
-import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.misc.PropertiesEncrypter;
-import org.celllife.idart.misc.iDARTRuntimeException;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Properties;
 
-public class iDartProperties {
+import org.apache.log4j.Logger;
+import org.celllife.idart.misc.PatientBarcodeParser;
+import org.celllife.idart.misc.PropertiesEncrypter;
+import org.celllife.idart.misc.iDARTRuntimeException;
 
-    public enum LabelType {
-        EKAPA, IDART
-    }
+/**
+ */
+public class iDartProperties {
 
 	public static final String SWTBOT_KEY = "org.eclipse.swtbot.widget.key";
 
@@ -41,7 +39,7 @@ public class iDartProperties {
 	public static String hibernateUsername = "";
 
 	public static String hibernateDriver = "org.postgresql.Driver";
-
+	
 	public static String hibernateDialect = "org.hibernate.dialect.PostgreSQLDialect";
 
 	public static String updateScriptDir = "scripts";
@@ -95,28 +93,28 @@ public class iDartProperties {
 	public static boolean nextAppointmentDateOnLabels = true;
 
 	public static boolean showBatchInfoOnSummaryLabels = false;
-
 	public static boolean showBatchInfoOnDrugLabels = false;
-
+	
 	public static String country = "South Africa";
 
 	public static Locale currentLocale = new Locale("en", "ZA");
 
 	public static String importDateFormat = "dd/MM/yyyy";
-
+	
 	public static boolean enableDrugGroupEditor = true;
-
+	
 	public static boolean enableDrugEditor = true;
-
+	
 	public static boolean isCidaStudy = false;
 	
-	public static String clinicCode = "0000";
-	
-	public static boolean appointmentReminders = false;
-
 	public static String illegalPatientIdChars = "'`^";
-
 	public static String illegalPatientIdRegex = "["+illegalPatientIdChars+"]+";
+	
+	/**
+	 */
+	public enum LabelType {
+		EKAPA, IDART
+	}
 
 	public static LabelType labelType = LabelType.IDART;
 
@@ -133,7 +131,6 @@ public class iDartProperties {
 	}
 
 	public static void setiDartProperties() {
-
 		log = Logger.getLogger(iDartProperties.class);
 		log.info("Loading Encrypted System Properties");
 
@@ -190,15 +187,11 @@ public class iDartProperties {
 		eKapa_user = setStringProperty("eKapa_user");
 
 		intValueOfAlternativeBarcodeEndChar = setIntegerProperty("intValueOfAlternativeBarcodeEndChar");
-
+		
 		isCidaStudy = setBooleanProperty("cidaStudy");
-		
-		clinicCode = setStringProperty("clinicCode");
-		
-		appointmentReminders = setBooleanProperty("appointmentReminders");
 
 		String labelTypeString = setStringProperty("labelType");
-		// FIXME: Should paeds labels have quantities blank by default?
+		// Should paeds labels have quantities blank by default?
 		if (labelTypeString != null) {
 			if (labelTypeString.equalsIgnoreCase("idart")) {
 				labelType = LabelType.IDART;
@@ -261,6 +254,10 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("encrypted_hibernate_url="+hibernateConnectionUrl);
 		sb.append("\n");
+		sb.append("hibernate_dialect="+hibernateDialect);
+		sb.append("\n");
+		sb.append("hibernate_driver="+hibernateDriver);
+		sb.append("\n");
 		sb.append("encrypted_hibernate_password="+hibernatePassword);
 		sb.append("\n");
 		sb.append("encrypted_hibernate_username="+hibernateUsername);
@@ -286,10 +283,6 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("cidaStudy=" + isCidaStudy);
 		sb.append("\n");
-		sb.append("clinicCode=" + clinicCode);
-		sb.append("\n");
-		sb.append("appointmentReminders=" + appointmentReminders);
-		sb.append("\n");
 
 		switch (labelType) {
 		case EKAPA:
@@ -301,10 +294,30 @@ public class iDartProperties {
 		}
 		return sb.toString();
 	}
+	
+	/**
+	 * Returns the msisdn prefix for the specified locale (from sms.properties)
+	 * @return String indicating the prefix (e.g. 27 for ZA and 234 for NG)
+	 */
+	public static String msisdnPrefix() {
+		String locale = currentLocale.getCountry();
+		String prefix = PropertiesManager.smsRaw().getProperty(locale + "." + SmsProperties.MSISDN_PREFIX);
+		return prefix;
+	}
+	
+	/**
+	 * Returns a regex expression that can be used for validating a cellphone number for a specific locale (from sms.properties)
+	 * @return String the regex expression
+	 */
+	public static String msisdnRegex() {
+		String locale = currentLocale.getCountry();
+		String regex = PropertiesManager.smsRaw().getProperty(locale + "." + SmsProperties.MSISDN_REGEX);
+		return regex;
+	}
 
 	/**
 	 * Method setIntegerProperty.
-	 *
+	 * 
 	 * @param propertyName
 	 *            String
 	 * @return int
@@ -324,7 +337,7 @@ public class iDartProperties {
 
 	/**
 	 * Method setBooleanProperty.
-	 *
+	 * 
 	 * @param propertyName
 	 *            String
 	 * @return boolean
@@ -340,7 +353,7 @@ public class iDartProperties {
 
 	/**
 	 * Method setStringProperty.
-	 *
+	 * 
 	 * @param propertyName
 	 *            String
 	 * @return String
@@ -357,7 +370,7 @@ public class iDartProperties {
 
 	/**
 	 * Set the current locale from the country and language codes
-	 *
+	 * 
 	 * @param propertyNameLanguage
 	 * @param propertyNameCountry
 	 */
@@ -386,7 +399,7 @@ public class iDartProperties {
 
 	/**
 	 * Generates a string of name value pairs for the fields in this class.
-	 *
+	 * 
 	 * @return String listing all the values of the properties in this class.
 	 * @throws ClassNotFoundException
 	 * @throws IllegalAccessException

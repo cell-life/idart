@@ -8,7 +8,6 @@ import org.celllife.idart.database.hibernate.AttributeType;
 import org.celllife.idart.database.hibernate.IdentifierType;
 import org.celllife.idart.database.hibernate.Patient;
 import org.celllife.idart.database.hibernate.PatientAttribute;
-import org.celllife.idart.database.hibernate.PatientAttributeInterface;
 import org.celllife.idart.database.hibernate.PatientIdentifier;
 import org.celllife.idart.test.HibernateTest;
 import org.testng.Assert;
@@ -29,22 +28,19 @@ public class PatientManagerTest extends HibernateTest {
 		getSession().createQuery("delete from PatientAttribute").executeUpdate();
 		
 		patient = new Patient();
-		patient.setPatientId("managerTest");
+		patient.setPatientId("attribTest");
 		patient.setClinic(AdministrationManager.getMainClinic(getSession()));
 		patient.setSex('M');
 		patient.setModified('T');
-
-		IdentifierType type = new IdentifierType("type1",1);
-		getSession().save(type);
-		
 		PatientIdentifier e = new PatientIdentifier();
-		e.setType(type);
+		e.setType(new IdentifierType("type1",1));
 		e.setPatient(patient);
 		e.setValue("attribTest");
 		patient.getPatientIdentifiers().add(e);
 		getSession().save(patient);
 		
 		getSession().flush();
+		
 	}
 	
 	@Test
@@ -71,21 +67,6 @@ public class PatientManagerTest extends HibernateTest {
 		Patient search = PatientManager.getPatient(getSession(), patient.getPatientId());
 		Assert.assertNotNull(search);
 		Assert.assertEquals(patient.getId(), search.getId());
-	}
-	
-	@Test
-	public void testGetPatientsWithAttribute(){
-		
-		AttributeType t2 = PatientManager.addAttributeTypeToDatabase(getSession(), Date.class, PatientAttributeInterface.ARV_START_DATE, "");
-		PatientAttribute att2 = new PatientAttribute();
-		att2.setPatient(patient);
-		att2.setType(t2);
-		getSession().save(att2);
-		getSession().flush();
-		
-		List<Integer> list = PatientManager.getPatientsWithAttribute(getSession(), PatientAttributeInterface.ARV_START_DATE);
-		Assert.assertTrue(!list.isEmpty());
-		Assert.assertEquals(list.get(0).intValue(), patient.getId());
 	}
 	
 	@Test

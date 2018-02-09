@@ -57,10 +57,7 @@ public class StudyManagerTest extends IDARTtest{
 			
 			Cell cell = StudyManager.getRandomizedStudyGroup(sp);
 			Assert.assertNotNull(cell);
-			sp.setRandCell(cell);
-			StudyManager.commitRandomization(sp);
-			
-			if ((male+female)%100 == 0){
+			if (male+female%100 == 0){
 				// simulate logging out and in
 				StudyManager.randb = null;
 			}

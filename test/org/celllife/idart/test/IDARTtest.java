@@ -20,4 +20,19 @@ public class IDARTtest {
 		super();
 	}
 
+	// @AfterSuite
+	// public void writeMonitorReport() {
+	// StringBuffer report = new StringBuffer();
+	// report.append("<html><head></head><body>");
+	// report.append(MonitorFactory.getReport());
+	// report.append("</body></html>");
+	//
+	// File f = new File("monitorReport.html");
+	// try {
+	// FileUtils.writeStringToFile(f, report.toString());
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	// }
+
 }

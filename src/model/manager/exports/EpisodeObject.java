@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 
 import model.manager.exports.columns.EpisodeDetailsEnum;
 

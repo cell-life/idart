@@ -79,11 +79,12 @@ import com.pholser.util.properties.ValuesSeparatedBy;
  *  missedAppointmentSms2_message_French=Vous avez rat� votre rendez-vous il ya 7 jours
  * </pre>
  * 
- * see sms.properties file
+ * @see sms.properties file
  */
 public interface SmsProperties {
 
 	public String MSISDN_REGEX = "msisdnRegex";
+	public String MSISDN_PREFIX = "msisdnPrefix";
 
 	@DefaultsTo("-1")
 	@BoundProperty("appointmentReminder1_daysBefore")
@@ -126,22 +127,6 @@ public interface SmsProperties {
 	@BoundProperty("communicatePassword")
 	public String mobilisrpassword();
 
-    @BoundProperty("appointmentRemindersUrl")
-    public String appointmentRemindersUrl();
-
-    @BoundProperty("appointmentRemindersUsername")
-    public String appointmentRemindersUsername();
-
-    @BoundProperty("appointmentRemindersPassword")
-    public String appointmentRemindersPassword();
-    
-    /**
-     * The background task to communicate with the ARS is run every x number of minutes.
-     */
-    @DefaultsTo("10")
-    @BoundProperty("appointmentReminderTaskMinutes")
-    public int appointmentReminderTaskMinutes();
-
 	/**
 	 * All participants in the control group are added to this campaign. Leave
 	 * as -1 this is not desired.
@@ -149,10 +134,6 @@ public interface SmsProperties {
 	@DefaultsTo("-1")
 	@BoundProperty("controlCampaignId")
 	public Long controlcampaignid();
-
-    @DefaultsTo("0")
-    @BoundProperty("sendRemindersToAll")
-    public Long sendRemindersToAll();
 
 	/**
 	 * The default value for the custom message time on the 'Add participants to
@@ -173,15 +154,4 @@ public interface SmsProperties {
 	@BoundProperty("mobileNetworks")
 	@ValuesSeparatedBy(pattern = "\\s*,\\s*")
 	public List<String> networks();
-
-	@BoundProperty("msisdnPrefix")
-	public String msisdnPrefix();
-	
-	/**
-	 * Note that this property does not work due to parsing issues.
-	 * Use {@link PropertiesManager#smsRaw()} to get the property
-	 */
-	@BoundProperty("msisdnRegex")
-	@Deprecated
-	public String msisdnRegex();
 }

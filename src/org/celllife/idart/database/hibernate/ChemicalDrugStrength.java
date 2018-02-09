@@ -122,24 +122,40 @@ public class ChemicalDrugStrength {
 		this.drug = drug;
 	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int PRIME = 31;
+		int result = 1;
+		result = PRIME * result + (strength ^ (strength >>> 32));
+		result = PRIME
+		* result
+		+ ((chemicalCompound.getName() == null) ? 0 : chemicalCompound
+				.getName().hashCode());
+		return result;
 
-        ChemicalDrugStrength that = (ChemicalDrugStrength) o;
+	}
 
-        if (strength != that.strength) return false;
-        if (chemicalCompound != null ? !chemicalCompound.equals(that.chemicalCompound) : that.chemicalCompound != null)
-            return false;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final ChemicalDrugStrength other = (ChemicalDrugStrength) obj;
+		if (strength != other.strength)
+			return false;
+		if (chemicalCompound.getName() == null) {
+			if (other.chemicalCompound.getName() != null)
+				return false;
+		} else if (!chemicalCompound.getName().equals(
+				other.getChemicalCompound().getName()))
+			return false;
+		return true;
 
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = chemicalCompound != null ? chemicalCompound.hashCode() : 0;
-        result = 31 * result + strength;
-        return result;
-    }
+	}
 }

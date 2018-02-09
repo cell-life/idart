@@ -1,9 +1,8 @@
-package org.celllife.idart.utils;
+package org.celllife.idart.misc;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.misc.iDARTErrorDialog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 

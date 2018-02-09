@@ -1,18 +1,32 @@
 package model.manager;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
 import model.manager.exports.columns.EpisodeDetailsEnum;
 import model.nonPersistent.ExportDrugInfo;
 import model.nonPersistent.ExportPackageInfo;
-import org.celllife.idart.database.hibernate.*;
+
+import org.celllife.idart.database.hibernate.AccumulatedDrugs;
+import org.celllife.idart.database.hibernate.Drug;
+import org.celllife.idart.database.hibernate.Episode;
+import org.celllife.idart.database.hibernate.Packages;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PatientAttributeTest;
+import org.celllife.idart.database.hibernate.Pregnancy;
+import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.idart.test.HibernateTest;
-import org.celllife.idart.utils.iDARTUtil;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.*;
 
 public class PatientSetManagerTest extends HibernateTest {
 

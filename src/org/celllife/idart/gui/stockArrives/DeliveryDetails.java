@@ -26,7 +26,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
-import java.util.List;
 
 import model.manager.AdministrationManager;
 import model.manager.DrugManager;
@@ -72,7 +71,7 @@ public class DeliveryDetails extends GenericFormGui {
 
 	private Text txtDrugName;
 
-	private CCombo cmbManufacturer;
+	private Text txtManufacturer;
 
 	private Text txtDescription;
 
@@ -241,32 +240,19 @@ public class DeliveryDetails extends GenericFormGui {
 		lblManufacturer.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		lblManufacturer.setText("Manufacturer");
 
-		cmbManufacturer = new CCombo(grpBatchDetails, SWT.BORDER);
-		cmbManufacturer.setBounds(new Rectangle(135, 30, 220, 20));
-		cmbManufacturer.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		cmbManufacturer.setVisibleItemCount(13);
-		
-		cmbManufacturer.addKeyListener(new KeyAdapter() {
+		txtManufacturer = new Text(grpBatchDetails, SWT.BORDER);
+		txtManufacturer.setBounds(new Rectangle(135, 30, 185, 20));
+		txtManufacturer.setEditable(true);
+		txtManufacturer.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
+		txtManufacturer.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String theText = cmbManufacturer.getText();
-				String[] items = cmbManufacturer.getItems();
-				for (int i = 0; i < items.length; i++) {
-					if (items[i].equalsIgnoreCase(theText)) {
-						cmbManufacturer.setText(items[i]);
-						txtBatchNumber.setFocus();
-					}
-				}
+
 				if (e.character == SWT.CR) {
 					btnSave.setFocus();
 				}
 			}
 		});
-		
-		List<String> manufacturers = StockManager.getStockManufacturers(getHSession());
-		for (String manufacturer : manufacturers) {
-			cmbManufacturer.add(manufacturer);
-		}
 
 		// Batch number
 		Label lblBatchNumber = new Label(grpBatchDetails, SWT.NONE);
@@ -518,10 +504,10 @@ public class DeliveryDetails extends GenericFormGui {
 
 			String manu = getPreviousManufacturer(theDrug);
 			if (manu == null) {
-				cmbManufacturer.setFocus();
+				txtManufacturer.setFocus();
 			} else {
 				txtBatchNumber.setFocus();
-				cmbManufacturer.setText(manu);
+				txtManufacturer.setText(manu);
 			}
 
 		}
@@ -691,7 +677,7 @@ public class DeliveryDetails extends GenericFormGui {
 
 		// txtBarcode.setText("");
 		txtDrugName.setText("");
-		cmbManufacturer.setText("");
+		txtManufacturer.setText("");
 		txtDescription.setText("");
 		txtPackSize.setText("");
 		txtBatchNumber.setText("");
@@ -722,9 +708,9 @@ public class DeliveryDetails extends GenericFormGui {
 			String manu = getPreviousManufacturer(DrugManager.getDrug(
 					getHSession(), drugSearch.getValueSelected()[0]));
 			if (manu == null) {
-				cmbManufacturer.setFocus();
+				txtManufacturer.setFocus();
 			} else {
-				cmbManufacturer.setText(manu);
+				txtManufacturer.setText(manu);
 				txtBatchNumber.setFocus();
 			}
 
@@ -746,20 +732,18 @@ public class DeliveryDetails extends GenericFormGui {
 
 		txtDescription.setEnabled(enable);
 		txtPackSize.setEnabled(enable);
-		cmbManufacturer.setEnabled(enable);
+		txtManufacturer.setEnabled(enable);
 		txtBatchNumber.setEnabled(enable);
 		cmbExpiryMonth.setEnabled(enable);
 		cmbExpiryYear.setEnabled(enable);
 		txtUnitsReceived.setEnabled(enable);
 		txtShelfNo.setEnabled(enable);
 		txtUnitPrice.setEnabled(enable);
+
+		cmbStockCenter.setBackground(ResourceUtils.getColor(iDartColor.WHITE));
 		cmbStockCenter.setEnabled(enable);
 
 		btnArrivalDatePicker.setEnabled(enable);
-
-		cmbManufacturer.setBackground(enable ? ResourceUtils
-				.getColor(iDartColor.WHITE) : ResourceUtils
-				.getColor(iDartColor.GRAY));
 
 		cmbExpiryMonth.setBackground(enable ? ResourceUtils
 				.getColor(iDartColor.WHITE) : ResourceUtils
@@ -924,7 +908,7 @@ public class DeliveryDetails extends GenericFormGui {
 				getHSession(), cmbStockCenter.getText()));
 		tableItem.setText(5, newStock.getStockCenter().getStockCenterName());
 
-		newStock.setManufacturer(cmbManufacturer.getText());
+		newStock.setManufacturer(txtManufacturer.getText());
 		tableItem.setText(6, newStock.getManufacturer());
 
 		newStock.setBatchNumber(txtBatchNumber.getText());

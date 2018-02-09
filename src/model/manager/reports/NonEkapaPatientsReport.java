@@ -59,9 +59,11 @@ public class NonEkapaPatientsReport extends AbstractJasperReport {
 			theStringList.add(s);
 		}
 
+		// FIXME: (simon - multi ids) add in patient identifiers 
+		
 		// print the header
 		theStringList.add(0, new String[] { "patientid", "patientname",
-				"dateofbirth", "sex", "episode start date" });
+				"dateofbirth", "sex" });
 
 		csvFile = createCSVFile("tmpNonEkapaPatients.csv", theStringList, true);
 	}

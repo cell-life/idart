@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.celllife.idart.commonobjects.PropertiesManager;
-import org.celllife.idart.commonobjects.SmsProperties;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.Campaign;
 import org.celllife.mobilisr.api.rest.CampaignDto;
@@ -146,8 +145,8 @@ public class MobilisrManager {
 	private static ValidatorFactory getValidator(){
 		if (vfactory == null){
 			ValidatorFactoryImpl vf = new ValidatorFactoryImpl();
-			String prefix = PropertiesManager.sms().msisdnPrefix();
-			String regex = PropertiesManager.smsRaw().getProperty(SmsProperties.MSISDN_REGEX);
+			String prefix = iDartProperties.msisdnPrefix();
+			String regex = iDartProperties.msisdnRegex();
 			vf.setCountryRules(Arrays.asList(new MsisdnCountryRule(iDartProperties.country, 
 					prefix, regex)));
 			vfactory = vf;

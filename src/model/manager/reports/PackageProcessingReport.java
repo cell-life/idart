@@ -18,8 +18,8 @@ import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Packages;
 import org.celllife.idart.database.hibernate.Patient;
 import org.celllife.idart.database.hibernate.Prescription;
-import org.celllife.idart.utils.iDARTUtil;
-import org.celllife.idart.utils.PackageLifeStage;
+import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.model.utils.PackageLifeStage;
 import org.eclipse.swt.widgets.Shell;
 
 public class PackageProcessingReport extends AbstractJasperReport {

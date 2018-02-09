@@ -18,30 +18,29 @@
  */
 package org.celllife.idart.gui.drug;
 
-import model.manager.AdministrationManager;
 import model.manager.DrugManager;
+
 import org.apache.log4j.Logger;
-import org.celllife.idart.commonobjects.CommonObjects;
-import org.celllife.idart.database.hibernate.AtcCode;
 import org.celllife.idart.database.hibernate.ChemicalCompound;
+import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.platform.GenericFormGui;
-import org.celllife.idart.gui.search.Search;
 import org.celllife.idart.gui.user.ConfirmWithPasswordDialogAdapter;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import java.util.Set;
-
+/**
+ */
 public class AddChemicalCompound extends GenericFormGui {
 
 	private Text txtName;
@@ -62,20 +61,15 @@ public class AddChemicalCompound extends GenericFormGui {
 
 	private Group grpChemicalCompoundInfo;
 
-	private List lstAtc;
-
-	public static ChemicalCompound compoundAdded = null; // only set if a component has
+	public static String compoundAdded = ""; // only set if a component has
 
 	/**
 	 * Use true if you want to add a new doctor, use false if you are updating
 	 * an existing doctor
 	 * @param parent Shell
-	 * @param cc 
 	 */
-	public AddChemicalCompound(Shell parent, Session session, ChemicalCompound cc) {
-		super(parent, session);
-		localChemicalCompound = cc;
-		populateForm();
+	public AddChemicalCompound(Shell parent) {
+		super(parent, HibernateUtil.getNewSession());
 	}
 
 	/**
@@ -108,110 +102,53 @@ public class AddChemicalCompound extends GenericFormGui {
 
 		// grpChemicalCompoundInfo
 		grpChemicalCompoundInfo = new Group(getShell(), SWT.NONE);
-		grpChemicalCompoundInfo.setBounds(new Rectangle(60, 70, 480, 220));
-		GridLayout gridLayout = new GridLayout(3, false);
-		gridLayout.verticalSpacing = 10;
-		grpChemicalCompoundInfo.setLayout(gridLayout);
+		grpChemicalCompoundInfo.setBounds(new Rectangle(60, 130, 480, 160));
 
 		lblInstructions = new Label(grpChemicalCompoundInfo, SWT.CENTER);
-		lblInstructions.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 3,1));
+		lblInstructions.setBounds(new org.eclipse.swt.graphics.Rectangle(110,
+				15, 260, 20));
 		lblInstructions.setText("All fields marked with * are compulsory");
 		lblInstructions.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_10_ITALIC));
 
 		// lblChemicalCompound & txtChemicalCompound
 		lblName = new Label(grpChemicalCompoundInfo, SWT.NONE);
-		lblName.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblName
+		.setBounds(new org.eclipse.swt.graphics.Rectangle(30, 70, 80,
+				20));
 		lblName.setText("* Name:");
 		lblName.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtName = new Text(grpChemicalCompoundInfo, SWT.BORDER);
-		txtName.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false, 1,1));
+		txtName.setBounds(new org.eclipse.swt.graphics.Rectangle(110, 70, 220,
+				20));
 		txtName.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		lblNameEg = new Label(grpChemicalCompoundInfo, SWT.NONE);
-		lblNameEg.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblNameEg.setBounds(new org.eclipse.swt.graphics.Rectangle(340, 70,
+				120, 20));
 		lblNameEg.setText("e.g. Lamivudine");
 		lblNameEg.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		// lblAcronym & txtAcronym
 		lblAcronym = new Label(grpChemicalCompoundInfo, SWT.NONE);
-		lblAcronym.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblAcronym.setBounds(new org.eclipse.swt.graphics.Rectangle(30, 100,
+				80, 20));
 		lblAcronym.setText("* Acronym:");
 		lblAcronym.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtAcronym = new Text(grpChemicalCompoundInfo, SWT.BORDER);
-		txtAcronym.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false, 1,1));
+		txtAcronym.setBounds(new org.eclipse.swt.graphics.Rectangle(110, 100,
+				220, 20));
 		txtAcronym.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		lblAcronymEg = new Label(grpChemicalCompoundInfo, SWT.NONE);
-		lblAcronymEg.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+
+		lblAcronymEg.setBounds(new org.eclipse.swt.graphics.Rectangle(340, 100,
+				120, 20));
 		lblAcronymEg.setText("e.g. 3TC");
 		lblAcronymEg.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		
-		// atc code
-		Label lblAtc = new Label(grpChemicalCompoundInfo, SWT.NONE);
-		lblAtc.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,2));
-		lblAtc.setText("  ATC Codes:");
-		lblAtc.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		
-		lstAtc = new List(grpChemicalCompoundInfo, SWT.BORDER);
-		lstAtc.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true, 1,2));
-		lstAtc.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		
-		Button btnAtcAdd = new Button(grpChemicalCompoundInfo, SWT.NONE);
-		btnAtcAdd.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
-		btnAtcAdd.setText("Add");
-		btnAtcAdd.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnAtcAdd.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			@Override
-			public void widgetSelected(
-					org.eclipse.swt.events.SelectionEvent e) {
-				cmdAtcAddWidgetSelected();
-			}
-		});
-		btnAtcAdd.setToolTipText("Press this button to search for an ATC drug code.");
-		
-		Button btnAtcRemove = new Button(grpChemicalCompoundInfo, SWT.NONE);
-		btnAtcRemove.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
-		btnAtcRemove.setText("Remove");
-		btnAtcRemove.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnAtcRemove.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			@Override
-			public void widgetSelected(
-					org.eclipse.swt.events.SelectionEvent e) {
-				cmdAtcRemoveWidgetSelected();
-			}
-		});
-		btnAtcRemove.setToolTipText("Press this button to search for an ATC drug code.");
-		
-		grpChemicalCompoundInfo.layout();
-	}
 
-	protected void cmdAtcRemoveWidgetSelected() {
-		int[] selectionIndices = lstAtc.getSelectionIndices();
-		lstAtc.remove(selectionIndices);
-	}
-
-	protected void cmdAtcAddWidgetSelected() {
-		Search atcSearch = new Search(getHSession(), getShell(),
-				CommonObjects.ATC);
-
-		if (atcSearch.getValueSelected() != null) {
-
-			AtcCode atc = AdministrationManager.getAtccodeFromName(getHSession(), atcSearch
-					.getValueSelected()[0]);
-			
-			if (atc == null){
-				return;
-			}
-			Object data = lstAtc.getData(atc.getDisplayName());
-			if (data == null){
-				lstAtc.add(atc.getDisplayName());
-				lstAtc.setData(atc.getDisplayName(), atc);
-			}
-		}
-		
 	}
 
 	/**
@@ -230,19 +167,10 @@ public class AddChemicalCompound extends GenericFormGui {
 
 			// this is a new ChemicalCompound
 			if (localChemicalCompound == null) {
-				localChemicalCompound = new ChemicalCompound();
-			}
-			
-			localChemicalCompound.setName(txtName.getText().trim());
-			localChemicalCompound.setAcronym(txtAcronym.getText().trim());
-			
-			localChemicalCompound.getAtccodes().clear();
-			String[] selection = lstAtc.getItems();
-			for (String atc : selection) {
-				AtcCode code = (AtcCode) lstAtc.getData(atc);
-				if (code != null){
-					localChemicalCompound.getAtccodes().add(code);
-				}
+
+				localChemicalCompound = new ChemicalCompound(txtName.getText().trim(),
+						txtAcronym.getText().trim());
+
 			}
 
 			// before we try anything, lets ask the user for their password
@@ -259,7 +187,6 @@ public class AddChemicalCompound extends GenericFormGui {
 					tx = getHSession().beginTransaction();
 					DrugManager.saveChemicalCompound(getHSession(),
 							localChemicalCompound);
-					getHSession().flush();
 					tx.commit();
 					MessageBox feedBack = new MessageBox(getShell(), SWT.OK
 							| SWT.ICON_INFORMATION);
@@ -268,7 +195,7 @@ public class AddChemicalCompound extends GenericFormGui {
 							localChemicalCompound.getName()).concat(
 							"' has been added"));
 					feedBack.open();
-					compoundAdded = localChemicalCompound;
+					compoundAdded = localChemicalCompound.getName();
 
 				} catch (HibernateException he) {
 					MessageBox m = new MessageBox(getShell(), SWT.OK
@@ -317,7 +244,8 @@ public class AddChemicalCompound extends GenericFormGui {
 	@Override
 	protected void cmdCancelWidgetSelected() {
 
-		closeShell(false);
+		getHSession().close();
+		getShell().dispose();
 	}
 
 	@Override
@@ -356,9 +284,8 @@ public class AddChemicalCompound extends GenericFormGui {
 
 		}
 
-		ChemicalCompound byName = DrugManager.getChemicalCompoundByName(getHSession(), txtName
-				.getText().trim());
-		if (byName != null && (localChemicalCompound != null && byName.getId() != localChemicalCompound.getId())) {
+		if (DrugManager.getChemicalCompoundByName(getHSession(), txtName
+				.getText().trim()) != null) {
 			MessageBox b = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
 			b
 			.setMessage("There is another chemical compound with this name. Please make sure you are not trying to add a chemical compound that is already saved.");
@@ -389,9 +316,8 @@ public class AddChemicalCompound extends GenericFormGui {
 			return false;
 		}
 
-		ChemicalCompound byAcronym = DrugManager.getChemicalCompoundByAcronym(getHSession(),
-				txtAcronym.getText().trim());
-		if (byAcronym != null && (localChemicalCompound != null && byAcronym.getId() != localChemicalCompound.getId())) {
+		if (DrugManager.getChemicalCompoundByAcronym(getHSession(),
+				txtAcronym.getText().trim()) != null) {
 			MessageBox b = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.OK);
 			b
 			.setMessage("There is another chemical compound with this acronym. Please make sure you are not trying to add a chemical compound that is already saved.");
@@ -425,18 +351,6 @@ public class AddChemicalCompound extends GenericFormGui {
 	@Override
 	protected void createContents() {
 		createCompChemicalCompoundInfo();
-	}
-
-	private void populateForm() {
-		if (localChemicalCompound != null){
-			txtName.setText(localChemicalCompound.getName());
-			txtAcronym.setText(localChemicalCompound.getAcronym());
-			Set<AtcCode> atccodes = localChemicalCompound.getAtccodes();
-			for (AtcCode atc : atccodes) {
-				lstAtc.add(atc.getDisplayName());
-				lstAtc.setData(atc.getDisplayName(), atc);
-			}
-		}
 	}
 
 	/**

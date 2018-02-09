@@ -1,7 +1,5 @@
 package org.celllife.idart.gui.patient.tabs;
 
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,14 +14,12 @@ import org.celllife.idart.gui.misc.GenericTab;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.widget.DateButton;
-import org.celllife.idart.messages.Messages;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -215,23 +211,8 @@ public class TreatmentManagementTab extends GenericTab implements IPatientTab {
 		patient.setNextOfKinName(txtTreatmentSupporterName.getText());
 		patient.setNextOfKinPhone(txtTreatmentSupporterPhone.getText());
 		if (btnNextAppointment.getDate() != null) {
-			Date appointmentDate = btnNextAppointment.getDate();
-			Appointment appointment = PatientManager.setNextAppointmentDate(hSession, patient, appointmentDate);
-			// check if the appointment date was automatically changed and see if they wish to override
-			if (!appointment.getAppointmentDate().equals(appointmentDate)) {
-				MessageBox mbox = new MessageBox(tabItem.getParent().getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
-				mbox.setText(Messages.getString("appointmentdate.question.title"));
-				SimpleDateFormat sdf = new SimpleDateFormat("EEE d MMM yyyy");
-				mbox.setMessage(MessageFormat.format(Messages.getString("appointmentdate.question.text"), 
-						sdf.format(appointmentDate), 
-						sdf.format(appointment.getAppointmentDate())));
-				switch (mbox.open()) {
-					case SWT.NO:
-						appointment.overrideAppointmentDate(appointmentDate);
-						break;
-				}
-			}
-			PatientManager.scheduleApppointmentReminderMessages(patient, appointment);
+			PatientManager.setNextAppointmentDate(hSession, patient,
+					btnNextAppointment.getDate());
 		}
 
 	}

@@ -25,6 +25,7 @@ public abstract class ExcelExporter {
 	protected HashMap<Integer, List<Integer>> patientPackageMap;
 	private DataExportFunctions functions;
 	private IProgressMonitor monitor;
+	private GenerateExcelReportInterface excelReport;
 
 	public ExcelExporter() {
 		super();
@@ -49,7 +50,7 @@ public abstract class ExcelExporter {
 		if (monitor != null){
 			monitor.beginTask("Generating report", entitySet.getSize());
 		}
-		GenerateExcelReportInterface excelReport = getExcelReport(report);
+		excelReport = getExcelReport(report);
 		excelReport.writeTitle();
 		int extraColumns = getNumberOfExtraColumn();
 		excelReport.writeHeadings(extraColumns);

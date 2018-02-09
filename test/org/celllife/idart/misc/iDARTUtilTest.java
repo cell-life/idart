@@ -1,22 +1,22 @@
-package org.celllife.idart.utils;
-
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+package org.celllife.idart.misc;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 /**
  * @author munaf
- *
+ * 
  */
 public class iDARTUtilTest {
 
 	/**
 	 * Test method for
-	 * {@link org.celllife.idart.utils.iDARTUtil#before(java.util.Date, java.util.Date)}
+	 * {@link org.celllife.idart.misc.iDARTUtil#before(java.util.Date, java.util.Date)}
 	 * .
 	 */
 	@Test(dataProvider = "dateProvider")
@@ -44,7 +44,7 @@ public class iDARTUtilTest {
 
 	/**
 	 * Test method for
-	 * {@link org.celllife.idart.utils.iDARTUtil#isInteger(String)} .
+	 * {@link org.celllife.idart.misc.iDARTUtil#isInteger(String)} .
 	 */
 	@Test(dataProvider = "intProvider")
 	public void testIsInteger(String str, Object result) {

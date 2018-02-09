@@ -65,6 +65,10 @@ public class AddDoctor extends GenericFormGui {
 
 	private Label lblInstructions;
 
+	private Label lblDoctorSurname;
+
+	private Label lblDoctorFirstname;
+
 	private Label lblTelephone;
 
 	private Label lblCellphoneNo;
@@ -156,7 +160,7 @@ public class AddDoctor extends GenericFormGui {
 				.getFont(iDartFont.VERASANS_10_ITALIC));
 
 		// lblDoctor & txtDoctor
-		Label lblDoctorSurname = new Label(grpDoctorInfo, SWT.NONE);
+		lblDoctorSurname = new Label(grpDoctorInfo, SWT.NONE);
 		lblDoctorSurname.setBounds(new org.eclipse.swt.graphics.Rectangle(30,
 				50, 130, 20));
 		lblDoctorSurname.setText(Messages.getString("adddoctor.label.surname")); //$NON-NLS-1$
@@ -185,7 +189,7 @@ public class AddDoctor extends GenericFormGui {
 		});
 
 		// lblDoctorFirstname & txtDoctorFirstname
-		Label lblDoctorFirstname = new Label(grpDoctorInfo, SWT.NONE);
+		lblDoctorFirstname = new Label(grpDoctorInfo, SWT.NONE);
 		lblDoctorFirstname.setBounds(new org.eclipse.swt.graphics.Rectangle(30,
 				80, 130, 20));
 		lblDoctorFirstname.setText(Messages.getString("adddoctor.label.firstname.title")); //$NON-NLS-1$

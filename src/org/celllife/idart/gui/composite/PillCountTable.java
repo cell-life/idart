@@ -19,8 +19,15 @@
 
 package org.celllife.idart.gui.composite;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import model.manager.AdherenceManager;
 import model.manager.DrugManager;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.database.hibernate.Drug;
 import org.celllife.idart.database.hibernate.PackagedDrugs;
@@ -32,17 +39,34 @@ import org.celllife.idart.gui.platform.GenericGuiInterface;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartColor;
 import org.celllife.idart.gui.utils.iDartFont;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 
-import java.util.*;
-
+/**
+ * Table Composite
+ * 
+ */
 public class PillCountTable implements GenericGuiInterface {
 
 	private Logger log = Logger.getLogger(PillCountTable.class);
@@ -545,7 +569,7 @@ public class PillCountTable implements GenericGuiInterface {
 	/**
 	 * Update the pillcounts given a new dateOfCount.
 	 * 
-	 * @param dateOfCount
+	 * @param dispenseDate
 	 */
 	public void update(Date dateOfCount) {
 		TableItem[] items = theTable.getItems();

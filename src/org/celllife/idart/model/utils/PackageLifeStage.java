@@ -1,10 +1,12 @@
-package org.celllife.idart.utils;
+package org.celllife.idart.model.utils;
+
+import java.util.Date;
 
 import org.celllife.idart.database.hibernate.Packages;
 import org.celllife.idart.gui.utils.iDartImage;
 
-import java.util.Date;
-
+/**
+ */
 public enum PackageLifeStage {
 	PACKED("Packages Created", iDartImage.REPORT_PACKAGESARRIVE), 
 	SCANNED_OUT("Packages Leaving Pharmacy",iDartImage.REPORT_PACKAGESSCANNEDOUT), 

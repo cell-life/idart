@@ -168,6 +168,7 @@ public class DrugSheet extends BaseImportSheet {
 
 				currentDrug.setDispensingInstructions1("");
 				currentDrug.setDispensingInstructions2("");
+				currentDrug.setNsnCode("");
 				currentDrug.setStockCode("");
 				currentDrug.setForm(currentForm);
 				currentDrug.setModified('T');

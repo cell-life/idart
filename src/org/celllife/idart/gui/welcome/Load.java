@@ -93,8 +93,8 @@ public class Load {
 		return splash != null && !splash.isDisposed();
 	}
 	
-	public void updateProgress(int done) {
-		if (!bar.isDisposed()) {
+	public void updateProgress(int done){
+		if (!bar.isDisposed()){
 			this.progress += done;
 			bar.setSelection(progress);
 		}

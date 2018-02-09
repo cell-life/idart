@@ -35,6 +35,8 @@ public class AdherenceRecord {
 
 	String pawcNo = "";
 
+	boolean invalid = false;
+
 	public AdherenceRecord() {
 		super();
 
@@ -236,4 +238,21 @@ public class AdherenceRecord {
 	public void setCluser(String user) {
 		this.cluser = user;
 	}
+
+	/**
+	 * Method isInvalid.
+	 * @return boolean
+	 */
+	public boolean isInvalid() {
+		return invalid;
+	}
+
+	/**
+	 * Method setInvalid.
+	 * @param invalid boolean
+	 */
+	public void setInvalid(boolean invalid) {
+		this.invalid = invalid;
+	}
+
 }

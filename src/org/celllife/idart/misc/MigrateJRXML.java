@@ -15,7 +15,7 @@ import net.sf.jasperreports.engine.xml.JRXmlWriter;
  * newer jrxml file format. It will open all jrxml files under a given directory and write them again using
  * the current serializer for jrxml.
  *
- * @author toesterdahl, Torbjï¿½rn ï¿½sterdahl, ultra-marine.org 2009
+ * @author toesterdahl, Torbjörn Österdahl, ultra-marine.org 2009
  */
 public class MigrateJRXML {
 

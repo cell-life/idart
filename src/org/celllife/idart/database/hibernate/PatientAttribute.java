@@ -1,9 +1,19 @@
+/**
+ * 
+ */
 package org.celllife.idart.database.hibernate;
 
-import org.celllife.idart.utils.iDARTUtil;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
-import javax.persistence.*;
+import org.celllife.idart.misc.iDARTUtil;
 
+/**
+ */
 @Entity
 public class PatientAttribute implements PatientAttributeInterface{
 

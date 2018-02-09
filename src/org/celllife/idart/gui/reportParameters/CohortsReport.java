@@ -203,7 +203,9 @@ public class CohortsReport extends GenericReportGui {
 			try {
 				fileName = dlg.open();
 			} catch (Exception e) {
-				getLog().error(e);
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+
 			}
 
 			Boolean runner = true;
@@ -273,9 +275,10 @@ public class CohortsReport extends GenericReportGui {
 			write = new FileWriter(filename);
 
 		} catch (IOException e) {
-			getLog().error(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
 		}
-		
 		BufferedWriter bw = new BufferedWriter(write);
 		PrintWriter pw = new PrintWriter(bw);
 

@@ -19,11 +19,17 @@
 
 package org.celllife.idart.database.hibernate;
 
-import org.hibernate.annotations.Cascade;
-
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.Cascade;
 
 /**
  */
@@ -37,10 +43,6 @@ public class Drug implements Comparable<Drug> {
 	@ManyToOne
 	@JoinColumn(name = "form")
 	private Form form;
-	
-	@ManyToOne
-	@JoinColumn(name = "atccode_id")
-	private AtcCode atccode;
 
 	private String dispensingInstructions1;
 
@@ -60,6 +62,8 @@ public class Drug implements Comparable<Drug> {
 	private double defaultAmnt;
 
 	private int defaultTimes;
+
+	private String nsnCode;
 
 	private String stockCode;
 
@@ -314,6 +318,22 @@ public class Drug implements Comparable<Drug> {
 	}
 
 	/**
+	 * Method getNsnCode.
+	 * @return String
+	 */
+	public String getNsnCode() {
+		return nsnCode;
+	}
+
+	/**
+	 * Method setNsnCode.
+	 * @param nsnCode String
+	 */
+	public void setNsnCode(String nsnCode) {
+		this.nsnCode = nsnCode;
+	}
+
+	/**
 	 * Method getStockCode.
 	 * @return String
 	 */
@@ -350,61 +370,43 @@ public class Drug implements Comparable<Drug> {
 		return sideTreatment == 'F';
 	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Drug drug = (Drug) o;
-
-        if (sideTreatment != drug.sideTreatment) return false;
-        if (chemicalDrugStrengths != null ? !chemicalDrugStrengths.equals(drug.chemicalDrugStrengths) : drug.chemicalDrugStrengths != null)
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (int) sideTreatment;
-        result = 31 * result + (chemicalDrugStrengths != null ? chemicalDrugStrengths.hashCode() : 0);
-        return result;
-    }
-
-    public void setAtccode(AtcCode atccode) {
-		this.atccode = atccode;
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime
+				* result
+				+ ((chemicalDrugStrengths == null) ? 0 : chemicalDrugStrengths
+						.hashCode());
+		result = prime * result + sideTreatment;
+		return result;
 	}
 
-	public AtcCode getAtccode() {
-		return atccode;
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Drug other = (Drug) obj;
+		if (chemicalDrugStrengths == null) {
+			if (other.chemicalDrugStrengths != null)
+				return false;
+		} else if (!chemicalDrugStrengths.equals(other.chemicalDrugStrengths)  
+				&& sideTreatment == 'F')
+			return false;
+		if (sideTreatment != other.sideTreatment)
+			return false;
+		return true;
 	}
 
-	public Set<AtcCode> getAtccodes() {
-		Set<AtcCode> codes = new HashSet<AtcCode>();
-		if (atccode != null)
-			codes.add(atccode);
-		
-		if (chemicalDrugStrengths == null || chemicalDrugStrengths.isEmpty()){
-			return codes;
-		}
-		for (ChemicalDrugStrength cds : chemicalDrugStrengths) {
-			Set<AtcCode> atccodes = cds.getChemicalCompound().getAtccodes();
-			if (atccodes != null){
-				codes.addAll(atccodes);
-			}
-		}
-		return codes;
-	}
-
-	public Set<ChemicalCompound> getChemicalCompounds(){
-		Set<ChemicalCompound> ccs = new HashSet<ChemicalCompound>();
-		Set<ChemicalDrugStrength> cds = getChemicalDrugStrengths();
-		if (cds != null){
-			for (ChemicalDrugStrength cd : cds) {
-				ccs.add(cd.getChemicalCompound());
-			}
-		}
-		return ccs;
-	}
 	
 }

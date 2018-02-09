@@ -37,14 +37,6 @@ public class PatientIdentifier {
 		super();
 		id = -1;
 	}
-	
-	public PatientIdentifier(Patient patient, String value, IdentifierType type) {
-		super();
-		this.patient = patient;
-		this.value = value;
-		this.type = type;
-		id = -1;
-	}
 
 	/**
 	 * @return the id

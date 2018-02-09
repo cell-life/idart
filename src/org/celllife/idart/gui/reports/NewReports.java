@@ -19,39 +19,57 @@
 
 package org.celllife.idart.gui.reports;
 
-import model.manager.exports.iedea.IedeaExporter;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.gui.dataExports.DataExport;
 import org.celllife.idart.gui.dataQuality.DataQuality;
 import org.celllife.idart.gui.platform.GenericAdminGui;
 import org.celllife.idart.gui.platform.GenericReportGui;
 import org.celllife.idart.gui.platform.GenericReportGuiInterface;
-import org.celllife.idart.gui.reportParameters.*;
+import org.celllife.idart.gui.reportParameters.ARVDrugUsage;
+import org.celllife.idart.gui.reportParameters.ClinicIndicators;
+import org.celllife.idart.gui.reportParameters.CohortDrugCollections;
+import org.celllife.idart.gui.reportParameters.DailyDispensingTotals;
+import org.celllife.idart.gui.reportParameters.DrugCombinations;
+import org.celllife.idart.gui.reportParameters.DrugsDispensed;
+import org.celllife.idart.gui.reportParameters.EpisodeStats;
+import org.celllife.idart.gui.reportParameters.EpisodesStartedOrEndedReportGUI;
+import org.celllife.idart.gui.reportParameters.MissedAppointments;
+import org.celllife.idart.gui.reportParameters.MonthlyReceiptsAndIssues;
+import org.celllife.idart.gui.reportParameters.MonthlyStockReceipt;
+import org.celllife.idart.gui.reportParameters.PackageProcessingReportGUI;
+import org.celllife.idart.gui.reportParameters.PackageTracking;
+import org.celllife.idart.gui.reportParameters.PackagesAwaiting;
+import org.celllife.idart.gui.reportParameters.PatientHistory;
+import org.celllife.idart.gui.reportParameters.PatientsExpected;
+import org.celllife.idart.gui.reportParameters.PepfarReportGUI;
+import org.celllife.idart.gui.reportParameters.PrescribingDoctors;
+import org.celllife.idart.gui.reportParameters.StockTakeReportGUI;
+import org.celllife.idart.gui.reportParameters.TransactionLog;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.messages.Messages;
-import org.celllife.idart.misc.task.TaskException;
-import org.celllife.idart.utils.MessageUtil;
-import org.celllife.idart.utils.PackageLifeStage;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.celllife.idart.model.utils.PackageLifeStage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+/**
+ */
 public class NewReports extends GenericAdminGui {
 
 	private Group grpPatientReports;
@@ -80,13 +98,11 @@ public class NewReports extends GenericAdminGui {
 
 	private Table tblClinicManagementReports;
 
-	private Button btnIedeaExport;
-
 	private Button btnDataExport;
-
+	
 	private Button btnDataQuality;
 
-	Map<String, GenericReportGui> reportGUIs = new LinkedHashMap<String, GenericReportGui>();
+	Map<String, GenericReportGui> reportGUIs = new  LinkedHashMap<String, GenericReportGui>();
 
 	/**
 	 * Constructor for NewReports.
@@ -130,8 +146,7 @@ public class NewReports extends GenericAdminGui {
 	private void createGrpPatientReports() {
 		grpPatientReports = new Group(getShell(), SWT.NONE);
 		grpPatientReports.setBounds(new Rectangle(100, 80, 325, 200));
-		grpPatientReports.setText(Messages
-				.getString("NewReports.section.patient")); //$NON-NLS-1$
+		grpPatientReports.setText(Messages.getString("NewReports.section.patient")); //$NON-NLS-1$
 		grpPatientReports.setFont(ResourceUtils.getFont(iDartFont.VERASANS_12));
 
 		lblPicPatientReports = new Label(grpPatientReports, SWT.NONE);
@@ -146,8 +161,7 @@ public class NewReports extends GenericAdminGui {
 
 		TableColumn tblColReportsAvailable = new TableColumn(tblPatientReports,
 				SWT.NONE);
-		tblColReportsAvailable.setText(Messages
-				.getString("NewReports.table.title")); //$NON-NLS-1$
+		tblColReportsAvailable.setText(Messages.getString("NewReports.table.title")); //$NON-NLS-1$
 		tblColReportsAvailable.setWidth(270);
 
 		tblPatientReports.addMouseListener(new MouseAdapter() {
@@ -168,18 +182,19 @@ public class NewReports extends GenericAdminGui {
 		});
 	}
 
+
 	private void createGrpClinicManagementReports() {
 		grpClinicManagementReports = new Group(getShell(), SWT.NONE);
 		grpClinicManagementReports.setBounds(new Rectangle(100, 305, 325, 200));
-		grpClinicManagementReports.setText(Messages
-				.getString("NewReports.section.clinic")); //$NON-NLS-1$
+		grpClinicManagementReports
+		.setText(Messages.getString("NewReports.section.clinic")); //$NON-NLS-1$
 		grpClinicManagementReports.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_12));
 
 		lblPicClinicManagementReports = new Label(grpClinicManagementReports,
 				SWT.NONE);
 		lblPicClinicManagementReports
-				.setBounds(new org.eclipse.swt.graphics.Rectangle(10, 0, 50, 43));
+		.setBounds(new org.eclipse.swt.graphics.Rectangle(10, 0, 50, 43));
 		lblPicClinicManagementReports.setImage(ResourceUtils
 				.getImage(iDartImage.REPORT_PACKAGESSCANNEDIN));
 
@@ -193,8 +208,7 @@ public class NewReports extends GenericAdminGui {
 		TableColumn tblColReportsAvailable = new TableColumn(
 				tblClinicManagementReports, SWT.NONE);
 		tblColReportsAvailable.setWidth(270);
-		tblColReportsAvailable.setText(Messages
-				.getString("NewReports.table.title")); //$NON-NLS-1$
+		tblColReportsAvailable.setText(Messages.getString("NewReports.table.title")); //$NON-NLS-1$
 
 		tblClinicManagementReports.addMouseListener(new MouseAdapter() {
 			@Override
@@ -207,8 +221,7 @@ public class NewReports extends GenericAdminGui {
 				final TableItem item = tblClinicManagementReports.getItem(pt);
 				if (item != null) {
 					launchReport(item);
-					tblClinicManagementReports
-							.select(tblClinicManagementReports.indexOf(item));
+					tblClinicManagementReports.select(tblClinicManagementReports.indexOf(item));
 				}
 
 			}
@@ -251,8 +264,7 @@ public class NewReports extends GenericAdminGui {
 		TableColumn tblColReportsAvailable = new TableColumn(tblStockReports,
 				SWT.NONE);
 		tblColReportsAvailable.setWidth(270);
-		tblColReportsAvailable.setText(Messages
-				.getString("NewReports.table.title")); //$NON-NLS-1$
+		tblColReportsAvailable.setText(Messages.getString("NewReports.table.title")); //$NON-NLS-1$
 		tblStockReports.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent event) {
@@ -273,8 +285,7 @@ public class NewReports extends GenericAdminGui {
 	private void createGrpMandEReports() {
 		grpMandEReports = new Group(getShell(), SWT.NONE);
 		grpMandEReports.setBounds(new Rectangle(475, 305, 325, 200));
-		grpMandEReports.setText(Messages
-				.getString("NewReports.section.m_and_e")); //$NON-NLS-1$
+		grpMandEReports.setText(Messages.getString("NewReports.section.m_and_e")); //$NON-NLS-1$
 		grpMandEReports.setFont(ResourceUtils.getFont(iDartFont.VERASANS_12));
 
 		lblPicMandEReports = new Label(grpMandEReports, SWT.NONE);
@@ -290,8 +301,7 @@ public class NewReports extends GenericAdminGui {
 		TableColumn tblColReportsAvailable = new TableColumn(tblMandEReports,
 				SWT.NONE);
 		tblColReportsAvailable.setWidth(270);
-		tblColReportsAvailable.setText(Messages
-				.getString("NewReports.table.title")); //$NON-NLS-1$
+		tblColReportsAvailable.setText(Messages.getString("NewReports.table.title")); //$NON-NLS-1$
 
 		tblMandEReports.addMouseListener(new MouseAdapter() {
 			@Override
@@ -327,7 +337,8 @@ public class NewReports extends GenericAdminGui {
 				new EpisodesStartedOrEndedReportGUI(getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PACKAGE_TRACKING,
 				new PackageTracking(getShell(), false));
-
+		
+		
 		// Stock Reports
 		reportGUIs.put(GenericReportGuiInterface.REPORT_MONTHLY_STOCK_RECEIPTS,
 				new MonthlyStockReceipt(getShell(), false));
@@ -335,7 +346,8 @@ public class NewReports extends GenericAdminGui {
 				GenericReportGuiInterface.REPORT_DAILY_DISPENSING_TOTALS,
 				new DailyDispensingTotals(getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_STOCK_TAKE,
-				new StockTakeReportGUI(getShell(), false));
+				new StockTakeReportGUI(
+						getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_DRUGS_DISPENSED,
 				new DrugsDispensed(getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_COHORT_COLLECTIONS,
@@ -344,44 +356,46 @@ public class NewReports extends GenericAdminGui {
 				new MonthlyReceiptsAndIssues(getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_ARV_DRUG_USAGE,
 				new ARVDrugUsage(getShell(), false));
-
+		
 		// Clinic Management Reports
-
+		
 		PackageProcessingReportGUI packsCreated = new PackageProcessingReportGUI(
 				getShell(), false);
 		packsCreated.setPackageStage(PackageLifeStage.PACKED);
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PACKAGES_CREATED,
 				packsCreated);
-
+		
 		PackageProcessingReportGUI packsLeft = new PackageProcessingReportGUI(
 				getShell(), false);
 		packsLeft.setPackageStage(PackageLifeStage.SCANNED_OUT);
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PACKAGES_LEAVING,
 				packsLeft);
-
+		
 		PackageProcessingReportGUI packsRec = new PackageProcessingReportGUI(
 				getShell(), false);
 		packsRec.setPackageStage(PackageLifeStage.SCANNED_IN);
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PACKAGES_RECEIVED,
 				packsRec);
-
+		
 		PackageProcessingReportGUI packsCollected = new PackageProcessingReportGUI(
 				getShell(), false);
 		packsCollected.setPackageStage(PackageLifeStage.PICKED_UP);
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PACKAGES_COLLECTED,
 				packsCollected);
-
+		
 		reportGUIs.put(
 				GenericReportGuiInterface.REPORT_PACKAGES_AWAITING_PICKUP,
 				new PackagesAwaiting(getShell(), false));
-
+		
 		reportGUIs.put(
 				GenericReportGuiInterface.REPORT_PATIENTS_EXPECTED_ON_A_DAY,
 				new PatientsExpected(getShell(), false));
-
+		
 		reportGUIs.put(GenericReportGuiInterface.REPORT_MISSED_APPOINTMENTS,
 				new MissedAppointments(getShell(), false));
-
+		
+		
+		
 		// M & E Reports
 		reportGUIs.put(GenericReportGuiInterface.REPORT_DRUG_COMBINATIONS,
 				new DrugCombinations(getShell(), false));
@@ -392,12 +406,16 @@ public class NewReports extends GenericAdminGui {
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PRESCRIBING_DOCTORS,
 				new PrescribingDoctors(getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_PEPFAR,
-				new PepfarReportGUI(getShell(), false));
+				new PepfarReportGUI(
+						getShell(), false));
 		reportGUIs.put(GenericReportGuiInterface.REPORT_CLINIC_INDICATORS,
 				new ClinicIndicators(getShell(), false));
+		
+		
+		
 
 		Iterator<Map.Entry<String, GenericReportGui>> reportGUIsItr = reportGUIs
-				.entrySet().iterator();
+		.entrySet().iterator();
 
 		while (reportGUIsItr.hasNext()) {
 			Map.Entry<String, GenericReportGui> nextPair = reportGUIsItr.next();
@@ -444,118 +462,57 @@ public class NewReports extends GenericAdminGui {
 	 */
 	protected void createCompButtons() {
 		compButton = new Composite(getShell(), SWT.NONE);
-		compButton.setBounds(new Rectangle(100, 520, 700, 40));
-		RowLayout rowLayout = new RowLayout();
-		rowLayout.wrap = false;
-		rowLayout.pack = false;
-		rowLayout.justify = true;
-		rowLayout.type = SWT.HORIZONTAL;
-		rowLayout.spacing = 0;
-		compButton.setLayout(rowLayout);
-		btnIedeaExport = new Button(compButton, SWT.NONE);
-		btnIedeaExport.setText(Messages
-				.getString("NewReports.button.export.iedea")); //$NON-NLS-1$
-		btnIedeaExport.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnIedeaExport.setLayoutData(new RowData(200, 30));
-		btnIedeaExport.setToolTipText(Messages
-				.getString("NewReports.button.export.tooltip.iedea")); //$NON-NLS-1$
-		btnIedeaExport
-				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-					@Override
-					public void widgetSelected(
-							org.eclipse.swt.events.SelectionEvent e) {
-						cmdIedeaExportsSelected();
-					}
-				});
-
+		compButton.setBounds(new Rectangle(40, 520, 680, 40));
 		btnDataExport = new Button(compButton, SWT.NONE);
 		btnDataExport.setText(Messages.getString("NewReports.button.export")); //$NON-NLS-1$
 		btnDataExport.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnDataExport.setLayoutData(new RowData(200, 30));
-		btnDataExport.setToolTipText(Messages
-				.getString("NewReports.button.export.tooltip")); //$NON-NLS-1$
+		btnDataExport.setBounds(new Rectangle(120, 5, 200, 30));
 		btnDataExport
-				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-					@Override
-					public void widgetSelected(
-							org.eclipse.swt.events.SelectionEvent e) {
-						cmdDataExportsSelected();
-					}
-				});
-
+		.setToolTipText(Messages.getString("NewReports.button.export.tooltip")); //$NON-NLS-1$
+		btnDataExport
+		.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+			@Override
+			public void widgetSelected(
+					org.eclipse.swt.events.SelectionEvent e) {
+				cmdDataExportsSelected();
+			}
+		});
 		btnDataQuality = new Button(compButton, SWT.NONE);
-		btnDataQuality.setText(Messages
-				.getString("NewReports.button.dataQuality")); //$NON-NLS-1$
+		btnDataQuality.setText(Messages.getString("NewReports.button.dataQuality")); //$NON-NLS-1$
 		btnDataQuality.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnDataQuality.setLayoutData(new RowData(200, 30));
-		btnDataQuality.setToolTipText(Messages
-				.getString("NewReports.button.dataQuality.tooltip")); //$NON-NLS-1$
+		btnDataQuality.setBounds(new Rectangle(500, 5, 180, 30));
+		btnDataQuality.setToolTipText(Messages.getString("NewReports.button.dataQuality.tooltip")); //$NON-NLS-1$
 		btnDataQuality
-				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-					@Override
-					public void widgetSelected(
-							org.eclipse.swt.events.SelectionEvent e) {
-						cmdDataQualitySelected();
-					}
-				});
-		compButton.layout();
+		.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+			@Override
+			public void widgetSelected(
+					org.eclipse.swt.events.SelectionEvent e) {
+				cmdDataQualitySelected();
+			}
+		});
 	}
 
 	/**
 	 * Deselects all previously selected values in the tables
-	 * 
+	 *
 	 */
 	private void clearSelections() {
-		for (int i = 0; i < tblClinicManagementReports.getItemCount(); i++) {
+		for(int i = 0; i < tblClinicManagementReports.getItemCount(); i++) {
 			tblClinicManagementReports.deselect(i);
 		}
 
-		for (int i = 0; i < tblMandEReports.getItemCount(); i++) {
+		for(int i = 0; i < tblMandEReports.getItemCount(); i++) {
 			tblMandEReports.deselect(i);
 		}
 
-		for (int i = 0; i < tblPatientReports.getItemCount(); i++) {
+		for(int i = 0; i < tblPatientReports.getItemCount(); i++) {
 			tblPatientReports.deselect(i);
 		}
 
-		for (int i = 0; i < tblStockReports.getItemCount(); i++) {
+		for(int i = 0; i < tblStockReports.getItemCount(); i++) {
 			tblStockReports.deselect(i);
 		}
 
-	}
-
-	public void cmdIedeaExportsSelected() {
-		DirectoryDialog dlg = new DirectoryDialog(getShell());
-		dlg.setText("Select a folder to save the export files in");
-		dlg.setMessage("Select a directory");
-		final String dir = dlg.open();
-		if (dir == null) {
-			return;
-		}
-
-		final IedeaExporter iedeaExporter = new IedeaExporter();
-		try {
-			new ProgressMonitorDialog(null).run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					try {
-						iedeaExporter.setMonitor(monitor);
-						iedeaExporter.generate(dir);
-					} catch (TaskException e) {
-						throw new InvocationTargetException(e);
-					}
-				}
-			});
-			MessageDialog
-			.openInformation(null, "Completed", "Tier.net export successful");
-		} catch (InvocationTargetException e) {
-			MessageUtil.showError(e, "Error running export", 
-					e.getMessage());
-		} catch (InterruptedException e) {
-			MessageDialog
-			.openInformation(null, "Cancelled", e.getMessage());
-		}
 	}
 
 	public void cmdDataExportsSelected() {
@@ -565,7 +522,7 @@ public class NewReports extends GenericAdminGui {
 	public void cmdDataQualitySelected() {
 		new DataQuality(getShell());
 	}
-
+	
 	@Override
 	protected void setLogger() {
 		setLog(Logger.getLogger(this.getClass()));

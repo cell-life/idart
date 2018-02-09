@@ -326,15 +326,6 @@ public abstract class GenericWelcome implements GenericGuiInterface {
 		LayoutUtils.centerGUI(shell);
 
 		shell.open();
-		
-		showAlerts();
-	}
-	
-	/**
-	 * Override this method to show alerts after login
-	 */
-	public void showAlerts() {
-		
 	}
 
 	/**

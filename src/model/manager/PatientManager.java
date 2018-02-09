@@ -31,15 +31,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import model.manager.exports.iedea.ArtDto;
 import model.nonPersistent.PatientIdAndName;
 
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.LocalObjects;
-import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AccumulatedDrugs;
 import org.celllife.idart.database.hibernate.Appointment;
-import org.celllife.idart.database.hibernate.AppointmentReminder;
 import org.celllife.idart.database.hibernate.AttributeType;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Episode;
@@ -55,7 +52,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.hibernate.transform.AliasToBeanResultTransformer;
 
 /**
  */
@@ -154,20 +150,21 @@ public class PatientManager {
 	 * @param appointmentDate
 	 * @throws HibernateException
 	 */
-	public static Appointment setNextAppointmentDate(Session session,
+	public static void setNextAppointmentDate(Session session,
 			Patient thePatient, Date appointmentDate) throws HibernateException {
 		
-		Appointment appointment = getLatestAppointmentForPatient(thePatient, true);
-		if (appointment != null) {
+		Appointment lastestApp = getLatestAppointmentForPatient(thePatient, true);
+
+		if (lastestApp != null) {
 			// appointment date was changed
-			appointment.setAppointmentDate(appointmentDate);
+			lastestApp.setAppointmentDate(appointmentDate);
+		
 		}
 		else {
-			appointment = getNewAppointmentForPatient(session, thePatient, appointmentDate);
-			thePatient.getAppointments().add(appointment);
+			thePatient.getAppointments().add(
+					getNewAppointmentForPatient(session, thePatient, appointmentDate));
 		}
 		
-		return appointment;
 	}
 
 	/**
@@ -182,7 +179,7 @@ public class PatientManager {
 	 *            the date of the next appointment
 	 * @throws HibernateException
 	 */
-	public static Appointment setNextAppointmentDateAtVisit(Session session,
+	public static void setNextAppointmentDateAtVisit(Session session,
 			Patient thePatient, Date visitDate, Date theAppDate)
 			throws HibernateException {
 		
@@ -191,21 +188,11 @@ public class PatientManager {
 		if (lastestApp != null) {
 			// Patient visited clinic
 			lastestApp.setVisitDate(visitDate);
+			
 		}
 
-		// create new appointment
-		Appointment newApp = getNewAppointmentForPatient(session, thePatient, theAppDate);
-		thePatient.getAppointments().add(newApp);
-
-		return newApp;
-	}
-	
-	public static void scheduleApppointmentReminderMessages(Patient thePatient, Appointment newApp) {
-		// schedule appointment reminder messages
-		if (iDartProperties.appointmentReminders 
-				&& thePatient.getAppointmentReminder() != null && thePatient.getAppointmentReminder().isSubscribed()) {
-			AppointmentReminderManager.createAppointmentReminderMessage(newApp);
-		}
+		thePatient.getAppointments().add(
+				getNewAppointmentForPatient(session, thePatient, theAppDate));
 	}
 	
 	public static void setVisitDateOnly(Patient patient, Date visitDate) throws HibernateException {
@@ -1093,47 +1080,5 @@ public class PatientManager {
 		query.setParameter("value", identifierValue);
 		List<?> list = query.list();
 		return !list.isEmpty();
-	}
-
-	public static List<Integer> getPatientsWithAttribute(Session session, String attributeTypeName) {
-		Query query = session.createQuery("select att.patient.id from PatientAttribute att where " +"att.type.name = :name");
-		query.setParameter("name", attributeTypeName);
-		
-		@SuppressWarnings("unchecked")
-		List<Integer> list = query.list();
-		return list;
-	}
-
-	public static List<ArtDto> getIedeaArtData(Session session, Patient patient) {
-		SQLQuery query = session.createSQLQuery("select f.form as form, atc.code as code, min(pickupdate) as startdate, max(pickupdate) as enddate" 
-			+ " from prescription sc, package p, packageddrugs pd, stock s, drug d, form f, atccode atc"
-			+ " where sc.id = p.prescription"
-			+ " and p.id = pd.parentpackage"
-			+ " and pd.stock = s.id"
-			+ " and s.drug = d.id"
-			+ " and d.form = f.id"
-			+ " and d.atccode_id = atc.id"
-			+ " and d.sidetreatment = 'F'"
-			+ " and sc.patient = :patid"
-			+ " and pickupdate is not null"
-			+ " group by f.form, atc.code");
-		query.setInteger("patid", patient.getId());
-		query.setResultTransformer(new AliasToBeanResultTransformer(ArtDto.class));
-		
-		@SuppressWarnings("unchecked")
-		List<ArtDto> list = query.list();
-		
-		return list;
-	}
-	
-	public static AppointmentReminder getAppointmentReminder(Session session, Patient patient) {
-		AppointmentReminder result = (AppointmentReminder) session.createQuery(
-						"from AppointmentReminder as ar where ar.patient.id=:patid")
-						.setInteger("patid", patient.getId()).uniqueResult();
-		return result;
-	}
-
-	public static void saveAppointmentReminder(Session session, AppointmentReminder appointmentReminder) {
-		session.saveOrUpdate(appointmentReminder);
 	}
 }

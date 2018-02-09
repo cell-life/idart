@@ -19,11 +19,22 @@
 
 package org.celllife.idart.gui.drug;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import model.manager.AdministrationManager;
 import model.manager.DrugManager;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.CommonObjects;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.database.hibernate.ChemicalCompound;
+import org.celllife.idart.database.hibernate.ChemicalDrugStrength;
+import org.celllife.idart.database.hibernate.Drug;
+import org.celllife.idart.database.hibernate.Form;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.search.Search;
@@ -31,26 +42,64 @@ import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartColor;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
-import org.celllife.idart.utils.iDARTUtil;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.celllife.idart.misc.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 import org.jfree.util.Log;
 
-import java.util.*;
-import java.util.List;
-
+/**
+ */
 public class AddDrug extends GenericFormGui {
 
-	private static final String ID = "id";
+	private Composite compSideTreatment;
+
+	private Group grpDrugInfo;
+
+	private Label lblInstructions;
+
+	private Label lblDrugSearch;
+
+	private Label lblName;
+
+	private Label lblFormLanguage1;
+
+	private Label lblPacksize;
+
+	private Label lblPackDescription;
+
+	private Label lblDispensingInstructions1;
+
+	private Label lblDispensingInstructions2;
+
+	private Label lblSideTreatment;
 
 	private Button btnSearch;
 
@@ -68,39 +117,41 @@ public class AddDrug extends GenericFormGui {
 
 	boolean isAddnotUpdate;
 
-	private Drug localDrug;
+	private Drug localDrug; // @jve:decl-index=0:
+
+	private Group grpStandadDosages;
+
+	private Label lblTake;
 
 	private Text txtAmountPerTime;
 
+	private Label lblTablets;
+
 	private Text txtTimesPerDay;
 
-	private Text txtAtc;
+	private Label lblTimesPerDay;
 
-	private Text txtMims;
+	private Text txtNSN;
+
+	private Label lblNSN;
+
+	private Text txtStockCode;
+
+	private Label lblStockCode;
 
 	private Combo cmbForm;
 
 	private Composite compInstructions;
 
+	private Group grpChemicalCompounds;
+
 	private Table tblChemicalCompounds;
 
 	private Button btnAddChemical;
 
+	private Label lblAddChemical;
+
 	private TableEditor editor;
-
-	private Label lblTablets;
-
-	private Label lblTake;
-
-	private Label lblPackDescription;
-
-	private Group grpChemicalCompounds;
-
-	private Button btnAtcSearch;
-
-	private Group grpDrugInfo;
-
-	private Button btnEditChemical;
 
 	/**
 	 * Use true if you want to add a new drug, use false if you are updating an
@@ -173,12 +224,9 @@ public class AddDrug extends GenericFormGui {
 		grpDrugInfo.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		grpDrugInfo.setText("Drug Details");
 		grpDrugInfo.setBounds(new Rectangle(18, 110, 483, 293));
-		GridLayout layout = new GridLayout(3, false);
-		layout.verticalSpacing = 10;
-		grpDrugInfo.setLayout(layout);
 
-		Label lblDrugSearch = new Label(grpDrugInfo, SWT.NONE);
-		lblDrugSearch.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblDrugSearch = new Label(grpDrugInfo, SWT.NONE);
+		lblDrugSearch.setBounds(new Rectangle(16, 29, 210, 20));
 
 		if (isAddnotUpdate) {
 			lblDrugSearch.setText("");
@@ -189,7 +237,7 @@ public class AddDrug extends GenericFormGui {
 
 		// btnSearch
 		btnSearch = new Button(grpDrugInfo, SWT.NONE);
-		btnSearch.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 2,1));
+		btnSearch.setBounds(new Rectangle(230, 24, 90, 30));
 		btnSearch.setText("Drug Search");
 		btnSearch.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		btnSearch.setVisible(!isAddnotUpdate);
@@ -205,62 +253,22 @@ public class AddDrug extends GenericFormGui {
 		.setToolTipText("Press this button to search for an existing drug.");
 
 		// lblName & txtName
-		Label lblName = new Label(grpDrugInfo, SWT.NONE);
-		lblName.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblName = new Label(grpDrugInfo, SWT.NONE);
+		lblName.setBounds(new Rectangle(16, 59, 180, 20));
 		lblName.setText("* Drug Name:");
 		lblName.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		
 		txtName = new Text(grpDrugInfo, SWT.BORDER);
-		txtName.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false, 2,1));
+		txtName.setBounds(new Rectangle(230, 59, 240, 20));
 		txtName.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		
-		// lblNSN & txtNSN
-		Label lblatc = new Label(grpDrugInfo, SWT.NONE);
-		lblatc.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
-		lblatc.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		lblatc.setText("  ATC Code:");
-		lblatc
-		.setToolTipText("This is recorded on the report Receipts and Issues: ARV Drugs");
-
-		txtAtc = new Text(grpDrugInfo, SWT.BORDER);
-		txtAtc.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false, 1,1));
-		txtAtc.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		txtAtc.setEditable(false);
-		
-		btnAtcSearch = new Button(grpDrugInfo, SWT.NONE);
-		btnAtcSearch.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
-		btnAtcSearch.setText("Search");
-		btnAtcSearch.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnAtcSearch.setEnabled(false);
-		btnAtcSearch.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			@Override
-			public void widgetSelected(
-					org.eclipse.swt.events.SelectionEvent e) {
-				cmdAtcSearchWidgetSelected();
-			}
-		});
-		btnAtcSearch.setToolTipText("Press this button to search for an ATC drug code.");
-
-		// lblStockCode & txtStockCode
-		Label lblMims = new Label(grpDrugInfo, SWT.NONE);
-		lblMims.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
-		lblMims.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		lblMims.setText("  MIMS Reference:");
-		lblMims
-		.setToolTipText("This is recorded on the report Receipts and Issues: ARV Drugs");
-
-		txtMims = new Text(grpDrugInfo, SWT.BORDER);
-		txtMims.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 2,1));
-		txtMims.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		// lblFormLanguage1 & txtFormLanguage1
-		Label lblFormLanguage1 = new Label(grpDrugInfo, SWT.NONE);
-		lblFormLanguage1.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblFormLanguage1 = new Label(grpDrugInfo, SWT.NONE);
+		lblFormLanguage1.setBounds(new Rectangle(16, 86, 180, 20));
 		lblFormLanguage1.setText("* Form:");
 		lblFormLanguage1.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		cmbForm = new Combo(grpDrugInfo, SWT.BORDER);
-		cmbForm.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 2,1));
+		cmbForm.setBounds(new Rectangle(230, 86, 150, 20));
 		CommonObjects.populateForms(getHSession(), cmbForm);
 		cmbForm.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		cmbForm.setText("");
@@ -307,23 +315,23 @@ public class AddDrug extends GenericFormGui {
 		});
 
 		// lblPacksize & txtPacksize
-		Label lblPacksize = new Label(grpDrugInfo, SWT.NONE);
-		lblPacksize.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblPacksize = new Label(grpDrugInfo, SWT.NONE);
+		lblPacksize.setBounds(new Rectangle(16, 115, 180, 20));
 		lblPacksize.setText("* Pack Size:");
 		lblPacksize.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtPacksize = new Text(grpDrugInfo, SWT.BORDER);
-		txtPacksize.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1,1));
+		txtPacksize.setBounds(new Rectangle(230, 115, 50, 20));
 		txtPacksize.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		lblPackDescription = new Label(grpDrugInfo, SWT.NONE);
-		lblPackDescription.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblPackDescription.setBounds(new Rectangle(290, 115, 150, 20));
 		lblPackDescription.setText("");
 		lblPackDescription.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		// lblDispensingInstructions1 & txtDispenseInstr
-		Label lblDispensingInstructions1 = new Label(grpDrugInfo, SWT.NONE);
-		lblDispensingInstructions1.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblDispensingInstructions1 = new Label(grpDrugInfo, SWT.NONE);
+		lblDispensingInstructions1.setBounds(new Rectangle(16, 145, 200, 20));
 		lblDispensingInstructions1
 		.setText("  Dispensing Instructions (line 1):");
 		lblDispensingInstructions1.setFont(ResourceUtils
@@ -332,13 +340,13 @@ public class AddDrug extends GenericFormGui {
 		.setToolTipText("This appears on the drug label");
 
 		txtDispensingInstructions1 = new Text(grpDrugInfo, SWT.BORDER);
-		txtDispensingInstructions1.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 2,1));
+		txtDispensingInstructions1.setBounds(new Rectangle(230, 145, 240, 20));
 		txtDispensingInstructions1.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_8));
 
 		// lblDispensingInstructions2 & txtDispensingInstructions2
-		Label lblDispensingInstructions2 = new Label(grpDrugInfo, SWT.NONE);
-		lblDispensingInstructions2.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblDispensingInstructions2 = new Label(grpDrugInfo, SWT.NONE);
+		lblDispensingInstructions2.setBounds(new Rectangle(16, 175, 200, 20));
 		lblDispensingInstructions2
 		.setText("  Dispensing Instructions (line 2):");
 		lblDispensingInstructions2.setFont(ResourceUtils
@@ -347,80 +355,57 @@ public class AddDrug extends GenericFormGui {
 		.setToolTipText("This appears on the drug label");
 
 		txtDispensingInstructions2 = new Text(grpDrugInfo, SWT.BORDER);
-		txtDispensingInstructions2.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 2,1));
+		txtDispensingInstructions2.setBounds(new Rectangle(230, 175, 240, 20));
 		txtDispensingInstructions2.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_8));
 
 		// Account Status
-		Label lblSideTreatment = new Label(grpDrugInfo, SWT.NONE);
-		lblSideTreatment.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		lblSideTreatment = new Label(grpDrugInfo, SWT.NONE);
+		lblSideTreatment.setBounds(new Rectangle(16, 205, 117, 20));
 		lblSideTreatment.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		lblSideTreatment.setText("* Drug is:");
 
-		rdBtnSideTreatment = new Button(grpDrugInfo, SWT.RADIO);
-		rdBtnSideTreatment.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1,1));
-		rdBtnSideTreatment.setLayoutData(new GridData(110, 20));
+		compSideTreatment = new Composite(grpDrugInfo, SWT.NONE);
+		compSideTreatment.setBounds(new Rectangle(230, 205, 220, 20));
+
+		rdBtnSideTreatment = new Button(compSideTreatment, SWT.RADIO);
+		rdBtnSideTreatment.setBounds(new org.eclipse.swt.graphics.Rectangle(0,
+				0, 110, 20));
 		rdBtnSideTreatment.setText("Side Treatment");
 		rdBtnSideTreatment.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		rdBtnSideTreatment.setSelection(false);
 
-		rdBtnARV = new Button(grpDrugInfo, SWT.RADIO);
-		rdBtnARV.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false, 1,1));
+		rdBtnARV = new Button(compSideTreatment, SWT.RADIO);
+		rdBtnARV.setBounds(new org.eclipse.swt.graphics.Rectangle(140, 0, 80,
+				20));
 		rdBtnARV.setText("ARV Drug");
 		rdBtnARV.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		rdBtnARV.setSelection(true);
-		
-		grpDrugInfo.layout();
-	}
 
-	protected void cmdAtcSearchWidgetSelected() {
-		Search atcSearch = new Search(getHSession(), getShell(),
-				CommonObjects.ATC);
+		// lblNSN & txtNSN
+		lblNSN = new Label(grpDrugInfo, SWT.NONE);
+		lblNSN.setBounds(new Rectangle(16, 237, 180, 20));
+		lblNSN.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
+		lblNSN.setText("  Drug Code 1:");
+		lblNSN
+		.setToolTipText("This is recorded on the report Receipts and Issues: ARV Drugs");
 
-		if (atcSearch.getValueSelected() != null) {
+		txtNSN = new Text(grpDrugInfo, SWT.BORDER);
+		txtNSN.setBounds(new Rectangle(228, 237, 240, 20));
+		txtNSN.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
-			AtcCode atc = AdministrationManager.getAtccodeFromCode(getHSession(), atcSearch
-					.getValueSelected()[1]);
-			
-			if (atc == null){
-				return;
-			}
-			
-			Set<ChemicalCompound> ccs = atc.getChemicalCompounds();
-			String name = atc.getName();
-			if (ccs != null && ccs.size() == 1){
-				String acronym = ccs.iterator().next().getAcronym();
-				if (acronym != null && !acronym.isEmpty()){
-					name = "[" + acronym + "] " + name;
-				}
-			}
-			txtName.setText(name);
-			txtAtc.setText(atc.getCode());
-			String mims = atc.getMims();
-			if (mims != null)
-				txtMims.setText(mims);
-			
-			if (ccs == null || ccs.isEmpty()){
-				return;
-			}
-			
-			for (int i = 0; i < tblChemicalCompounds.getItemCount(); i++) {
-				boolean foundMatch = false;
-				for (ChemicalCompound cc : ccs) {
-					if (((ChemicalCompound) tblChemicalCompounds.getItem(i)
-							.getData()).getId() == cc.getId()) {
-						tblChemicalCompounds.getItem(i).setChecked(true);
-						foundMatch = true;
-						break;
-					}
-				}
+		// lblStockCode & txtStockCode
+		lblStockCode = new Label(grpDrugInfo, SWT.NONE);
+		lblStockCode.setBounds(new Rectangle(16, 266, 180, 20));
+		lblStockCode.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
+		lblStockCode.setText("  Drug Code 2:");
+		lblStockCode
+		.setToolTipText("This is recorded on the report Receipts and Issues: ARV Drugs");
 
-				if (!foundMatch){
-					tblChemicalCompounds.getItem(i).setChecked(false);
-				}
-			}
-		}
-		
+		txtStockCode = new Text(grpDrugInfo, SWT.BORDER);
+		txtStockCode.setBounds(new Rectangle(228, 266, 240, 20));
+		txtStockCode.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
+
 	}
 
 	/**
@@ -430,7 +415,7 @@ public class AddDrug extends GenericFormGui {
 	private void createGrpStandardDosages() {
 
 		// grpStandadDosages
-		Group grpStandadDosages = new Group(getShell(), SWT.NONE);
+		grpStandadDosages = new Group(getShell(), SWT.NONE);
 		grpStandadDosages.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		grpStandadDosages.setText("Standard Dosage ");
 		grpStandadDosages.setLayout(null);
@@ -459,7 +444,7 @@ public class AddDrug extends GenericFormGui {
 		txtTimesPerDay.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		// lblTimesPerDay
-		Label lblTimesPerDay = new Label(grpStandadDosages, SWT.CENTER);
+		lblTimesPerDay = new Label(grpStandadDosages, SWT.CENTER);
 		lblTimesPerDay.setBounds(new Rectangle(298, 28, 126, 22));
 		lblTimesPerDay.setText("times per day");
 		lblTimesPerDay.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
@@ -546,8 +531,8 @@ public class AddDrug extends GenericFormGui {
 			txtDispensingInstructions1.setText("");
 			txtDispensingInstructions2.setText("");
 			btnSearch.setEnabled(true);
-			txtAtc.setText("");
-			txtMims.setText("");
+			txtNSN.setText("");
+			txtStockCode.setText("");
 			txtTimesPerDay.setText("");
 			txtAmountPerTime.setText("");
 
@@ -574,35 +559,26 @@ public class AddDrug extends GenericFormGui {
 		cmdCloseSelected();
 	}
 
-	private void cmdAddChemicalWidgetSelected(final ChemicalCompound cc) {
+	private void cmdAddChemicalWidgetSelected() {
 
-		final AddChemicalCompound ac = new AddChemicalCompound(getShell(), getHSession(), cc);
+		final AddChemicalCompound ac = new AddChemicalCompound(getShell());
 		ac.getShell().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 
-				if (AddChemicalCompound.compoundAdded != null) {
-					ChemicalCompound ncc = DrugManager
+				if (!(AddChemicalCompound.compoundAdded.trim().equals(""))) {
+					ChemicalCompound cc = DrugManager
 					.getChemicalCompoundByName(getHSession(),
-							AddChemicalCompound.compoundAdded.getName());
+							AddChemicalCompound.compoundAdded.trim());
 
-					if (ncc != null) {
-						if (cc == null){
-							// new cc
-							TableItem ti = new TableItem(tblChemicalCompounds,
-									SWT.NONE);
-		
-							populateTableItem(ncc, ti);
-						} else {
-							// edit cc
-							TableItem[] items = tblChemicalCompounds.getItems();
-							for (TableItem ti : items) {
-								if (ti.getData(ID).equals(ncc.getId())){
-									// populate table
-									populateTableItem(ncc, ti);
-								}
-							}
-						}
+					if (cc != null) {
+						TableItem ti = new TableItem(tblChemicalCompounds,
+								SWT.NONE);
+
+						// populate table
+						ti.setText(0, "[" + cc.getAcronym() + "] "
+								+ cc.getName());
+						ti.setData(cc);
 					}
 				}
 			}
@@ -674,11 +650,11 @@ public class AddDrug extends GenericFormGui {
 		}
 
 		if (localDrug.getStockCode() != null) {
-			txtMims.setText(localDrug.getStockCode());
+			txtStockCode.setText(localDrug.getStockCode());
 		}
 
-		if (localDrug.getAtccode() != null) {
-			txtAtc.setText(localDrug.getAtccode().getCode());
+		if (localDrug.getNsnCode() != null) {
+			txtNSN.setText(localDrug.getNsnCode());
 		}
 
 		Iterator<ChemicalDrugStrength> chemicalDrugStrengthIt = localDrug
@@ -710,8 +686,6 @@ public class AddDrug extends GenericFormGui {
 			}
 
 		}
-		
-		grpDrugInfo.layout();
 
 	}
 
@@ -794,15 +768,6 @@ public class AddDrug extends GenericFormGui {
 				return false;
 			}
 
-		}
-		
-		if (!txtAtc.getText().trim().isEmpty()){
-			AtcCode atccode = AdministrationManager.getAtccodeFromCode(getHSession(),
-					txtAtc.getText().trim());
-			if (atccode == null){
-				showMessage(MessageDialog.ERROR, "Unknown ATC Code", "The ATC code you selected is not it the database.");
-				return false;
-			}
 		}
 
 		if (!txtTimesPerDay.getText().trim().equals("")) {
@@ -995,11 +960,8 @@ public class AddDrug extends GenericFormGui {
 				localDrug.setSideTreatment('F');
 			}
 
-			if (!txtAtc.getText().trim().isEmpty()){
-				localDrug.setAtccode(AdministrationManager.getAtccodeFromCode(getHSession(),
-					txtAtc.getText().trim()));
-			}
-			localDrug.setStockCode(txtMims.getText());
+			localDrug.setNsnCode(txtNSN.getText());
+			localDrug.setStockCode(txtStockCode.getText());
 
 			if (localDrug.getChemicalDrugStrengths() == null) {
 				localDrug
@@ -1043,14 +1005,12 @@ public class AddDrug extends GenericFormGui {
 		rdBtnARV.setEnabled(enable);
 		txtAmountPerTime.setEnabled(enable);
 		txtTimesPerDay.setEnabled(enable);
-		txtAtc.setEnabled(enable);
-		txtMims.setEnabled(enable);
+		txtNSN.setEnabled(enable);
+		txtStockCode.setEnabled(enable);
 		btnSave.setEnabled(enable);
 		grpChemicalCompounds.setEnabled(enable);
 		tblChemicalCompounds.setEnabled(enable);
 		btnAddChemical.setEnabled(enable);
-		btnEditChemical.setEnabled(enable);
-		btnAtcSearch.setEnabled(enable);
 
 		if (enable) {
 			cmbForm.setBackground(ResourceUtils.getColor(iDartColor.WHITE));
@@ -1097,7 +1057,7 @@ public class AddDrug extends GenericFormGui {
 		compInstructions.setLayout(null);
 		compInstructions.setBounds(new Rectangle(270, 79, 300, 25));
 
-		Label lblInstructions = new Label(compInstructions, SWT.CENTER);
+		lblInstructions = new Label(compInstructions, SWT.CENTER);
 		lblInstructions.setBounds(new Rectangle(0, 0, 300, 25));
 		lblInstructions.setText("All fields marked with * are compulsory");
 		lblInstructions.setFont(ResourceUtils
@@ -1114,7 +1074,7 @@ public class AddDrug extends GenericFormGui {
 		grpChemicalCompounds.setBounds(new Rectangle(524, 110, 235, 372));
 		grpChemicalCompounds.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_8));
-		
+		grpChemicalCompounds.setLayout(null);
 		tblChemicalCompounds = new Table(grpChemicalCompounds, SWT.CHECK
 				| SWT.FULL_SELECTION | SWT.BORDER);
 		tblChemicalCompounds.setHeaderVisible(true);
@@ -1123,41 +1083,23 @@ public class AddDrug extends GenericFormGui {
 		tblChemicalCompounds.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_8));
 
-//		Label lblAddChemical = new Label(grpChemicalCompounds, SWT.NONE);
-//		lblAddChemical.setBounds(new Rectangle(14, 334, 30, 26));
-//		lblAddChemical.setText("");
-//		lblAddChemical.setImage(ResourceUtils.getImage(iDartImage.DRUG_30X26));
-		
 		btnAddChemical = new Button(grpChemicalCompounds, SWT.NONE);
-		btnAddChemical.setBounds(new Rectangle(14, 332, 100, 30));
+		btnAddChemical.setBounds(new Rectangle(47, 332, 178, 30));
 		btnAddChemical.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnAddChemical.setText("Add Compound");
+		btnAddChemical.setText("Add Chemical Compound");
 		btnAddChemical
 		.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 			@Override
 			public void widgetSelected(
 					org.eclipse.swt.events.SelectionEvent e) {
-				cmdAddChemicalWidgetSelected(null);
+				cmdAddChemicalWidgetSelected();
 			}
 		});
-		
-		btnEditChemical = new Button(grpChemicalCompounds, SWT.NONE);
-		btnEditChemical.setBounds(new Rectangle(120, 332, 100, 30));
-		btnEditChemical.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		btnEditChemical.setText("Edit Compound");
-		btnEditChemical.setEnabled(false);
-		btnEditChemical
-		.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			@Override
-			public void widgetSelected(
-					org.eclipse.swt.events.SelectionEvent e) {
-				TableItem[] selection = tblChemicalCompounds.getSelection();
-				if (selection.length > 0){
-					ChemicalCompound cc = (ChemicalCompound) selection[0].getData();
-					cmdAddChemicalWidgetSelected(cc);
-				}
-			}
-		});
+
+		lblAddChemical = new Label(grpChemicalCompounds, SWT.NONE);
+		lblAddChemical.setBounds(new Rectangle(14, 334, 30, 26));
+		lblAddChemical.setText("");
+		lblAddChemical.setImage(ResourceUtils.getImage(iDartImage.DRUG_30X26));
 
 		TableColumn tblColChemicalCompounds = new TableColumn(
 				tblChemicalCompounds, SWT.NONE);
@@ -1272,18 +1214,9 @@ public class AddDrug extends GenericFormGui {
 			TableItem ti = new TableItem(tblChemicalCompounds, SWT.NONE);
 
 			// populate table
-			populateTableItem(cc, ti);
+			ti.setText(0, "[" + cc.getAcronym() + "] " + cc.getName());
+			ti.setData(cc);
 		}
-	}
-
-	/**
-	 * @param cc
-	 * @param ti
-	 */
-	private void populateTableItem(ChemicalCompound cc, TableItem ti) {
-		ti.setText(0, "[" + cc.getAcronym() + "] " + cc.getName());
-		ti.setData(cc);
-		ti.setData(ID, cc.getId());
 	}
 
 	/**

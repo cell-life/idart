@@ -135,12 +135,6 @@ public class ResourceUtils {
 		try {
 			URL baseDir = (new File("img" + File.separator)).toURI().toURL();
 
-			imageRegistry.put(iDartImage.APPOINTMENTREMINDERS.name(),
-					ImageDescriptor.createFromURL(new URL(baseDir,
-					"AppointmentReminders.jpg")));
-			imageRegistry.put(iDartImage.APPOINTMENTREMINDERS_30X26.name(),
-					ImageDescriptor.createFromURL(new URL(baseDir,
-					"AppointmentReminders_30x26.jpg")));
 			imageRegistry.put(iDartImage.ARROWLEFT_40X34.name(),
 					ImageDescriptor.createFromURL(new URL(baseDir,
 					"ArrowLeft_40x34.jpg")));
@@ -192,9 +186,6 @@ public class ResourceUtils {
 					.createFromURL(new URL(baseDir, "final_logo.png")));
 			imageRegistry.put(iDartImage.GENERALADMIN.name(), ImageDescriptor
 					.createFromURL(new URL(baseDir, "GeneralAdmin.jpg")));
-			imageRegistry.put(iDartImage.GREENDOT.name(), 
-					ImageDescriptor.createFromURL(new URL(baseDir,
-					"greendot.png")));
 			imageRegistry.put(iDartImage.HELP.name(), ImageDescriptor
 					.createFromURL(new URL(baseDir, "Help.jpg")));
 			imageRegistry.put(iDartImage.HOURGLASS.name(), ImageDescriptor
@@ -266,9 +257,6 @@ public class ResourceUtils {
 			imageRegistry.put(iDartImage.PRESCRIPTIONNEW.name(),
 					ImageDescriptor.createFromURL(new URL(baseDir,
 					"PrescriptionNew.jpg")));
-			imageRegistry.put(iDartImage.REDDOT.name(), 
-					ImageDescriptor.createFromURL(new URL(baseDir,
-					"reddot.png")));
 			imageRegistry.put(iDartImage.REDOPACKAGE_40X34.name(),
 					ImageDescriptor.createFromURL(new URL(baseDir,
 					"RedoPackage_40x34.jpg")));

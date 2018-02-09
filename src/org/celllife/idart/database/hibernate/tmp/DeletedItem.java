@@ -8,9 +8,6 @@ import javax.persistence.Id;
  */
 @Entity
 public class DeletedItem {
-	
-	public static final String ITEM_ADHERANCE = "AdherenceRecord";
-	public static final String ITEM_PACKAGE_DRUG = "PackageDrugInfo";
 
 	@Id
 	@GeneratedValue
@@ -20,16 +17,23 @@ public class DeletedItem {
 
 	private String itemType;
 
+	private boolean invalid = false;
+
+	public DeletedItem() {
+		super();
+	}
+
 	/**
 	 * Constructor for DeletedItem.
 	 * @param deletedItemId int
 	 * @param itemType String
 	 * @param invalid boolean
 	 */
-	public DeletedItem(int deletedItemId, String itemType) {
+	public DeletedItem(int deletedItemId, String itemType, boolean invalid) {
 		super();
 		this.deletedItemId = deletedItemId;
 		this.itemType = itemType;
+		this.invalid = invalid;
 	}
 
 	/**
@@ -57,6 +61,14 @@ public class DeletedItem {
 	}
 
 	/**
+	 * Method isInvalid.
+	 * @return boolean
+	 */
+	public boolean isInvalid() {
+		return invalid;
+	}
+
+	/**
 	 * Method setDeletedItemId.
 	 * @param deletedItemId int
 	 */
@@ -70,6 +82,14 @@ public class DeletedItem {
 	 */
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	/**
+	 * Method setInvalid.
+	 * @param invalid boolean
+	 */
+	public void setInvalid(boolean invalid) {
+		this.invalid = invalid;
 	}
 
 	/**

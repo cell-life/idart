@@ -28,11 +28,9 @@ import model.nonPersistent.PharmacyDetails;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.celllife.idart.commonobjects.LocalObjects;
-import org.celllife.idart.database.hibernate.AtcCode;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Doctor;
 import org.celllife.idart.database.hibernate.Form;
-import org.celllife.idart.database.hibernate.IdentifierType;
 import org.celllife.idart.database.hibernate.Logging;
 import org.celllife.idart.database.hibernate.NationalClinics;
 import org.celllife.idart.database.hibernate.Regimen;
@@ -909,16 +907,6 @@ public class AdministrationManager {
 
 		return result;
 	}
-	
-	public static List<AtcCode> getAtccodes(Session sess) {
-		String qString = "from AtcCode as f order by f.name";
-		Query q = sess.createQuery(qString);
-		@SuppressWarnings("unchecked")
-		List<AtcCode> result = q.list();
-
-		return result;
-	}
-	
 
 	/**
 	 * This method gets a form from the database.
@@ -933,18 +921,6 @@ public class AdministrationManager {
 		return (Form) (session.createQuery(
 		"from Form as f where upper(f.form) = :form").setString("form",
 				formName.toUpperCase()).uniqueResult());
-	}
-	
-	public static AtcCode getAtccodeFromName(Session session, String name) {
-		return (AtcCode) (session.createQuery(
-		"from AtcCode as a where upper(a.name) = :name").setString("name",
-				name.toUpperCase()).uniqueResult());
-	}
-	
-	public static AtcCode getAtccodeFromCode(Session session, String code) {
-		return (AtcCode) (session.createQuery(
-		"from AtcCode as a where upper(a.code) = :code").setString("code",
-				code.toUpperCase()).uniqueResult());
 	}
 
 	/**
@@ -1065,10 +1041,5 @@ public class AdministrationManager {
 	public static List<StudyParticipant> getP() {
 		return null;
 	}
-
-	public static IdentifierType getNationalIdentifierType(Session hSession) {
-		// FIXME: figure out a way to identify the national id type
-		return (IdentifierType) hSession.createQuery(
-				"from IdentifierType where id = 0").uniqueResult();
-	}
+	
 }

@@ -18,35 +18,57 @@
  */
 package model.manager;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.LocalObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.database.hibernate.AccumulatedDrugs;
+import org.celllife.idart.database.hibernate.Clinic;
+import org.celllife.idart.database.hibernate.Drug;
+import org.celllife.idart.database.hibernate.Form;
+import org.celllife.idart.database.hibernate.PackagedDrugs;
+import org.celllife.idart.database.hibernate.Packages;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PillCount;
+import org.celllife.idart.database.hibernate.Prescription;
+import org.celllife.idart.database.hibernate.StockCenter;
+import org.celllife.idart.database.hibernate.User;
 import org.celllife.idart.database.hibernate.tmp.PackageDrugInfo;
+import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.model.utils.PackageLifeStage;
 import org.celllife.idart.print.label.DrugLabel;
 import org.celllife.idart.print.label.PackageCoverLabel;
 import org.celllife.idart.print.label.PrintThread;
 import org.celllife.idart.print.label.ScriptSummaryLabel;
-import org.celllife.idart.utils.PackageLifeStage;
-import org.celllife.idart.utils.iDARTUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
-
+/**
+ */
 public class PackageManager {
 
 	// --------- METHODS FOR PRESCRIPTION OBJECT MANAGER
-    /**
-     * Method checkStockLevels.
-     * @param sess
-     * @param d
-     * @param stockCenter
-     * @return
-     * @throws HibernateException
-     */
+	// ---------------------------------
+	/**
+	 * Method checkStockLevels.
+	 * 
+	 * @param sess
+	 *            Session
+	 * @param d
+	 *            Drug
+	 * @param c
+	 *            Clinic
+	 * @return boolean
+	 * @throws HibernateException
+	 */
 	public static boolean checkStockLevels(Session sess, Drug d,
 			StockCenter stockCenter) throws HibernateException {
 		boolean levelsFine = false;
@@ -212,9 +234,8 @@ public class PackageManager {
 			throws HibernateException, IllegalArgumentException {
 
 		if (!previousPrescriptionDeleted) {
-			List<Prescription> updatedPrescriptions = sess
-					.createQuery(
-							"from Prescription as p where p.patient.id = :patid")
+			List<Prescription> updatedPrescriptions = sess.createQuery(
+					"from Prescription as p where p.patient.id = :patid")
 					.setInteger("patid", preToBeSaved.getPatient().getId())
 					.list();
 
@@ -288,18 +309,6 @@ public class PackageManager {
 		return null;
 	}
 
-	public static Packages getMostRecentCollectedPackage(Session session,
-			Patient p) throws HibernateException {
-
-		Packages pack = (Packages) session
-				.createQuery(
-						"select pack from Packages as pack where pack.prescription.patient.id = :thePatientId " +
-						" and pack.pickupDate is not null" + 
-						" order by pack.pickupDate desc")
-				.setInteger("thePatientId", p.getId()).setMaxResults(1).uniqueResult();
-		return pack;
-	}
-
 	/**
 	 * Gets a list of all the packages that have been packed for a particular
 	 * prescription.
@@ -340,9 +349,7 @@ public class PackageManager {
 	}
 
 	/**
-	 * Return a list of all waiting packages for this patient, ordered by pack
-	 * date
-	 * 
+	 *  Return a list of all waiting packages for this patient, ordered by pack date
 	 * @param session
 	 * @param p
 	 * @return List<Packages>
@@ -357,16 +364,14 @@ public class PackageManager {
 								+ "pack.dateReceived is not null and "
 								+ "pack.dateLeft is not null and "
 								+ "pack.pickupDate is null "
-								+ "order by pack.packDate desc")
-				.setInteger("thePatientId", p.getId()).list();
+								+ "order by pack.packDate desc").setInteger(
+						"thePatientId", p.getId()).list();
 		return packages;
 
 	}
 
 	/**
-	 * Return a list of all waiting packages for this patient, where the id is
-	 * like "%id%" ordered by pack date
-	 * 
+	 *  Return a list of all waiting packages for this patient, where the id is like "%id%" ordered by pack date
 	 * @param session
 	 * @param patientId
 	 * @return List<Packages>
@@ -376,14 +381,13 @@ public class PackageManager {
 			Session session, String patientId) {
 
 		List<Packages> packages = session
-				.createQuery(
-						"select pack from Packages as pack where UPPER(pack.prescription.patient.patientId) like :patientId and "
+				.createQuery("select pack from Packages as pack where UPPER(pack.prescription.patient.patientId) like :patientId and "
 								+ "pack.packageReturned = false and "
 								+ "pack.dateReceived is not null and "
 								+ "pack.dateLeft is not null and "
 								+ "pack.pickupDate is null "
-								+ "order by pack.packDate desc")
-				.setString("patientId", "%" + patientId.toUpperCase() + "%")
+								+ "order by pack.packDate desc").setString(
+						"patientId", "%" + patientId.toUpperCase() + "%")
 				.list();
 		return packages;
 
@@ -405,8 +409,8 @@ public class PackageManager {
 						"select pack from Packages as pack where pack.prescription.patient.id = :thePatientId "
 								+ "and pack.pickupDate is not null "
 								+ "and pack.packageReturned = false "
-								+ "order by pack.pickupDate desc")
-				.setInteger("thePatientId", p.getId()).list();
+								+ "order by pack.pickupDate desc").setInteger(
+						"thePatientId", p.getId()).list();
 		return patientsPackages;
 	}
 
@@ -555,8 +559,8 @@ public class PackageManager {
 								+ "and pack.pickupDate is not null "
 								+ "and pack.packageReturned = false "
 								+ "and pack.pickupDate < :thisPackPickupDate "
-								+ "order by pack.pickupDate desc")
-				.setInteger("thePatientId",
+								+ "order by pack.pickupDate desc").setInteger(
+						"thePatientId",
 						pack.getPrescription().getPatient().getId())
 				.setTimestamp("thisPackPickupDate", pack.getPickupDate())
 				.setMaxResults(1).uniqueResult();
@@ -572,8 +576,8 @@ public class PackageManager {
 	public static String getShortPackageContentsString(Session sess,
 			Packages pack) throws HibernateException {
 		String drugsInPack = "";
-		drugsInPack = DrugManager.getDrugListString(
-				PackageManager.getDrugsInPackage(sess, pack), ", ", true);
+		drugsInPack = DrugManager.getDrugListString(PackageManager
+				.getDrugsInPackage(sess, pack), ", ", true);
 		return drugsInPack;
 	}
 
@@ -736,7 +740,7 @@ public class PackageManager {
 						"select pack from Packages pack where pack.clinic = :clinic "
 								+ "and date(pack."
 								+ lifeStage.getDatePropertyName()
-								+ ") between date(:startDate) and date(:endDate) "
+								+ ") between date(:startDate) and date(:endDate) " 
 								+ "and pack.prescription is not null order by "
 								+ lifeStage.getDatePropertyName() + " ASC")
 				.setLong("clinic", c.getId()).setDate("startDate", startDate)
@@ -763,16 +767,15 @@ public class PackageManager {
 	public static List<Packages> getPackagesInTransit(Session session,
 			String clinicName) throws HibernateException {
 		List<Packages> result;
-		result = session
-				.createQuery(
-						"select distinct pack from Packages as pack where "
-								+ "pack.clinic.clinicName =:clinic and "
-								+ "pack.packageReturned = false and "
-								+ "pack.packDate is not null and "
-								+ "pack.dateLeft is not null and "
-								+ "pack.dateReceived is null and "
-								+ "pack.pickupDate is null")
-				.setString("clinic", clinicName).list();
+		result = session.createQuery(
+				"select distinct pack from Packages as pack where "
+						+ "pack.clinic.clinicName =:clinic and "
+						+ "pack.packageReturned = false and "
+						+ "pack.packDate is not null and "
+						+ "pack.dateLeft is not null and "
+						+ "pack.dateReceived is null and "
+						+ "pack.pickupDate is null").setString("clinic",
+				clinicName).list();
 		return result;
 	}
 
@@ -792,15 +795,14 @@ public class PackageManager {
 			Session session, String clinicName) throws HibernateException {
 		java.util.List<Packages> result;
 
-		result = session
-				.createQuery(
-						"select distinct pack from Packages as pack where "
-								+ "pack.clinic.clinicName =:clinic and "
-								+ "pack.packageReturned = false and "
-								+ "pack.dateReceived is not null and "
-								+ "pack.dateLeft is not null and "
-								+ "pack.pickupDate is null")
-				.setString("clinic", clinicName).list();
+		result = session.createQuery(
+				"select distinct pack from Packages as pack where "
+						+ "pack.clinic.clinicName =:clinic and "
+						+ "pack.packageReturned = false and "
+						+ "pack.dateReceived is not null and "
+						+ "pack.dateLeft is not null and "
+						+ "pack.pickupDate is null").setString("clinic",
+				clinicName).list();
 		return result;
 	}
 
@@ -818,13 +820,12 @@ public class PackageManager {
 
 		java.util.List<PackageDrugInfo> result;
 
-		result = session
-				.createQuery(
-						"select packInfo from PackageDrugInfo as packInfo where "
-								+ "packInfo.packageId =:packageId and "
-								+ "packInfo.patientId =:patientId order by id")
-				.setString("packageId", packageId)
-				.setString("patientId", patientId).list();
+		result = session.createQuery(
+				"select packInfo from PackageDrugInfo as packInfo where "
+						+ "packInfo.packageId =:packageId and "
+						+ "packInfo.patientId =:patientId order by id")
+				.setString("packageId", packageId).setString("patientId",
+						patientId).list();
 		return result;
 	}
 
@@ -839,14 +840,13 @@ public class PackageManager {
 	public static Packages getPackage(Session session, String packageId)
 			throws HibernateException {
 		Packages result;
-		result = (Packages) session
-				.createQuery(
-						"select pack from Packages as pack where "
-								+ "pack.packageId = :packageId")
-				.setString("packageId", packageId.toUpperCase()).uniqueResult();
+		result = (Packages) session.createQuery(
+				"select pack from Packages as pack where "
+						+ "pack.packageId = :packageId").setString("packageId",
+				packageId.toUpperCase()).uniqueResult();
 		return result;
 	}
-
+	
 	// --------- METHODS FOR PACKAGES LEAVING MANAGER
 	// ---------------------------------
 
@@ -891,18 +891,27 @@ public class PackageManager {
 
 	// ---------- METHODS FOR PATIENT PACKAGING MANAGER ---------------
 
-    /**
-     * Method printLabels
-     * @param sess
-     * @param pdisForLabels
-     * @param qtysForLabels
-     * @return
-     * @throws HibernateException
-     */
+	/**
+	 * Method printLabels.
+	 * 
+	 * @param sess
+	 *            Session
+	 * @param pdisForLabels
+	 *            List<PackageDrugInfo>
+	 * @param qtysForLabels
+	 * @param pInfo
+	 *            PackageInfo
+	 * @return boolean
+	 * @throws HibernateException
+	 */
 	public static boolean printLabels(Session sess,
 			List<PackageDrugInfo> pdisForLabels,
 			Map<Object, Integer> qtysForLabels) throws HibernateException {
 
+		/*
+		 * NOTE: do not make changes to PackageDrugInfo object here since the 
+		 * changes will get updated in the database
+		 */
 		int qtySummaryLabel = qtysForLabels.get(ScriptSummaryLabel.KEY);
 		int qtyPackageLabel = qtysForLabels.get(PackageCoverLabel.KEY);
 		int qtyNextAppointment = qtysForLabels
@@ -918,6 +927,8 @@ public class PackageManager {
 			int qtyDrugLabel = qtysForLabels.get(pdi);
 			if (qtyDrugLabel > 0
 					&& (!pdi.isSideTreatment() || iDartProperties.printSideTreatmentLabels)) {
+
+				boolean firstBatchInPrintJob = pdi.isFirstBatchInPrintJob();
 				for (int j = 0; j < pdi.getNumberOfLabels(); j++) {
 
 					Drug theDrug = DrugManager.getDrug(sess, pdi.getDrugName());
@@ -927,45 +938,45 @@ public class PackageManager {
 						pdi.setNotes("");
 					}
 
+					String qtyInHand = pdi.getQtyInHand();
 					// Case 1: 1st label but not last. Also, 1st label for the
 					// drug
 					if (j == 0 && j != pdi.getNumberOfLabels() - 1
-							&& pdi.isFirstBatchInPrintJob()) {
-						pdi.setQtyInHand(pdi.getQtyInHand());
-						// Case 2: 1st Label but not last. This is not the
-						// 1st label for the drug. This occurs when multiple
-						// batches are dispensed from for a single drug
+							&& firstBatchInPrintJob) {
+						qtyInHand = pdi.getQtyInHand();
+					// Case 2: 1st Label but not last. This is not the
+					// 1st label for the drug. This occurs when multiple
+					// batches are dispensed from for a single drug
 					} else if (j == 0 && j != pdi.getNumberOfLabels() - 1) {
-						pdi.setQtyInHand(iDARTUtil.removeAccumulated(pdi
-								.getQtyInHand()));
+						qtyInHand = iDARTUtil.removeAccumulated(pdi.getQtyInHand());
 					} else if (j == 0 && j == pdi.getNumberOfLabels() - 1
-							&& pdi.isFirstBatchInPrintJob()) {
-						pdi.setQtyInHand(pdi.getQtyInHand());
+							&& firstBatchInPrintJob) {
+						qtyInHand = pdi.getQtyInHand();
 					} else if (j == 0 && j == pdi.getNumberOfLabels() - 1
-							&& !pdi.isFirstBatchInPrintJob()) {
-						pdi.setQtyInHand((iDARTUtil.removeAccumulated(pdi
-								.getQtyInHand())));
+							&& !firstBatchInPrintJob) {
+						qtyInHand = iDARTUtil.removeAccumulated(pdi
+								.getQtyInHand());
 					}
 					// Case 3: not the 1st and not the last label
 					else if (j != 0 && (j != pdi.getNumberOfLabels() - 1)) {
-						pdi.setQtyInHand(iDARTUtil.removeAccumulated(pdi
-								.getQtyInHand()));
+						qtyInHand = iDARTUtil.removeAccumulated(pdi
+								.getQtyInHand());
 						// Case 4: last label in this pdi but not last label for
 						// the drug
 					} else if (j == (pdi.getNumberOfLabels() - 1)
-							&& pdi.isFirstBatchInPrintJob()) {
-						pdi.setQtyInHand(iDARTUtil.removeAccumulated(pdi
-								.getQtyInHand()));
+							&& firstBatchInPrintJob) {
+						qtyInHand = iDARTUtil.removeAccumulated(pdi
+								.getQtyInHand());
 					}
 					// Case 5: last label in this pdi and for the drug
 					else if (j == (pdi.getNumberOfLabels() - 1)) {
-						pdi.setQtyInHand(pdi.getQtyInLastBatch());
+						qtyInHand = pdi.getQtyInLastBatch();
 					}
 
-					if ("".equalsIgnoreCase(pdi.getQtyInHand())) {
-						pdi.setQtyInHand("("
+					if (qtyInHand.isEmpty()) {
+						qtyInHand = "("
 								+ pdi.getPackagedDrug().getStock().getDrug()
-										.getPackSize() + ")");
+										.getPackSize() + ")";
 					}
 
 					String appointment = "";
@@ -974,12 +985,12 @@ public class PackageManager {
 						appointment = pdi.getDateExpectedString();
 					}
 					Object labelToPrint = createLabel(false, pdi, theForm,
-							appointment);
+							appointment, qtyInHand);
 
 					for (int k = 0; k < qtyDrugLabel; k++) {
 						printerQueue.add(labelToPrint);
 					}
-					pdi.setFirstBatchInPrintJob(false);
+					firstBatchInPrintJob = false;
 				}
 			}
 		}
@@ -1017,8 +1028,8 @@ public class PackageManager {
 									(pdi.getPrescriptionDuration() / 4)
 									+ " month"
 									: pdi.getPrescriptionDuration() + " week"),
-					pdi.getPatientId(), pdi.getPatientName(),
-					(pdi.getDateExpectedString() == null
+					pdi.getPatientId(), pdi.getPatientName(), (pdi
+							.getDateExpectedString() == null
 							|| !printNextAppointment(qtyNextAppointment) || pdi
 							.getDateExpectedString().isEmpty()) ? ""
 							: "Date Exp " + pdi.getDateExpectedString());
@@ -1151,15 +1162,18 @@ public class PackageManager {
 		}
 	}
 
-    /**
-     * @param leaveQuantitiesBlank
-     * @param pdi
-     * @param theForm
-     * @param nextAppointmentDate
-     * @return
-     */
+	/**
+	 * @param pInfo
+	 * @param printPackageCover
+	 * @param leaveQuantitiesBlank
+	 * @param pdi
+	 * @param theForm
+	 * @param qtyInHand 
+	 * @param patientName
+	 * @return
+	 */
 	private static Object createLabel(boolean leaveQuantitiesBlank,
-			PackageDrugInfo pdi, Form theForm, String nextAppointmentDate) {
+			PackageDrugInfo pdi, Form theForm, String nextAppointmentDate, String qtyInHand) {
 
 		String amountPerTime = "";
 		String form = theForm.getFormLanguage1();
@@ -1194,7 +1208,7 @@ public class PackageManager {
 		pdl.setPharmHeaderLocation(LocalObjects.pharmacy.getStreet() + ", "
 				+ LocalObjects.pharmacy.getCity() + ", Tel: "
 				+ LocalObjects.pharmacy.getContactNo());
-		pdl.setDrug(pdi.getDrugName() + " " + pdi.getQtyInHand());
+		pdl.setDrug(pdi.getDrugName() + " " + qtyInHand);
 
 		pdl.setDispInstructions1((pdi.getSpecialInstructions1() == null ? ""
 				: pdi.getSpecialInstructions1()));

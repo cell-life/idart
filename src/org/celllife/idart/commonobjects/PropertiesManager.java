@@ -1,9 +1,5 @@
 package org.celllife.idart.commonobjects;
 
-import com.pholser.util.properties.PropertyBinder;
-import org.apache.log4j.Logger;
-import org.celllife.idart.misc.iDARTRuntimeException;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,12 +9,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+import org.celllife.idart.misc.iDARTRuntimeException;
+
+import com.pholser.util.properties.PropertyBinder;
+
 public class PropertiesManager {
 
 	private static enum Props{
 		SMS("sms.properties"),
-		IDART("idart.properties"),
-        DAYS("working_days.properties");
+		IDART("idart.properties");
 		
 		private final String path;
 
@@ -37,13 +37,6 @@ public class PropertiesManager {
 			loadProperties(SmsProperties.class, Props.SMS);
 		}
 		return (SmsProperties) propMap.get(Props.SMS);
-	}
-
-    public static final WorkingDaysProperties workingDaysProperties() {
-        if (propMap.get(Props.DAYS) == null){
-            loadProperties(WorkingDaysProperties.class, Props.DAYS);
-        }
-        return (WorkingDaysProperties) propMap.get(Props.DAYS);
 	}
 	
 	public static final Properties smsRaw() {

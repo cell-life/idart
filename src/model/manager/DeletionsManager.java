@@ -77,7 +77,7 @@ public class DeletionsManager {
 	 *            Packages
 	 * @throws HibernateException
 	 */
-	public static void removePackage(Session session,
+	public static void removeThisPackage(Session session,
 			Packages packageToRemove) throws HibernateException {
 
 		int prescriptionId = packageToRemove.getPrescription().getId();
@@ -126,9 +126,6 @@ public class DeletionsManager {
 					appToUpdate.setVisitDate(null);
 				}
 				session.save(pat);
-				
-				// make a note of this deleted appointment so it can be sent to ARS later
-				AppointmentReminderManager.savedDeletedAppointment(session, appToDelete);
 			}
 		}
 
@@ -136,8 +133,20 @@ public class DeletionsManager {
 		removePillCountInfo(session, packageToRemove, delList);
 
 		// get any temp records that have not yet been sent
-		log.info("deleting PackageDrugInfo records for package: " + packageToRemove.getId());
-		TemporaryRecordsManager.deletePackageDrugInfosForPackage(session, packageToRemove);
+
+		List<PackageDrugInfo> pdiList = TemporaryRecordsManager
+				.getPDIsForPackage(session, packageToRemove);
+
+		Iterator<PackageDrugInfo> pdiToRemoveItr = pdiList.iterator();
+		while (pdiToRemoveItr.hasNext()) {
+			PackageDrugInfo pdi = pdiToRemoveItr.next();
+			String pdiDelete = "delete PackageDrugInfo where id = :pdiId";
+
+			session.createQuery(pdiDelete).setInteger("pdiId", pdi.getId())
+					.executeUpdate();
+
+			log.info("deleting PackageDrugInfo record " + pdi.getId());
+		}
 
 		Iterator<PackagedDrugs> packDrugToRemoveItr = packageToRemove
 				.getPackagedDrugs().iterator();
@@ -147,7 +156,7 @@ public class DeletionsManager {
 			String packageDrugsDelete = "delete PackagedDrugs where id = :pId";
 			session.createQuery(packageDrugsDelete).setInteger("pId",
 					pd.getId()).executeUpdate();
-			delList.add(new DeletedItem(pd.getId(), DeletedItem.ITEM_PACKAGE_DRUG));
+			delList.add(new DeletedItem(pd.getId(), "PackageDrugInfo", false));
 			log.info("deleting PackageDrug" + pd.getId());
 
 		}
@@ -181,7 +190,7 @@ public class DeletionsManager {
 			StockManager.updateStockLevel(session, theStock);
 		}
 
-		// create a log entry for deleted package
+		// create a log entry
 		Logging logging = new Logging();
 		logging.setIDart_User(LocalObjects.getUser(session));
 		logging.setItemId(String.valueOf(packageToRemove.getId()));
@@ -228,25 +237,26 @@ public class DeletionsManager {
 	 * 
 	 * @param session
 	 *            Session
-	 * @param pdToRemove
+	 * @param drugToRemove
 	 *            PackagedDrugs
 	 * @throws HibernateException
 	 */
 	@SuppressWarnings( { "cast", "unchecked" })
-	public static void removePackagedDrug(Session session,
-			PackagedDrugs pdToRemove, Packages fromPackage)
+	public static void removeThisDrug(Session session,
+			PackagedDrugs drugToRemove, Packages fromPackage)
 			throws HibernateException {
 
 		List<DeletedItem> delList = new ArrayList<DeletedItem>();
-		delList.add(new DeletedItem(pdToRemove.getId(), DeletedItem.ITEM_PACKAGE_DRUG));
+		delList.add(new DeletedItem(drugToRemove.getId(), "PackageDrugInfo",
+				false));
 
 		// get stock batch to check hasUnitsRemaining
-		Stock theStockToCheck = StockManager.getStock(session, pdToRemove
+		Stock theStockToCheck = StockManager.getStock(session, drugToRemove
 				.getStock().getId());
 
 		// get PackageDrugInfo to delete, if any
 		PackageDrugInfo pdi = TemporaryRecordsManager.getPDIforPackagedDrug(
-				session, pdToRemove);
+				session, drugToRemove);
 
 		// delete pdi, if any
 		if (pdi != null) {
@@ -259,9 +269,9 @@ public class DeletionsManager {
 		// delete the packaged drug
 		String packageDrugsDelete = "delete PackagedDrugs where id = :pId";
 		session.createQuery(packageDrugsDelete).setInteger("pId",
-				pdToRemove.getId()).executeUpdate();
+				drugToRemove.getId()).executeUpdate();
 
-		log.info("deleting PackageDrug record " + pdToRemove.getId());
+		log.info("deleting PackageDrug record " + drugToRemove.getId());
 
 		StockManager.updateStockLevel(session, theStockToCheck);
 
@@ -284,14 +294,14 @@ public class DeletionsManager {
 
 		Logging logging = new Logging();
 		logging.setIDart_User(LocalObjects.getUser(session));
-		logging.setItemId(String.valueOf(pdToRemove.getId()));
+		logging.setItemId(String.valueOf(drugToRemove.getId()));
 		logging.setModified('Y');
 		logging.setTransactionDate(new Date());
 		logging.setTransactionType("Delete drug from Package");
 		logging.setMessage("Deleted drug "
-				+ pdToRemove.getStock().getDrug().getName() + " x "
-				+ pdToRemove.getAmount() + " from package "
-				+ pdToRemove.getParentPackage().getId());
+				+ drugToRemove.getStock().getDrug().getName() + " x "
+				+ drugToRemove.getAmount() + " from package "
+				+ drugToRemove.getParentPackage().getId());
 		logging.setMessage("Reset Package's PackagedDrug indices");
 		session.save(logging);
 
@@ -469,7 +479,7 @@ public class DeletionsManager {
 			session.createQuery(pcDelete).setInteger("pcId", pc.getId())
 					.executeUpdate();
 
-			delList.add(new DeletedItem(pc.getId(), DeletedItem.ITEM_ADHERANCE));
+			delList.add(new DeletedItem(pc.getId(), "AdherenceRecord", false));
 
 			log.info("deleting pill count " + pc.getId());
 		}

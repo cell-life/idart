@@ -1,10 +1,7 @@
-package org.celllife.idart.utils;
-
-import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.gui.welcome.GenericWelcome;
-import org.celllife.idart.misc.DateFieldComparator;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
+/**
+ *
+ */
+package org.celllife.idart.misc;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,6 +11,14 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.celllife.idart.commonobjects.iDartProperties;
+import org.celllife.idart.gui.welcome.GenericWelcome;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+
+/**
+ *
+ */
 public class iDARTUtil {
 
 	private static final String DATE_FORMAT = "dd MMM yyyy";
@@ -28,9 +33,9 @@ public class iDARTUtil {
 	/**
 	 * Calculates the number of days between two dates.
 	 * 
-	 * @param dateOne
+	 * @param d1
 	 *            The first date.
-	 * @param dateTwo
+	 * @param d2
 	 *            The second date.
 	 * 
 	 * @return The number of days between the two dates. Zero is returned if the
@@ -138,6 +143,8 @@ public class iDARTUtil {
 			return isInPast(theDate);
 
 		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -313,6 +320,9 @@ public class iDARTUtil {
 
 	/**
 	 * Method to check if a character is alpha.
+	 * 
+	 * @param str
+	 * @return
 	 */
 	public static boolean isAlpha(Character chr) {
 		return ((chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z'));
@@ -344,6 +354,9 @@ public class iDARTUtil {
 
 	/**
 	 * Method to check if a string contains numeric values only
+	 * 
+	 * @param str
+	 * @return
 	 */
 	public static boolean isNumeric(Character chr) {
 		return chr >= '0' && chr <= '9';
@@ -403,7 +416,8 @@ public class iDARTUtil {
 	 * 
 	 * this method replaces methods from IntegerValidator.java (deleted).
 	 * 
-	 * @param str
+	 * @param String
+	 *            str
 	 * @return Object containing the int if str is an integer, returns null if
 	 *         not an integer .
 	 */
@@ -424,7 +438,8 @@ public class iDARTUtil {
 	 * 
 	 * this method replaces methods from IntegerValidator.java (deleted).
 	 * 
-	 * @param str
+	 * @param String
+	 *            str
 	 * @return boolean containing true if str is a positive integer, false if
 	 *         not
 	 */
@@ -445,7 +460,8 @@ public class iDARTUtil {
 	 * 
 	 * this method replaces methods from IntegerValidator.java (deleted).
 	 * 
-	 * @param str
+	 * @param String
+	 *            str
 	 * @return boolean containing true if str is a negative integer, false if
 	 *         not
 	 */
@@ -559,13 +575,6 @@ public class iDARTUtil {
 			illegalText = matcher.group();
 		}
 		return illegalText;
-	}
-
-	public static Date add(Date date, int days) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		cal.add(Calendar.DATE, days);
-		return cal.getTime();
 	}
 	
 

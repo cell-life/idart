@@ -19,13 +19,23 @@
 
 package org.celllife.idart.gui.pillCount;
 
-import com.adamtaft.eb.EventBusService;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
 import model.manager.AdherenceManager;
 import model.manager.PackageManager;
+import model.manager.TemporaryRecordsManager;
+
 import org.apache.log4j.Logger;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.commonobjects.iDartProperties;
+import org.celllife.idart.database.hibernate.Packages;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PatientIdentifier;
+import org.celllife.idart.database.hibernate.Prescription;
+import org.celllife.idart.database.hibernate.tmp.AdherenceRecord;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
-import org.celllife.idart.events.AdherenceEvent;
 import org.celllife.idart.gui.composite.PillCountTable;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.search.PatientSearch;
@@ -34,20 +44,23 @@ import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Set;
-
+/**
+ */
 public class RecordPillCount extends GenericFormGui {
 
 	private Patient localPatient;
@@ -263,14 +276,18 @@ public class RecordPillCount extends GenericFormGui {
 		Transaction tx = null;
 		try {
 			tx = getHSession().beginTransaction();
-			
-			Set<PillCount> pillCounts = compTable.getPillCounts();
-			AdherenceManager.save(getHSession(), pillCounts);
+			AdherenceManager.save(getHSession(), compTable.getPillCounts());
+			if (iDartProperties.isEkapaVersion) {
+				java.util.List<AdherenceRecord> adhList = new ArrayList<AdherenceRecord>();
 
+				adhList = AdherenceManager.getAdherenceRecords(getHSession(),
+						previousPack);
+				TemporaryRecordsManager.saveAdherenceRecordsToDB(getHSession(),
+						adhList);
+
+			}
 			getHSession().flush();
 			tx.commit();
-			
-			EventBusService.publish(new AdherenceEvent(pillCounts));
 
 			getLog().info("Pillcount saved");
 			MessageBox save = new MessageBox(getShell(), SWT.ICON_INFORMATION
@@ -343,7 +360,8 @@ public class RecordPillCount extends GenericFormGui {
 				try {
 					compTable.populateLastPackageDetails(previousPack, sdf.parse(txtDateOfLastPickup.getText()) );
 				} catch (ParseException e) {
-					getLog().error(e);
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			} else {
 				MessageBox noPackage = new MessageBox(getShell().getParent()

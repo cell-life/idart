@@ -21,7 +21,6 @@ import org.celllife.idart.database.hibernate.Stock;
 import org.celllife.idart.database.hibernate.StockAdjustment;
 import org.celllife.idart.database.hibernate.StockCenter;
 import org.celllife.idart.database.hibernate.StockLevel;
-import org.celllife.idart.database.hibernate.StockManufacturer;
 import org.celllife.idart.database.hibernate.StockTake;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -50,30 +49,6 @@ public class StockManager {
 				"select stock from Stock as stock where stock.id = '" + stockId
 				+ "'").setMaxResults(1).uniqueResult();
 		return theStock;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static List<String> getStockManufacturers(Session session)
-	throws HibernateException {
-		List<String> result = null;
-		result = session.createQuery("select name from StockManufacturer as sm order by sm.name").list();
-		return result;
-	}
-	
-	public static void addManufacturer(Session session, String manufacturer) {
-		StockManufacturer stockManufacturer = null;
-		
-		stockManufacturer = (StockManufacturer) session.createQuery(
-				"from StockManufacturer as sm where sm.name =:name")
-					.setString("name", manufacturer).uniqueResult();
-		
-		if (stockManufacturer == null) {
-			stockManufacturer = new StockManufacturer();
-			stockManufacturer.setName(manufacturer);
-			session.save(stockManufacturer);
-			session.flush();
-			log.info("Added stock manufacturer '"+manufacturer+"'");
-		}
 	}
 
 	public static void deleteInvalidStockTakes(Session session)
@@ -806,6 +781,8 @@ public class StockManager {
 		
 		session.save(stockAdj);
 		session.flush();
+		
+		StockManager.updateStockLevel(session, stockAdj.getStock());
 	}
 
 	/**

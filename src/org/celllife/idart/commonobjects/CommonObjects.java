@@ -60,14 +60,11 @@ public class CommonObjects {
 	
 	public static final int NATION = 10;
 
-	public static final int ATC = 11;
-
 	public static String timesPerDayLanguage1 = "times per day";
 
 	public static String timesPerDayLanguage2 = "ngemini";
 
 	public static String timesPerDayLanguage3 = "keur per dag";
-
 	
 	public static final String NEXT_APPOINTMENT_KEY = "NEXT_APPOINTMENT";
 

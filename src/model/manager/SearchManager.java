@@ -19,9 +19,24 @@
 
 package model.manager;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import model.nonPersistent.PatientIdAndName;
+
 import org.celllife.idart.commonobjects.CommonObjects;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.database.hibernate.Clinic;
+import org.celllife.idart.database.hibernate.Doctor;
+import org.celllife.idart.database.hibernate.Drug;
+import org.celllife.idart.database.hibernate.NationalClinics;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PatientIdentifier;
+import org.celllife.idart.database.hibernate.Stock;
+import org.celllife.idart.database.hibernate.StockCenter;
+import org.celllife.idart.database.hibernate.StockTake;
 import org.celllife.idart.gui.search.Search;
 import org.celllife.idart.gui.search.SearchEntry;
 import org.celllife.idart.gui.search.TableComparator;
@@ -34,12 +49,6 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  */
@@ -224,14 +233,14 @@ public class SearchManager {
 
 		List<Doctor> doctors = null;
 		String itemText[];
-		search.getTableColumn1().setText("Name");
+		search.getTableColumn1().setText("Doctor's Name");
 		search.getTableColumn1().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				cmdColOneSelected();
 			}
 		});
-		search.getTableColumn2().setText("Status");
+		search.getTableColumn2().setText("Doctor's Status");
 		search.getTableColumn2().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -505,68 +514,6 @@ public class SearchManager {
 		return drugs;
 
 	}
-	
-	/**
-	 * loads a list of drugs onto the form
-	 * 
-	 * @param sess
-	 *            Session
-	 * @param search
-	 * @param includeSideTreatmentDrugs
-	 *            boolean
-	 * @param includeZeroDrugs
-	 *            boolean
-	 * @return List<Drug>
-	 * @throws HibernateException
-	 */
-	public static List<AtcCode> loadAtccodes(Session sess, Search search)
-			throws HibernateException {
-
-		listTableEntries = new ArrayList<SearchEntry>();
-		comparator = new TableComparator();
-
-		List<AtcCode> atccodes = null;
-		String itemText[];
-		search.getTableColumn1().setText("ATC Name");
-		search.getTableColumn1().addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				cmdColOneSelected();
-			}
-		});
-		search.getTableColumn2().setText("ATC Code");
-		search.getTableColumn2().addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				cmdColTwoSelected();
-			}
-		});
-
-		search.getShell().setText("Select an ATC Code...");
-
-		atccodes = AdministrationManager.getAtccodes(sess);
-
-		Collections.sort(atccodes);
-
-		Iterator<AtcCode> iter = new ArrayList<AtcCode>(atccodes).iterator();
-		TableItem[] t = new TableItem[atccodes.size()];
-
-		int i = 0;
-		while (iter.hasNext()) {
-			AtcCode atc = iter.next();
-			t[i] = new TableItem(search.getTblSearch(), SWT.NONE);
-			itemText = new String[2];
-			itemText[0] = atc.getName();
-			itemText[1] = atc.getCode();
-			t[i].setText(itemText);
-			listTableEntries.add(new SearchEntry(itemText[0], itemText[1]));
-			i++;
-		}
-		comparator.setColumn(TableComparator.COL1_NAME);
-		redrawTable();
-		return atccodes;
-
-	}
 
 	/**
 	 * loads a list of Stock into the table
@@ -793,21 +740,8 @@ public class SearchManager {
 				}
 
 				break;
-			case CommonObjects.ATC:
-				AtcCode atc = (AtcCode) fullList.get(i);
-				String upperCase = searchString.toUpperCase();
-				found1 = atc.getName().toUpperCase().indexOf(upperCase);
-				found2 = atc.getCode().toUpperCase().indexOf(upperCase);
-				if (found1 != -1 || found2 != -1) {
-					TableItem tableItem = new TableItem(t, SWT.NONE);
-					String[] newStrings = new String[2];
-					newStrings[0] = atc.getName();
-					newStrings[1] = atc.getCode();
-					tableItem.setText(newStrings);
-				}
-	
-				break;
 			}
+
 		}
 
 	}

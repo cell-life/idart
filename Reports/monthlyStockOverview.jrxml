@@ -32,18 +32,17 @@
 	<parameter name="monthStart" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="monthEnd" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
-		<![CDATA[select distinct d.id, d.name, d.packsize, a.code as atccode, d.stockcode
-from drug as d
-left outer join stock as s on s.drug = d.id
-left outer join atccode as a on d.atccode_id = a.id
-where s.stockCenter = $P{stockCenterId}
+		<![CDATA[select distinct d.id, d.name, d.packsize, d.nsncode,d.stockcode
+from drug as d, stock as s
+where s.drug = d.id 
+and s.stockCenter = $P{stockCenterId} 
 and d.sidetreatment = 'F'
 order by d.name asc]]>
 	</queryString>
 	<field name="id" class="java.lang.Integer"/>
 	<field name="name" class="java.lang.String"/>
 	<field name="packsize" class="java.lang.Integer"/>
-	<field name="atccode" class="java.lang.String"/>
+	<field name="nsncode" class="java.lang.String"/>
 	<field name="stockcode" class="java.lang.String"/>
 	<variable name="test" class="java.lang.String" resetType="None">
 		<variableExpression><![CDATA["test"]]></variableExpression>
@@ -448,8 +447,8 @@ DESTROYED]]></text>
 				<subreportParameter name="stockCenterId">
 					<subreportParameterExpression><![CDATA[$P{stockCenterId}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="ATC">
-					<subreportParameterExpression><![CDATA[$F{atccode}]]></subreportParameterExpression>
+				<subreportParameter name="NSN">
+					<subreportParameterExpression><![CDATA[$F{nsncode}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="name">
 					<subreportParameterExpression><![CDATA[$F{name}]]></subreportParameterExpression>

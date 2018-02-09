@@ -133,5 +133,9 @@
 	<changeSet author="simon@cell-life.org" id="3.7.8">
 		<customChange class="org.celllife.idart.database.FixMissingIdentifiers"/>
 	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.7.9">
+		<comment>changes from hibernate validation</comment>
+		<modifyDataType tableName="package" columnName="weekssupply" newDataType="int"/>
+	</changeSet>
 </databaseChangeLog>
 

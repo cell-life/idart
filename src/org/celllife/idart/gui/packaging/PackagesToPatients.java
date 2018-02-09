@@ -19,7 +19,6 @@
 
 package org.celllife.idart.gui.packaging;
 
-import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import model.manager.AdministrationManager;
 import model.manager.DrugManager;
 import model.manager.PackageManager;
 import model.manager.PatientManager;
+import model.manager.TemporaryRecordsManager;
 import model.manager.reports.PackageProcessingReport;
 import model.manager.reports.PatientHistoryReport;
 
@@ -43,8 +43,6 @@ import org.celllife.function.IRule;
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AccumulatedDrugs;
-import org.celllife.idart.database.hibernate.Appointment;
-import org.celllife.idart.database.hibernate.AppointmentReminder;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Drug;
 import org.celllife.idart.database.hibernate.Episode;
@@ -53,11 +51,9 @@ import org.celllife.idart.database.hibernate.Packages;
 import org.celllife.idart.database.hibernate.Patient;
 import org.celllife.idart.database.hibernate.PatientAttribute;
 import org.celllife.idart.database.hibernate.PillCount;
+import org.celllife.idart.database.hibernate.tmp.AdherenceRecord;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
-import org.celllife.idart.events.AdherenceEvent;
-import org.celllife.idart.events.PackageEvent;
 import org.celllife.idart.gui.misc.iDARTChangeListener;
-import org.celllife.idart.gui.patient.AppointmentReminderDialog;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.reportParameters.PatientHistory;
 import org.celllife.idart.gui.utils.ResourceUtils;
@@ -68,11 +64,10 @@ import org.celllife.idart.gui.widget.DateButton;
 import org.celllife.idart.gui.widget.DateChangedEvent;
 import org.celllife.idart.gui.widget.DateChangedListener;
 import org.celllife.idart.gui.widget.DateInputValidator;
-import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.DateFieldComparator;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.utils.PackageLifeStage;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.model.utils.PackageLifeStage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CCombo;
@@ -106,8 +101,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
-
-import com.adamtaft.eb.EventBusService;
 
 /**
  * @author Sarah
@@ -165,8 +158,6 @@ iDARTChangeListener {
 	private CCombo cmbClinic;
 
 	private DateButton btnCaptureDate;
-	
-	private Button btnAppointmentReminder;
 
 	private Button btnPatientHistoryReport;
 
@@ -195,6 +186,8 @@ iDARTChangeListener {
 	private TableEditor editorTblLastPackage;
 
 	private TableEditor editorTblThisPackage;
+
+	private java.util.List<PillCount> allPillCounts = new ArrayList<PillCount>();
 
 	private Packages previousPack;
 
@@ -960,23 +953,10 @@ iDARTChangeListener {
 		btnCollectionDateForNextPackage.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_8));
 		btnCollectionDateForNextPackage.setVisible(false);
-		
-		btnAppointmentReminder = new Button(grpPackageLists, SWT.NONE);
-		btnAppointmentReminder.setBounds(new Rectangle(488, 415, 50, 43));
-		btnAppointmentReminder.setToolTipText(Messages.getString("appointmentreminders.title"));
-		btnAppointmentReminder.setImage(ResourceUtils.getImage(iDartImage.APPOINTMENTREMINDERS));
-
-		btnAppointmentReminder.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent mu) {
-				cmdAppointmentReminderWidgetSelected();
-			}
-		});
-		btnAppointmentReminder.setEnabled(iDartProperties.appointmentReminders);
 
 		// lblPicPatientHistoryReport
 		btnPatientHistoryReport = new Button(grpPackageLists, SWT.NONE);
-		btnPatientHistoryReport.setBounds(new Rectangle(548, 415, 50, 43));
+		btnPatientHistoryReport.setBounds(new Rectangle(503, 415, 50, 43));
 		btnPatientHistoryReport
 		.setToolTipText("Press this button to view and / or print reports \nof patients' Prescription History.");
 		btnPatientHistoryReport.setImage(ResourceUtils
@@ -1000,7 +980,7 @@ iDARTChangeListener {
 
 		// lblPicPackagesReport
 		btnPackagesReport = new Button(grpPackageLists, SWT.NONE);
-		btnPackagesReport.setBounds(new Rectangle(608, 415, 50, 43));
+		btnPackagesReport.setBounds(new Rectangle(568, 415, 50, 43));
 		btnPackagesReport
 		.setToolTipText("Press this button to view and / or print Scanned Out Packages Report.");
 		btnPackagesReport.setImage(ResourceUtils.getImage(iDartImage.REPORTS));
@@ -1165,6 +1145,9 @@ iDARTChangeListener {
 
 	/**
 	 * Method populateTblLastPackage.
+	 * 
+	 * @param previousPack
+	 *            Packages
 	 */
 	private void populateTblLastPackage() {
 		if (tblLastPackage != null) {
@@ -1266,6 +1249,9 @@ iDARTChangeListener {
 	/**
 	 * This method updates the two lists: - packages waiting to be dispatched,
 	 * and - packages that have been scanned out of the pharmacy
+	 * 
+	 * @param index
+	 *            int
 	 */
 	private void updateLists() {
 
@@ -1486,6 +1472,7 @@ iDARTChangeListener {
 		btnCaptureDate.setDate(null);
 		btnCollectionDateForNextPackage.setDate(null);
 		previousPack = null;
+		allPillCounts = null;
 
 		// clear tables and table editors
 		tblLastPackage.clearAll();
@@ -1520,10 +1507,10 @@ iDARTChangeListener {
 	 * @return Set<PillCount>
 	 */
 	private Set<PillCount> getPillCountsForLastPackage() {
+
 		if (previousPack == null)
 			return null;
-		
-		Set<PillCount> pcsToSave = new HashSet<PillCount>();
+		java.util.Set<PillCount> pcsToSave = new HashSet<PillCount>();
 		previousPack.getPillCounts().clear();
 		for (int i = 0; i < tblLastPackage.getItemCount(); i++) {
 
@@ -1680,18 +1667,6 @@ iDARTChangeListener {
 			txtLastPackageDate.setText("Initial Pickup");
 		}
 
-	}
-	
-	private void cmdAppointmentReminderWidgetSelected() {
-		if (scannedPack != null) {
-			Patient localPatient = scannedPack.getPrescription().getPatient();
-			if (localPatient.getAppointmentReminder() == null) {
-				localPatient.setAppointmentReminder(new AppointmentReminder());
-				localPatient.getAppointmentReminder().setPatient(localPatient);
-			}
-			AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder(), true);
-			ard.openAndWait();
-		}
 	}
 
 	/**
@@ -1882,12 +1857,23 @@ iDARTChangeListener {
 	protected boolean submitForm() {
 		if (fieldsOk()) {
 			Transaction tx = null;
+			boolean containsARVDrug = false;
 
 			try {
 				tx = getHSession().beginTransaction();
 
 				Packages pack = PackageManager.getPackage(getHSession(),
 						txtPackageIdScan.getText());
+
+				// Check if package contains ARV
+				// Should be moved to a facade or manager class
+				java.util.List<PackagedDrugs> drugs = pack.getPackagedDrugs();
+				for (PackagedDrugs packs : drugs) {
+					if (packs.getStock().getDrug().getSideTreatment() == 'F') {
+						containsARVDrug = true;
+						break;
+					}
+				}
 
 				// Save dates associated with this package
 				if (AdministrationManager.getDefaultClinicName(getHSession())
@@ -1898,39 +1884,37 @@ iDARTChangeListener {
 
 				// if collection date is today, store the time too, else store
 				// 12am
-				if (iDARTUtil.dateIsToday(btnCaptureDate.getDate())) {
+				Date today = new Date();
+				Date pickupDate = new Date();
+				pack.setPickupDate(btnCaptureDate.getDate());
+				pickupDate.setTime(pack.getPickupDate().getTime());
+
+				if (DateFieldComparator.compare(today, pickupDate,
+						Calendar.DAY_OF_MONTH) == 0) {
 					pack.setPickupDate(new Date());
-				} else {
-					pack.setPickupDate(btnCaptureDate.getDate());
 				}
 
 				Patient aPatient = pack.getPrescription().getPatient();
-				Date appointmentDate = btnCollectionDateForNextPackage.getDate();
-				Appointment appointment = PatientManager.setNextAppointmentDateAtVisit(getHSession(),
+				PatientManager.setNextAppointmentDateAtVisit(getHSession(),
 						aPatient, btnCaptureDate.getDate(),
 						btnCollectionDateForNextPackage.getDate());
-				
-				// check if the appointment date was automatically changed and see if they wish to override
-				if (!appointment.getAppointmentDate().equals(appointmentDate)) {
-					MessageBox mbox = new MessageBox(getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
-					mbox.setText(Messages.getString("appointmentdate.question.title"));
-					SimpleDateFormat sdf2 = new SimpleDateFormat("EEE d MMM yyyy");
-					mbox.setMessage(MessageFormat.format(Messages.getString("appointmentdate.question.text"), 
-							sdf2.format(appointmentDate), 
-							sdf2.format(appointment.getAppointmentDate())));
-					switch (mbox.open()) {
-						case SWT.NO:
-							appointment.overrideAppointmentDate(appointmentDate);
-							break;
-					}
-				}
-				
-				PatientManager.scheduleApppointmentReminderMessages(aPatient, appointment);
 
 				Set<PillCount> pcs = getPillCountsForLastPackage();
 				if (pcs != null) {
 					AdherenceManager.save(getHSession(), pcs);
-					EventBusService.publish(new AdherenceEvent(pcs));
+				}
+				if (iDartProperties.isEkapaVersion) {
+					java.util.List<AdherenceRecord> adhList = new ArrayList<AdherenceRecord>();
+					for (PillCount pct : allPillCounts) {
+						AdherenceRecord ad = AdherenceManager
+						.getAdherenceRecordForPillCount(getHSession(),
+								pct);
+						if (ad != null) {
+							adhList.add(ad);
+						}
+					}
+					TemporaryRecordsManager.saveAdherenceRecordsToDB(
+							getHSession(), adhList);
 				}
 				Set<AccumulatedDrugs> accums = pack.getAccumulatedDrugs();
 				if (accums != null) {
@@ -1940,25 +1924,29 @@ iDARTChangeListener {
 					pack.setAccumulatedDrugs(getAccumDrugsToSave(pack));
 				}
 				PackageManager.savePackage(getHSession(), pack);
-				
-				if (pack.hasARVDrug() 
-					&& aPatient.getAttributeByName(PatientAttribute.ARV_START_DATE) == null) {
+
+				aPatient = PatientManager.getPatient(getHSession(), aPatient.getId());
+				if (PackageManager.getMostRecentARVPackage(getHSession(),
+						aPatient).getId() == pack.getId()
+						&& (aPatient
+								.getAttributeByName(PatientAttribute.ARV_START_DATE)) == null
+								&& containsARVDrug) {
 
 					Packages firstArvPacks = PackageManager
-						.getFirstPackageWithARVs(PackageManager
+					.getFirstPackageWithARVs(PackageManager
 							.getAllPackagesForPatient(getHSession(),
 									aPatient));
 					if (firstArvPacks.getId() == pack.getId()) {
 
+						MessageBox mbox = new MessageBox(getShell(), SWT.YES
+								| SWT.NO | SWT.ICON_QUESTION);
+						mbox.setText("ART Start Date Not Set");
 						// If this is the first ARV pack then get
 						// the first episode.
 						Episode firstEpisode = PatientManager
 						.getFirstEpisode(aPatient);
 						String epiStartReason = firstEpisode.getStartReason();
 						if (epiStartReason.equalsIgnoreCase("NEW PATIENT")) {
-							MessageBox mbox = new MessageBox(getShell(), SWT.YES
-									| SWT.NO | SWT.ICON_QUESTION);
-							mbox.setText("ART Start Date Not Set");
 							mbox
 							.setMessage("The ARV start date has not yet been set and this is the first time patient '"
 									+ txtFolderNo.getText()
@@ -1984,8 +1972,6 @@ iDARTChangeListener {
 				getHSession().flush();
 				tx.commit();
 
-				EventBusService.publish(new PackageEvent(PackageEvent.Type.PICKUP_ONLY, pack));
-				
 				updateLists();
 
 				MessageBox m = new MessageBox(getShell(), SWT.ICON_INFORMATION

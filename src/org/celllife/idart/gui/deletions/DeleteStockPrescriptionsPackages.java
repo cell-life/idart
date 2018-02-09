@@ -19,12 +19,35 @@
 
 package org.celllife.idart.gui.deletions;
 
-import model.manager.*;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import model.manager.DeletionsManager;
+import model.manager.DrugManager;
+import model.manager.PackageManager;
+import model.manager.PatientManager;
+import model.manager.StockManager;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.commonobjects.iDartProperties.LabelType;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.database.hibernate.AccumulatedDrugs;
+import org.celllife.idart.database.hibernate.Appointment;
+import org.celllife.idart.database.hibernate.Drug;
+import org.celllife.idart.database.hibernate.Form;
+import org.celllife.idart.database.hibernate.PackagedDrugs;
+import org.celllife.idart.database.hibernate.Packages;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PatientAttribute;
+import org.celllife.idart.database.hibernate.PatientIdentifier;
+import org.celllife.idart.database.hibernate.PrescribedDrugs;
+import org.celllife.idart.database.hibernate.Prescription;
+import org.celllife.idart.database.hibernate.Stock;
+import org.celllife.idart.database.hibernate.StockCenter;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.platform.GenericOthersGui;
 import org.celllife.idart.gui.search.PatientSearch;
@@ -36,24 +59,28 @@ import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.PatientBarcodeParser;
+import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.idart.print.label.PrintThread;
 import org.celllife.idart.print.label.ScriptSummaryLabel;
-import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+/**
+ */
 public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 
 	private Group grpDeletionTypeSelection;
@@ -1259,7 +1286,7 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 		try {
 			tx = getHSession().beginTransaction();
 
-			DeletionsManager.removePackage(getHSession(), packageToRemove);
+			DeletionsManager.removeThisPackage(getHSession(), packageToRemove);
 
 			boolean shouldRemoveARVStartDate = DeletionsManager
 			.isFirstPackageOnNewPatientEpisode(packageToRemove);
@@ -1335,7 +1362,7 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 			try {
 				tx = getHSession().beginTransaction();
 				if (type.equals("Dispensed")) {
-					DeletionsManager.removePackagedDrug(getHSession(),
+					DeletionsManager.removeThisDrug(getHSession(),
 							(PackagedDrugs) selectedDrug, packageToRemove);
 
 				} else if (type.equals("Accumulated")) {

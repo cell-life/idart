@@ -1,11 +1,34 @@
 package org.celllife.idart.gui.patient;
 
-import model.manager.*;
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.ws.rs.core.Response.Status;
+
+import model.manager.AdministrationManager;
+import model.manager.AlertManager;
+import model.manager.CampaignManager;
+import model.manager.DrugManager;
+import model.manager.PackageManager;
+import model.manager.PatientManager;
+import model.manager.StudyManager;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.LocalObjects;
 import org.celllife.idart.commonobjects.PropertiesManager;
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.database.hibernate.Campaign;
+import org.celllife.idart.database.hibernate.CampaignParticipant;
+import org.celllife.idart.database.hibernate.Packages;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PatientAttribute;
+import org.celllife.idart.database.hibernate.PatientIdentifier;
+import org.celllife.idart.database.hibernate.StudyParticipant;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.search.PatientSearch;
@@ -17,7 +40,7 @@ import org.celllife.idart.integration.mobilisr.MobilisrManager;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.AbstractCancellableJob;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.mobilisr.api.validation.MsisdnValidator;
 import org.celllife.mobilisr.api.validation.MsisdnValidator.ValidationError;
 import org.celllife.mobilisr.client.exception.RestCommandException;
@@ -31,18 +54,17 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
-
-import javax.ws.rs.core.Response.Status;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 public class AddPatientToStudy extends GenericFormGui {
 	
@@ -172,7 +194,7 @@ public class AddPatientToStudy extends GenericFormGui {
 			String message;
 			if (MsisdnValidator.Code.COUNTRY_CODE.equals(error.code)){
 				message = MessageFormat.format(Messages.getString("patient.error.incorrectCellphoneCode"), //$NON-NLS-1$
-						PropertiesManager.sms().msisdnPrefix());
+						iDartProperties.msisdnPrefix());
 			} else {
 				message = MessageFormat.format(Messages.getString("patient.error.incorrectCellphone"), //$NON-NLS-1$
 						error.message);

@@ -19,6 +19,18 @@
 
 package org.celllife.idart.gui.patient;
 
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import model.manager.AdministrationManager;
 import model.manager.PackageManager;
 import model.manager.PatientManager;
@@ -29,17 +41,31 @@ import org.apache.log4j.Logger;
 import org.celllife.function.DateRuleFactory;
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.LocalObjects;
-import org.celllife.idart.commonobjects.PropertiesManager;
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.database.hibernate.*;
+import org.celllife.idart.database.hibernate.Clinic;
+import org.celllife.idart.database.hibernate.Episode;
+import org.celllife.idart.database.hibernate.PackagedDrugs;
+import org.celllife.idart.database.hibernate.Packages;
+import org.celllife.idart.database.hibernate.Patient;
+import org.celllife.idart.database.hibernate.PatientAttribute;
+import org.celllife.idart.database.hibernate.PatientIdentifier;
+import org.celllife.idart.database.hibernate.Prescription;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.misc.iDARTChangeListener;
-import org.celllife.idart.gui.patient.tabs.*;
+import org.celllife.idart.gui.patient.tabs.AddressTab;
+import org.celllife.idart.gui.patient.tabs.ClinicInfoTab;
+import org.celllife.idart.gui.patient.tabs.IPatientTab;
+import org.celllife.idart.gui.patient.tabs.TreatmentHistoryTab;
+import org.celllife.idart.gui.patient.tabs.TreatmentManagementTab;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.prescription.AddPrescription;
 import org.celllife.idart.gui.reportParameters.PatientHistory;
 import org.celllife.idart.gui.search.PatientSearch;
-import org.celllife.idart.gui.utils.*;
+import org.celllife.idart.gui.utils.ComboUtils;
+import org.celllife.idart.gui.utils.ResourceUtils;
+import org.celllife.idart.gui.utils.iDartColor;
+import org.celllife.idart.gui.utils.iDartFont;
+import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.gui.widget.DateButton;
 import org.celllife.idart.gui.widget.DateInputValidator;
 import org.celllife.idart.integration.eKapa.gui.SearchPatientGui;
@@ -47,29 +73,40 @@ import org.celllife.idart.integration.mobilisr.MobilisrManager;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.DateFieldComparator;
 import org.celllife.idart.misc.PatientBarcodeParser;
+import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.idart.print.barcode.Barcode;
 import org.celllife.idart.print.label.PatientInfoLabel;
 import org.celllife.idart.print.label.PrintLabel;
-import org.celllife.idart.utils.iDARTUtil;
 import org.celllife.mobilisr.api.validation.MsisdnValidator;
 import org.celllife.mobilisr.api.validation.MsisdnValidator.ValidationError;
 import org.celllife.mobilisr.client.exception.RestCommandException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.List;
 
 public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 
@@ -182,8 +219,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 	private Button btnDownRefer;
 
 	private Text txtCellphone;
-	
-	private Button btnAppointmentReminder;
 
 	private DateButton btnARVStart;
 
@@ -601,18 +636,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			}
 		});
 
-		btnAppointmentReminder = new Button(grpParticulars, SWT.NONE);
-		btnAppointmentReminder.setBounds(new Rectangle(255, 207, 40, 40));
-		btnAppointmentReminder.setToolTipText(Messages.getString("appointmentreminders.title"));
-		btnAppointmentReminder.setImage(ResourceUtils.getImage(iDartImage.APPOINTMENTREMINDERS_30X26));
-
-		btnAppointmentReminder.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent mu) {
-				cmdAppointmentReminderWidgetSelected();
-			}
-		});
-		btnAppointmentReminder.setEnabled(iDartProperties.appointmentReminders);
 	}
 
 	private void updateClinicInfoTab() {
@@ -1025,7 +1048,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			ValidationError error = MobilisrManager.validateMsisdn(txtCellphone.getText().trim());
 			if (MsisdnValidator.Code.COUNTRY_CODE.equals(error.code)){
 				message = MessageFormat.format(Messages.getString("patient.error.incorrectCellphoneCode"), //$NON-NLS-1$
-						PropertiesManager.sms().msisdnPrefix());
+						iDartProperties.msisdnPrefix());
 			} else {
 				message = MessageFormat.format(Messages.getString("patient.error.incorrectCellphone"), //$NON-NLS-1$
 						error.message);
@@ -1696,9 +1719,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 		cmbDOBMonth.setEnabled(enable);
 		cmbDOBYear.setEnabled(enable);
 		txtCellphone.setEnabled(enable);
-		if (iDartProperties.appointmentReminders) {
-			btnAppointmentReminder.setEnabled(enable);
-		}
 		cmbSex.setEnabled(enable);
 		// cmbRace.setEnabled(enable);
 
@@ -2075,22 +2095,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			PatientHistory patHistory = new PatientHistory(getShell(), true);
 			patHistory.openShell();
 		}
-	}
-	
-	private void cmdAppointmentReminderWidgetSelected() {
-		if (localPatient.getAppointmentReminder() == null) {
-			localPatient.setAppointmentReminder(new AppointmentReminder());
-			localPatient.getAppointmentReminder().setPatient(localPatient);
-		}
-		localPatient.setCellphone(txtCellphone.getText());
-		if (isAddnotUpdate) {
-			AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder(), false);
-			ard.openAndWait();
-		} else {
-			AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder(), true);
-			ard.openAndWait();
-		}
-		txtCellphone.setText(localPatient.getCellphone());
 	}
 
 	private void createCmpTabbedInfo() {

@@ -195,7 +195,8 @@ public class XLWriteManager {
 			dateFormat.setVerticalAlignment(VerticalAlignment.CENTRE);
 			dateFormat.setBorder(Border.ALL, BorderLineStyle.THIN);
 		} catch (WriteException e) {
-			log.error(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		/*
@@ -209,7 +210,8 @@ public class XLWriteManager {
 			dateFormat2.setVerticalAlignment(VerticalAlignment.CENTRE);
 			dateFormat2.setBorder(Border.ALL, BorderLineStyle.THIN);
 		} catch (WriteException e) {
-			log.error(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		/*
@@ -224,7 +226,8 @@ public class XLWriteManager {
 			cellFormat.setVerticalAlignment(VerticalAlignment.CENTRE);
 			cellFormat.setBorder(Border.ALL, BorderLineStyle.THIN);
 		} catch (WriteException e) {
-			log.error(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		/*
@@ -241,7 +244,8 @@ public class XLWriteManager {
 			stringFormat.setVerticalAlignment(VerticalAlignment.CENTRE);
 			stringFormat.setBorder(Border.ALL, BorderLineStyle.THIN);
 		} catch (WriteException e) {
-			log.error(e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

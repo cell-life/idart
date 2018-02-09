@@ -11,12 +11,8 @@ import org.apache.log4j.Logger;
 import org.celllife.idart.database.hibernate.Episode;
 import org.celllife.idart.database.hibernate.Packages;
 import org.celllife.idart.database.hibernate.Patient;
-import org.celllife.idart.events.PackageEvent;
-import org.celllife.idart.events.PackageEvent.Type;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-
-import com.adamtaft.eb.EventBusService;
 
 /**
  */
@@ -60,8 +56,6 @@ public class PackageReturnFacade {
 			hSession.flush();
 		}
 		log.info("Package Returned - " + new Date().toString());
-		
-		EventBusService.publish(new PackageEvent(Type.RETURN, pack));
 	}
 	
 	/**

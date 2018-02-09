@@ -1,20 +1,30 @@
 package org.celllife.idart.sms;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import model.manager.AdministrationManager;
 import model.manager.SmsManager;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.LocalObjects;
 import org.celllife.idart.commonobjects.PropertiesManager;
 import org.celllife.idart.database.hibernate.MessageSchedule;
 import org.celllife.idart.database.hibernate.StudyParticipant;
 import org.celllife.idart.integration.mobilisr.MobilisrManager;
-import org.celllife.idart.utils.iDARTUtil;
-import org.celllife.mobilisr.api.rest.*;
+import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.mobilisr.api.rest.CampaignDto;
+import org.celllife.mobilisr.api.rest.ContactDto;
+import org.celllife.mobilisr.api.rest.MessageDto;
 import org.celllife.mobilisr.client.exception.RestCommandException;
 import org.hibernate.Session;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 public class CampaignSchedulingJob {
 	
@@ -32,6 +42,7 @@ public class CampaignSchedulingJob {
 	 * @param messageNumber
 	 * @param noOfDays
 	 * @param messageType
+	 * @param contacts
 	 */
 	protected void createAndScheduleCampaign(Session hSession,
 			int messageNumber, int noOfDays, SmsType messageType,
@@ -110,13 +121,6 @@ public class CampaignSchedulingJob {
 				return true;
 			} catch (RestCommandException e) {
 				log.warn("Failed to create new Just SMS Campaign on Mobiliser.");
-				PagedListDto<ErrorDto> errors = e.getErrors();
-				if (errors != null && !errors.isEmpty()){
-					log.warn("Request errors: ");
-					for (ErrorDto error : errors.getElements()) {
-						log.warn(error.getErrorCode() + " - " + error.getMessage());
-					}
-				}
 				return false;
 			}
 		}

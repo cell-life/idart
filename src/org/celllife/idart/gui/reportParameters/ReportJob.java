@@ -14,6 +14,8 @@ public class ReportJob extends AbstractCancellableJob {
 	private final iDARTReport reportObject;
 
 	/**
+	 * @param fileName
+	 *            File to write data to.
 	 * @param deo
 	 *            DataExportObject to export.
 	 */

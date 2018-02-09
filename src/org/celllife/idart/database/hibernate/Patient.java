@@ -21,7 +21,6 @@ package org.celllife.idart.database.hibernate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,29 +29,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 import model.manager.AdministrationManager;
 import model.manager.PatientManager;
 
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.misc.DateFieldComparator;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.IndexColumn;
 
 /**
- * @author Simon
  */
 @Entity
 public class Patient {
@@ -125,9 +120,6 @@ public class Patient {
 	@Cascade( { org.hibernate.annotations.CascadeType.ALL,
 			org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private Set<PatientIdentifier> patientIdentifiers;
-	
-	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER, mappedBy="patient")
-	private AppointmentReminder appointmentReminder;
 
 
 	public Patient() {
@@ -226,40 +218,6 @@ public class Patient {
 			appointments = new HashSet<Appointment>();
 		}
 		return appointments;
-	}
-
-	/**
-	 * Method to retrieve the latest Appointment. This is the Appointment with the latest appointment date.
-	 * @return Appointment, can be null if no Appointments are known
-	 */
-	public Appointment getLatestAppointment() {
-		Appointment latestApp = null;
-
-		if (appointments != null && !appointments.isEmpty()) {
-			Appointment[] appointmentArray = appointments.toArray(new Appointment[] {});
-			Arrays.sort(appointmentArray, Appointment.appointmentDateComparator);
-			latestApp = appointmentArray[appointmentArray.length-1];
-		}
-		
-		return latestApp;
-	}
-
-	/**
-	 * Method to retrieve the previous Appointment. This is the Appointment before the latest Appointment.
-	 * This Appointment should have a non-null visit date.
-	 *
-	 * @return Appointment, can be null if the Patient has one or less Appointments
-	 */
-	public Appointment getPreviousAppointment() {
-		Appointment previousApp = null;
-
-		if (appointments != null && !appointments.isEmpty() && appointments.size() > 1) {
-			Appointment[] appointmentArray = appointments.toArray(new Appointment[] {});
-			Arrays.sort(appointmentArray, Appointment.appointmentDateComparator);
-			previousApp = appointmentArray[appointmentArray.length-2];
-		}
-
-		return previousApp;
 	}
 
 	/**
@@ -760,14 +718,6 @@ public class Patient {
 		this.attributes = attibutes;
 	}
 
-	public AppointmentReminder getAppointmentReminder() {
-		return appointmentReminder;
-	}
-
-	public void setAppointmentReminder(AppointmentReminder appointmentReminder) {
-		this.appointmentReminder = appointmentReminder;
-	}
-
 	/**
 	 * <table>
 	 * <tr>
@@ -1011,82 +961,8 @@ public class Patient {
 		return identifiers.get(0);
 	}
 	
-	/**
-	 * Returns the identifier of a particular type or null if the patient does not
-	 * have an identifier of that type.
-	 * @param type
-	 * @return
-	 */
-	public PatientIdentifier getIdentifier(IdentifierType type){
-		if (type == null){
-			return null;
-		}
-		for (PatientIdentifier pid : getPatientIdentifiers()) {
-			if (pid.getType().getId() == type.getId())
-				return pid;
-		}
-		return null;
-	}
-	
 	@Override
 	public String toString() {
 		return getFirstNames() + " " + getLastname();
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((dateOfBirth == null) ? 0 : dateOfBirth.hashCode());
-		result = prime * result
-				+ ((firstNames == null) ? 0 : firstNames.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result
-				+ ((lastname == null) ? 0 : lastname.hashCode());
-		result = prime * result
-				+ ((patientId == null) ? 0 : patientId.hashCode());
-		result = prime * result + sex;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Patient other = (Patient) obj;
-		if (dateOfBirth == null) {
-			if (other.dateOfBirth != null)
-				return false;
-		} else if (!dateOfBirth.equals(other.dateOfBirth))
-			return false;
-		if (firstNames == null) {
-			if (other.firstNames != null)
-				return false;
-		} else if (!firstNames.equals(other.firstNames))
-			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (lastname == null) {
-			if (other.lastname != null)
-				return false;
-		} else if (!lastname.equals(other.lastname))
-			return false;
-		if (patientId == null) {
-			if (other.patientId != null)
-				return false;
-		} else if (!patientId.equals(other.patientId))
-			return false;
-		if (sex != other.sex)
-			return false;
-		return true;
-	}
-
 }

@@ -37,7 +37,6 @@ import org.celllife.idart.database.DatabaseException;
 import org.celllife.idart.database.DatabaseTools;
 import org.celllife.idart.database.DatabaseWizard;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
-import org.celllife.idart.events.EventManager;
 import org.celllife.idart.gui.login.Login;
 import org.celllife.idart.gui.login.LoginErr;
 import org.celllife.idart.gui.welcome.ClinicWelcome;
@@ -48,12 +47,10 @@ import org.celllife.idart.gui.welcome.ReportWorkerWelcome;
 import org.celllife.idart.gui.welcome.StudyWorkerWelcome;
 import org.celllife.idart.integration.eKapa.EkapaSubmitJob;
 import org.celllife.idart.integration.eKapa.JobScheduler;
+import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.task.TaskManager;
-import org.celllife.idart.sms.AppointmentReminderSchedulerJob;
-import org.celllife.idart.sms.MissedAppointmentReminderSchedulerJob;
 import org.celllife.idart.sms.SmsRetrySchedulerJob;
 import org.celllife.idart.sms.SmsSchedulerJob;
-import org.celllife.idart.utils.MessageUtil;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -128,7 +125,6 @@ public class PharmacyApplication {
 			showStartupErrorDialog(msg + e.getMessage());
 			System.exit(1);
 		}
-		
 		loginLoad.updateProgress(30);
 		
 		try {
@@ -144,7 +140,7 @@ public class PharmacyApplication {
 			showStartupErrorDialog(msg);
 			System.exit(1);
 		}
-		
+
 		try {
 			HibernateUtil.setValidation(true);
 		} catch (Exception e) {
@@ -166,8 +162,6 @@ public class PharmacyApplication {
 		boolean userExited;
 		GenericWelcome welcome = null;
 		JobScheduler scheduler = new JobScheduler();
-		EventManager events = new EventManager();
-		events.register();
 		do {
 			Login loginScreen = new Login();
 
@@ -212,7 +206,6 @@ public class PharmacyApplication {
 		} while (!userExited && welcome != null && welcome.isTimedOut());
 
 		scheduler.shutdown();
-		events.deRegister();
 		log.info("");
 		log.info("*********************");
 		log.info("iDART " + iDartProperties.idartVersionNumber + " exited");
@@ -221,18 +214,7 @@ public class PharmacyApplication {
 	}
 
 	private static void startSmsJobs(JobScheduler scheduler) {
-		if (iDartProperties.appointmentReminders) {
-			String arsGroupName = "ars";
-			if (!scheduler.hasJob(arsGroupName, AppointmentReminderSchedulerJob.JOB_NAME)) {
-				// schedule once off missed appointment reminder job
-				scheduler.scheduleOnceOff(MissedAppointmentReminderSchedulerJob.JOB_NAME, arsGroupName, MissedAppointmentReminderSchedulerJob.class);
-				int mins = PropertiesManager.sms().appointmentReminderTaskMinutes();
-				// schedule with a delay to let the missed appointment reminder messages to go out first
-				scheduler.scheduleWithDelay(AppointmentReminderSchedulerJob.JOB_NAME, arsGroupName, AppointmentReminderSchedulerJob.class, mins, 10);
-			} else {
-				log.info("Already scheduled "+ AppointmentReminderSchedulerJob.JOB_NAME + " and " + MissedAppointmentReminderSchedulerJob.JOB_NAME);
-			}
-		} else if (iDartProperties.isCidaStudy) {
+		if (iDartProperties.isCidaStudy) {
 			String cidaGroupName = "cida";
 			if (!scheduler.hasJob(cidaGroupName, SmsSchedulerJob.JOB_NAME)) {
 				scheduler.scheduleOnceOff(SmsSchedulerJob.JOB_NAME, cidaGroupName, SmsSchedulerJob.class);
@@ -346,8 +328,6 @@ public class PharmacyApplication {
 			// set default clinic
 			LocalObjects.mainClinic = AdministrationManager
 			.getMainClinic(hSession);
-			LocalObjects.nationalIdentifierType = AdministrationManager
-					.getNationalIdentifierType(hSession);
 			
 			loginLoad.updateProgress(5);
 

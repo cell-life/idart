@@ -19,10 +19,22 @@
 
 package org.celllife.idart.gui.dataExports;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import model.manager.FileManager;
 import model.manager.PatientManager;
-import model.manager.exports.*;
+import model.manager.exports.AppointmentColumnsGroup;
+import model.manager.exports.EpisodeColumnsGroup;
+import model.manager.exports.ExportColumn;
+import model.manager.exports.ExportColumnGroup;
+import model.manager.exports.PatientExportObject;
+import model.manager.exports.PrescriptionColumnsGroup;
+import model.manager.exports.ReportObject;
+import model.manager.exports.SimpleColumn;
 import model.manager.exports.columns.SimpleColumnsEnum;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.database.hibernate.AttributeType;
 import org.celllife.idart.database.hibernate.IdentifierType;
@@ -34,20 +46,24 @@ import org.celllife.idart.gui.platform.GenericOthersGui;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
-import org.celllife.idart.utils.iDARTUtil;
+import org.celllife.idart.misc.iDARTUtil;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+/**
+ */
 public class AddTemplate extends GenericOthersGui {
 
 	private Composite compDetails;

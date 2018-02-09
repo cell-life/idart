@@ -1,6 +1,5 @@
 package org.celllife.idart.integration.eKapa;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -25,31 +24,11 @@ public class JobScheduler {
 		
 		log.info("Scheduling job: " + name);
 		JobDetail jobDetail = new JobDetail(name, groupName, jobClass);
+		//jobDetail.
 		Trigger trigger = TriggerUtils.makeMinutelyTrigger(minuteInterval);
-		trigger.setStartTime(TriggerUtils.getNextGivenMinuteDate(new Date(), 1));
-		trigger.setName("trigger-" + name);
-
-		try {
-			sched.scheduleJob(jobDetail, trigger);
-			return true;
-		} catch (SchedulerException e) {
-			log.error("Exception scheduling job", e);
-			return false;
-		}
-	}
-	
-	public boolean scheduleWithDelay(String name, String groupName, Class<? extends Job> jobClass, int minuteInterval, int minuteDelay) {
-		if (!initScheduler()){
-			return false;
-		}
-		
-		log.info("Scheduling job: " + name);
-		JobDetail jobDetail = new JobDetail(name, groupName, jobClass);
-		Trigger trigger = TriggerUtils.makeMinutelyTrigger(minuteInterval);
-		Calendar startDate = Calendar.getInstance();
-		startDate.setTime(TriggerUtils.getNextGivenMinuteDate(new Date(), 1));
-		startDate.add(Calendar.MINUTE, minuteDelay);
-		trigger.setStartTime(startDate.getTime());
+		trigger
+		.setStartTime(TriggerUtils
+				.getNextGivenMinuteDate(new Date(), 1));
 		trigger.setName("trigger-" + name);
 
 		try {

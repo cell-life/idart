@@ -19,7 +19,10 @@
 
 package org.celllife.idart.gui.generalAdmin;
 
+import java.lang.reflect.InvocationTargetException;
+
 import model.manager.excel.reports.in.PatientSheet;
+
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
@@ -35,11 +38,11 @@ import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.messages.Messages;
+import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.SafeSaveDialog;
 import org.celllife.idart.misc.SafeSaveDialog.FileType;
 import org.celllife.idart.misc.task.Import;
 import org.celllife.idart.misc.task.TaskException;
-import org.celllife.idart.utils.MessageUtil;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -49,11 +52,15 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 
-import java.lang.reflect.InvocationTargetException;
-
+/**
+ */
 public class GeneralAdmin extends GenericAdminGui {
 
 	/**

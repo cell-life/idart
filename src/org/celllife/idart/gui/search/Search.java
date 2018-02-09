@@ -215,10 +215,6 @@ public class Search extends GenericOthersGui {
 			break;
 		case CommonObjects.STOCK_CENTER:
 			searchList = SearchManager.loadStockCenters(getHSession(), this);
-			break;
-		case CommonObjects.ATC:
-			searchList = SearchManager.loadAtccodes(getHSession(), this);
-			break;
 		}
 	}
 

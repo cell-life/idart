@@ -26,8 +26,6 @@ import org.celllife.idart.database.hibernate.AccumulatedDrugs;
 import org.celllife.idart.database.hibernate.Alerts;
 import org.celllife.idart.database.hibernate.AlternatePatientIdentifier;
 import org.celllife.idart.database.hibernate.Appointment;
-import org.celllife.idart.database.hibernate.AppointmentReminder;
-import org.celllife.idart.database.hibernate.AtcCode;
 import org.celllife.idart.database.hibernate.AttributeType;
 import org.celllife.idart.database.hibernate.Campaign;
 import org.celllife.idart.database.hibernate.CampaignParticipant;
@@ -62,7 +60,6 @@ import org.celllife.idart.database.hibernate.Stock;
 import org.celllife.idart.database.hibernate.StockAdjustment;
 import org.celllife.idart.database.hibernate.StockCenter;
 import org.celllife.idart.database.hibernate.StockLevel;
-import org.celllife.idart.database.hibernate.StockManufacturer;
 import org.celllife.idart.database.hibernate.StockTake;
 import org.celllife.idart.database.hibernate.Study;
 import org.celllife.idart.database.hibernate.StudyParticipant;
@@ -96,8 +93,9 @@ public class HibernateUtil {
 		// Create the session factory
 		AnnotationConfiguration ac = new AnnotationConfiguration();
 
-		if (validate)
+		if (validate) {
 			ac.setProperty("hibernate.hbm2ddl.auto", "validate");
+		}
 		ac.setProperty("hibernate.show_sql", "false");
 		ac.setProperty("hibernate.use_outer_join", "false");
 		ac.setProperty("hibernate.cache.provider_class",
@@ -122,7 +120,6 @@ public class HibernateUtil {
 		ac.addAnnotatedClass(AccumulatedDrugs.class);
 		ac.addAnnotatedClass(AlternatePatientIdentifier.class);
 		ac.addAnnotatedClass(Appointment.class);
-		ac.addAnnotatedClass(AppointmentReminder.class);
 		ac.addAnnotatedClass(ChemicalCompound.class);
 		ac.addAnnotatedClass(ChemicalDrugStrength.class);
 		ac.addAnnotatedClass(Clinic.class);
@@ -148,7 +145,6 @@ public class HibernateUtil {
 		ac.addAnnotatedClass(Stock.class);
 		ac.addAnnotatedClass(StockLevel.class);
 		ac.addAnnotatedClass(StockTake.class);
-		ac.addAnnotatedClass(StockManufacturer.class);
 		ac.addAnnotatedClass(User.class);
 		ac.addAnnotatedClass(AdherenceRecord.class);
 		ac.addAnnotatedClass(DeletedItem.class);
@@ -167,7 +163,6 @@ public class HibernateUtil {
 		ac.addAnnotatedClass(Alerts.class);
 		ac.addAnnotatedClass(IdentifierType.class);
 		ac.addAnnotatedClass(PatientIdentifier.class);
-		ac.addAnnotatedClass(AtcCode.class);
 		sessionFactory = ac.buildSessionFactory();
 	}
 
@@ -207,7 +202,7 @@ public class HibernateUtil {
 
 		return hUtil;
 	}
-	
+
 	public static void setValidation(boolean validation){
 		validate = validation;
 		rebuildUtil();

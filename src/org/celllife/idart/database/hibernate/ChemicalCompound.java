@@ -1,11 +1,13 @@
 package org.celllife.idart.database.hibernate;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.ForeignKey;
-
-import javax.persistence.*;
-import java.util.HashSet;
 import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.Cascade;
 
 /**
  */
@@ -15,7 +17,7 @@ public class ChemicalCompound {
 	@Id
 	@GeneratedValue
 	private Integer id;
-	
+
 	private String acronym;
 
 	private String name;
@@ -24,11 +26,6 @@ public class ChemicalCompound {
 	@Cascade( { org.hibernate.annotations.CascadeType.ALL,
 			org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
 	private Set<ChemicalDrugStrength> chemicalDrugStrengths;
-	
-	@ManyToMany(fetch=FetchType.EAGER)
-	@JoinTable(name = "atccode_chemicalcompound", joinColumns = { @JoinColumn(name = "chemicalcompound_id") }, inverseJoinColumns = { @JoinColumn(name = "atccode_id") })
-	@ForeignKey(inverseName="fk_atccode_chemicalcompound",name="fk_chemicalcompound_atccode")
-	private Set<AtcCode> atccodes;
 
 	public ChemicalCompound() {
 	}
@@ -48,7 +45,7 @@ public class ChemicalCompound {
 	 * @return String
 	 */
 	public String getAcronym() {
-		return acronym == null ? name : acronym;
+		return acronym == null ? "" : acronym;
 	}
 
 	/**
@@ -108,41 +105,4 @@ public class ChemicalCompound {
 		this.id = id;
 	}
 
-	public void setAtccodes(Set<AtcCode> atccodes) {
-		this.atccodes = atccodes;
-	}
-
-	public Set<AtcCode> getAtccodes() {
-		if (atccodes == null){
-			atccodes = new HashSet<AtcCode>();
-		}
-		return atccodes;
-	}
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ChemicalCompound that = (ChemicalCompound) o;
-
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return name != null ? name.hashCode() : 0;
-    }
-
-    @Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ChemicalCompound [acronym=").append(acronym)
-				.append(", name=").append(name).append("]");
-		return builder.toString();
-	}
-	
-	
 }

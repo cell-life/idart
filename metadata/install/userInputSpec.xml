@@ -1,27 +1,46 @@
 <userInput>
 	<panel order="0" id="path.panel1">
-		<field
-			type="staticText"
-			align="left"
-			txt="Before Installation, could you please complete the following fields."/>
-		<field type="text" variable="dbAddress">
-			<spec txt="Database Server:" size="12" set="localhost" />
-		</field>
-		<space></space>
-		<field type="text" variable="dbName">
-			<spec txt="iDART Database Name:" size="12" set="pharm" />
-		</field>
-		<space></space>
-		<field type="text" variable="dbUser">
-			<spec txt="iDART Database Username:" size="12" set="postgres" />
-		</field>
-		<space></space>
-		<field type="text" variable="dbPassword">
-			<spec txt="iDART Database Password:" size="12" set="postgres" />
-		</field>
-		<space></space>
-		<field type="divider" align="center"/>
+           <field
+            type="staticText"
+            align="left"
+            txt="Before Installation, could you please complete the following fields."/>
+	<field type="space" /> 
+	<field type="divider" align="center"/>
+	<field type="space" />
+	<field type="text" variable="dbAddress">
+		<spec txt="Database Server:" size="12" set="localhost" />
+	</field>
 	<space></space>
+	<field type="text" variable="dbName">
+		<spec txt="iDART Database Name:" size="12" set="pharm" />
+	</field>
+	<space></space>
+	<field type="text" variable="dbUser">
+		<spec txt="iDART Database Username:" size="12" set="postgres" />
+	</field>
+	<space></space>
+	<field type="text" variable="dbPassword">
+		<spec txt="iDART Database Password:" size="12" set="postgres" />
+	</field>
+	<space></space>
+	<field type="divider" align="center"/>
+	<field type="space" />
+        <field type="combo" variable="country">
+            <spec txt="Country">
+                <choice txt="South Africa" value="South Africa" set="true" />
+                <choice txt="Nigeria" value="Nigeria"   />
+            </spec>
+        </field>
+	<space></space>
+        <field type="combo" variable="localeCountry">
+            <spec txt="Locale">
+                <choice txt="ZA" value="ZA" set="true" />
+                <choice txt="NG" value="NG" />
+            </spec>
+        </field>
+	<space></space>
+        <field type="divider" align="center"/>
+	<field type="space" />
 		<field type="radio" variable="isEkapaVersion">
 			<description align="left" txt="Connecting to Ekapa?" />
 			<spec>

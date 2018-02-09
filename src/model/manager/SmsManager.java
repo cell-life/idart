@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.celllife.idart.commonobjects.PropertiesManager;
 import org.celllife.idart.database.hibernate.MessageSchedule;
 import org.celllife.idart.database.hibernate.StudyParticipant;
 import org.celllife.idart.sms.SmsType;
@@ -27,14 +26,19 @@ public class SmsManager {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, noOfDays);
 		Date appDate = cal.getTime();
-
-        List<StudyParticipant> participants;
-
-        if (PropertiesManager.sms().sendRemindersToAll() == 1) {
-           participants = getAllParticipants(session, appDate);
-        } else {
-           participants = getActiveParticipants(session, appDate);
-        }
+		
+		List<StudyParticipant> participants = session
+				.createQuery(
+						"select sp from StudyParticipant sp, Patient p, Appointment a "
+								+ "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
+								+ "and  date(a.appointmentDate) = :appDate "
+								+ "and a.visitDate is null "
+								+ "and sp.studyGroup = :activeGroup "
+								+ "and sp.endDate is null")
+				.setDate("appDate", appDate)
+				.setString("activeGroup", StudyParticipant.GP_ACTIVE)
+				.list();
+		
 		
 		return participants;
 	}
@@ -54,12 +58,17 @@ public class SmsManager {
 		cal.add(Calendar.DATE, -noOfDays);
 		Date appDate = cal.getTime();
 		
-		List<StudyParticipant> participants;
-        if (PropertiesManager.sms().sendRemindersToAll() == 1) {
-            participants = getAllParticipants(session, appDate);
-        } else {
-            participants = getActiveParticipants(session, appDate);
-        }
+		List<StudyParticipant> participants = session
+				.createQuery(
+						"select sp from StudyParticipant sp, Patient p, Appointment a "
+								+ "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
+								+ "and date(a.appointmentDate) = :appDate "
+								+ "and a.visitDate is null "
+								+ "and sp.studyGroup = :activeGroup "
+								+ "and sp.endDate is null")
+				.setDate("appDate", appDate)
+				.setString("activeGroup", StudyParticipant.GP_ACTIVE)
+				.list();
 		
 		return participants;
 	}
@@ -127,33 +136,6 @@ public class SmsManager {
 	public static void updateMessageSchedule(Session session, MessageSchedule messageSchedule) {
 		messageSchedule.setScheduledSuccessfully(true);
 		session.save(messageSchedule);
-	}
-
-    protected static List<StudyParticipant> getActiveParticipants(Session session, Date appDate) {
-
-        return session.createQuery(
-                "select sp from StudyParticipant sp, Patient p, Appointment a "
-                        + "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
-                        + "and  date(a.appointmentDate) = :appDate "
-                        + "and a.visitDate is null "
-                        + "and sp.studyGroup = :activeGroup "
-                        + "and sp.endDate is null")
-                .setDate("appDate", appDate)
-                .setString("activeGroup", StudyParticipant.GP_ACTIVE)
-                .list();
-
-    }
-
-    protected static List<StudyParticipant> getAllParticipants(Session session, Date appDate) {
-
-        return session.createQuery(
-                "select sp from StudyParticipant sp, Patient p, Appointment a "
-                        + "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
-                        + "and  date(a.appointmentDate) = :appDate "
-                        + "and a.visitDate is null "
-                        + "and sp.endDate is null")
-                .setDate("appDate", appDate)
-                .list();
 	}
 	
 }
