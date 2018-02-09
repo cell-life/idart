@@ -28,7 +28,6 @@ import model.nonPersistent.PharmacyDetails;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.celllife.idart.commonobjects.LocalObjects;
-import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AtcCode;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Doctor;
@@ -43,7 +42,6 @@ import org.celllife.idart.database.hibernate.Study;
 import org.celllife.idart.database.hibernate.StudyParticipant;
 import org.celllife.idart.database.hibernate.User;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
-import org.celllife.idart.integration.idartweb.doctor.IdartWebDoctorServiceFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -67,33 +65,10 @@ public class AdministrationManager {
 	@SuppressWarnings("unchecked")
 	public static List<Doctor> getAllDoctors(Session sess)
 	throws HibernateException {
-
-        if (iDartProperties.idartWebEnabled) {
-            IdartWebDoctorServiceFactory.getInstance().updateDoctors();
-        }
-
-        List<Doctor> result = sess.createQuery("select d from Doctor as d order by upper(d.lastname)").list();
+		List<Doctor> result = sess.createQuery(
+		"select d from Doctor as d order by upper(d.lastname)").list();
 
 		return result;
-	}
-
-    /**
-	 * Method getDoctorByIdentifier.
-	 *
-	 * @param sess
-	 *            Session
-	 * @return List<Doctor>
-	 * @throws HibernateException
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<Doctor> getDoctorByIdentifier(Session sess, String doctorIdentifier) throws HibernateException {
-
-        String queryString = "select d from Doctor as d where d.doctorIdentifier = :doctorIdentifier";
-
-        Query query = sess.createQuery(queryString);
-        query.setParameter("doctorIdentifier", doctorIdentifier);
-
-        return query.list();
 	}
 
 	/**
@@ -110,17 +85,6 @@ public class AdministrationManager {
 		// if this is the 1st time we're accessing the doctor List
 		s.save(theDoctor);
 	}
-
-    public static Doctor findDoctorByIdentifier(Session session, String doctorIdentifier) {
-
-        String querySql = "select doctor from Doctor doctor where doctor.identifier = :doctorIdentifier";
-
-        Query query = session.createQuery(querySql);
-
-        query.setParameter("doctorIdentifier", doctorIdentifier);
-
-        return (Doctor) query.uniqueResult();
-    }
 
 	/**
 	 * Method getDoctor.

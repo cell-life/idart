@@ -19,24 +19,11 @@
 
 package org.celllife.idart.gui.drug;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
 import model.manager.AdministrationManager;
 import model.manager.DrugManager;
-
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.CommonObjects;
-import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.database.hibernate.AtcCode;
-import org.celllife.idart.database.hibernate.ChemicalCompound;
-import org.celllife.idart.database.hibernate.ChemicalDrugStrength;
-import org.celllife.idart.database.hibernate.Drug;
-import org.celllife.idart.database.hibernate.Form;
+import org.celllife.idart.database.hibernate.*;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.search.Search;
@@ -44,47 +31,23 @@ import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartColor;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
-import org.celllife.idart.integration.idartweb.IdartWebException;
-import org.celllife.idart.integration.idartweb.medication.IdartWebMedicationServiceFactory;
-import org.celllife.idart.misc.MessageUtil;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 import org.jfree.util.Log;
 
-/**
- */
+import java.util.*;
+import java.util.List;
+
 public class AddDrug extends GenericFormGui {
 
 	private static final String ID = "id";
@@ -521,148 +484,51 @@ public class AddDrug extends GenericFormGui {
 			switch (mSave.open()) {
 
 			case SWT.YES:
-				if (checkAtcCode()) {
-					Transaction tx = null;
-					String action = "";
-					try {
-						tx = getHSession().beginTransaction();
-						if (isAddnotUpdate) {
-							localDrug = new Drug();
-							setLocalDrug();
-							DrugManager.saveDrug(getHSession(), localDrug);
-							action = "added";
-						} else {
-							setLocalDrug();
-							action = "updated";
-						}
-	
-	                    if (iDartProperties.idartWebEnabled) {
-	                        IdartWebMedicationServiceFactory.getInstance().saveMedication(localDrug);
-	                    }
-	
-						tx.commit();
-						getHSession().flush();
-	
-						// Updating the drug list after being saved.
-						MessageBox m = new MessageBox(getShell(),
-								SWT.ICON_INFORMATION | SWT.OK);
-						m.setMessage("Drug '".concat(localDrug.getName()).concat(
-								"' has been " + action + "."));
-						m.setText("Database Updated");
-						m.open();
-	
-					} catch (HibernateException he) {
-						MessageBox m = new MessageBox(getShell(), SWT.OK
-								| SWT.ICON_INFORMATION);
-						m.setText("Problems Saving to the Database");
-						m
-						.setMessage("There was a problem saving the drug's information to the database. Please try again.");
-						m.open();
-						if (tx != null) {
-							tx.rollback();
-						}
-						getLog().error(he);
-					} catch (IdartWebException e) {
-						if (tx != null) {
-							tx.rollback();
-						}
-						getLog().error("Error while communicating with iDARTweb - couldn't save drug: "+localDrug, e);
-						MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
+
+				Transaction tx = null;
+				String action = "";
+				try {
+					tx = getHSession().beginTransaction();
+					if (isAddnotUpdate) {
+						localDrug = new Drug();
+						setLocalDrug();
+						DrugManager.saveDrug(getHSession(), localDrug);
+						action = "added";
+					} else {
+						setLocalDrug();
+						action = "updated";
 					}
-					cmdCancelWidgetSelected(); // go back to previous screen
-					break;
+
+					tx.commit();
+					getHSession().flush();
+
+					// Updating the drug list after being saved.
+					MessageBox m = new MessageBox(getShell(),
+							SWT.ICON_INFORMATION | SWT.OK);
+					m.setMessage("Drug '".concat(localDrug.getName()).concat(
+							"' has been " + action + "."));
+					m.setText("Database Updated");
+					m.open();
+
+				} catch (HibernateException he) {
+					MessageBox m = new MessageBox(getShell(), SWT.OK
+							| SWT.ICON_INFORMATION);
+					m.setText("Problems Saving to the Database");
+					m
+					.setMessage("There was a problem saving the drug's information to the database. Please try again.");
+					m.open();
+					if (tx != null) {
+						tx.rollback();
+					}
+					getLog().error(he);
 				}
+				cmdCancelWidgetSelected(); // go back to previous screen
+				break;
 			case SWT.NO:
 				// do nothing
 			}
 
 		}
-	}
-	
-	private boolean checkAtcCode() {
-		if (txtAtc.getText().trim().isEmpty()) {
-			List<String> atcCodes = new ArrayList<String>();
-			StringBuffer suggestedAtcCodes = new StringBuffer();
-			for (int i = 0; i < tblChemicalCompounds.getItemCount(); i++) {
-				TableItem ti = tblChemicalCompounds.getItem(i);
-				if (ti.getChecked()) {
-					ChemicalCompound compound = (ChemicalCompound)ti.getData();
-					if (suggestedAtcCodes.length() > 0) {
-						suggestedAtcCodes.append("\n");
-					}
-					if (compound.getAtccodes().size() >= 1) {
-						suggestedAtcCodes.append(compound.getName());
-						suggestedAtcCodes.append(": ");
-						int atcCodeCounter = 0;
-						for (AtcCode atcCode : compound.getAtccodes()) {
-							if (atcCodeCounter++ > 0) {
-								suggestedAtcCodes.append(", ");
-							}
-							suggestedAtcCodes.append(atcCode.getCode());
-							atcCodes.add(atcCode.getCode());
-						}
-					}
-				}
-			}
-			
-			if (iDartProperties.idartWebEnabled) {
-				if (atcCodes.size() == 1) {
-					MessageBox mSave = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-					mSave.setText("No ATC code");
-					mSave.setMessage("The ATC code is empty which can cause issues when integrating with other systems."
-							+ "\n\nBased on the selected chemical compounds, would you like to use "+atcCodes.get(0)+"?");
-					switch (mSave.open()) {
-						case SWT.YES:
-							this.txtAtc.setText(atcCodes.get(0));
-							break;
-						case SWT.CANCEL:
-							return false;
-					}
-				} else {
-					MessageBox mSave = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-					mSave.setText("No ATC code");
-					if (suggestedAtcCodes.length() > 0) {
-						mSave.setMessage("Are you sure you want to leave the ATC code empty"
-								+ " as it can cause issues when integrating with other systems?"
-								+ "\n\nSuggested ATC codes (based on the selected chemical compounds) are: "
-								+ "\n" + suggestedAtcCodes);
-					} else {
-						mSave.setMessage("Are you sure you want to leave the ATC code empty"
-								+ " as it can cause issues when integrating with other systems?");
-					}
-					switch (mSave.open()) {
-						case SWT.NO:
-							return false;
-					}
-				}
-				return true;
-			} else {
-				// helpful for all users (not just iDARTweb) - if we can suggest an ATC code (based on compounds), do it.
-				if (atcCodes.size() == 1) {
-					MessageBox mSave = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
-					mSave.setText("No ATC code");
-					mSave.setMessage("The ATC code is empty. Based on the selected chemical compounds, would you like to use "+atcCodes.get(0)+"?");
-					switch (mSave.open()) {
-						case SWT.YES:
-							this.txtAtc.setText(atcCodes.get(0));
-							break;
-						case SWT.CANCEL:
-							return false;
-					}
-				} else if (suggestedAtcCodes.length() > 0) {
-					MessageBox mSave = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-					mSave.setText("No ATC code");
-					mSave.setMessage("Are you sure you want to leave the ATC code empty?"
-							+ "\n\nSuggested ATC codes (based on the selected chemical compounds) are: "
-							+ "\n" + suggestedAtcCodes);
-					switch (mSave.open()) {
-						case SWT.NO:
-							return false;
-					}
-				}
-			}
-		}
-		return true;
 	}
 
 	/**

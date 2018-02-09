@@ -3,7 +3,7 @@
 	<native type="izpack" name="ShellLink.dll" />
 	<info>
 		<appname>iDART</appname>
-		<appversion>3.8.1</appversion>
+		<appversion>3.8.1.1</appversion>
 		<authors>
 			<author name="Samir Anand" email="samir@cell-life.org" />
 			<author name="Sarah Brown" email="sarah@cell-life.org" />
@@ -59,11 +59,10 @@
 		<panel classname="PacksPanel" />
 		<panel classname="UserInputPanel" id="path.panel1" />
 		<panel classname="UserInputPanel" id="path.panel2" />
-        <panel classname="UserInputPanel" id="path.panel3" />
-        <panel classname="UserInputPanel" id="path.panel4" />
-        <panel classname="UserInputPanel" id="path.panel5" />
-        <panel classname="UserInputPanel" id="path.panel6" />
-        <panel classname="TargetPanel" />
+		<panel classname="UserInputPanel" id="path.panel3" />
+		<panel classname="UserInputPanel" id="path.panel4" />
+		<panel classname="UserInputPanel" id="path.panel5" />
+		<panel classname="TargetPanel" />
 		<panel classname="ShortcutPanel" os="Windows" />
 		<panel classname="InstallPanel" />
 		<panel classname="ProcessPanel" />
@@ -82,6 +81,7 @@
 				<include name="log4j.xml" />
 				<include name="quartz.properties" />
 				<include name="sms.properties" />
+                <include name="working_days.properties" />
 			</fileset>
 			<fileset dir="metadata/database/" targetdir="$INSTALL_PATH/scripts">
 				<include name="*diff.sql" />

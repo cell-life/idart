@@ -19,6 +19,7 @@
 
 package org.celllife.idart.gui.packaging;
 
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ import org.celllife.function.IRule;
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AccumulatedDrugs;
+import org.celllife.idart.database.hibernate.Appointment;
+import org.celllife.idart.database.hibernate.AppointmentReminder;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Drug;
 import org.celllife.idart.database.hibernate.Episode;
@@ -54,6 +57,7 @@ import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.events.AdherenceEvent;
 import org.celllife.idart.events.PackageEvent;
 import org.celllife.idart.gui.misc.iDARTChangeListener;
+import org.celllife.idart.gui.patient.AppointmentReminderDialog;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.reportParameters.PatientHistory;
 import org.celllife.idart.gui.utils.ResourceUtils;
@@ -64,12 +68,11 @@ import org.celllife.idart.gui.widget.DateButton;
 import org.celllife.idart.gui.widget.DateChangedEvent;
 import org.celllife.idart.gui.widget.DateChangedListener;
 import org.celllife.idart.gui.widget.DateInputValidator;
-import org.celllife.idart.integration.idartweb.IdartWebException;
+import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.DateFieldComparator;
-import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.misc.iDARTUtil;
-import org.celllife.idart.model.utils.PackageLifeStage;
+import org.celllife.idart.utils.PackageLifeStage;
+import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CCombo;
@@ -162,6 +165,8 @@ iDARTChangeListener {
 	private CCombo cmbClinic;
 
 	private DateButton btnCaptureDate;
+	
+	private Button btnAppointmentReminder;
 
 	private Button btnPatientHistoryReport;
 
@@ -955,10 +960,23 @@ iDARTChangeListener {
 		btnCollectionDateForNextPackage.setFont(ResourceUtils
 				.getFont(iDartFont.VERASANS_8));
 		btnCollectionDateForNextPackage.setVisible(false);
+		
+		btnAppointmentReminder = new Button(grpPackageLists, SWT.NONE);
+		btnAppointmentReminder.setBounds(new Rectangle(488, 415, 50, 43));
+		btnAppointmentReminder.setToolTipText(Messages.getString("appointmentreminders.title"));
+		btnAppointmentReminder.setImage(ResourceUtils.getImage(iDartImage.APPOINTMENTREMINDERS));
+
+		btnAppointmentReminder.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent mu) {
+				cmdAppointmentReminderWidgetSelected();
+			}
+		});
+		btnAppointmentReminder.setEnabled(iDartProperties.appointmentReminders);
 
 		// lblPicPatientHistoryReport
 		btnPatientHistoryReport = new Button(grpPackageLists, SWT.NONE);
-		btnPatientHistoryReport.setBounds(new Rectangle(503, 415, 50, 43));
+		btnPatientHistoryReport.setBounds(new Rectangle(548, 415, 50, 43));
 		btnPatientHistoryReport
 		.setToolTipText("Press this button to view and / or print reports \nof patients' Prescription History.");
 		btnPatientHistoryReport.setImage(ResourceUtils
@@ -982,7 +1000,7 @@ iDARTChangeListener {
 
 		// lblPicPackagesReport
 		btnPackagesReport = new Button(grpPackageLists, SWT.NONE);
-		btnPackagesReport.setBounds(new Rectangle(568, 415, 50, 43));
+		btnPackagesReport.setBounds(new Rectangle(608, 415, 50, 43));
 		btnPackagesReport
 		.setToolTipText("Press this button to view and / or print Scanned Out Packages Report.");
 		btnPackagesReport.setImage(ResourceUtils.getImage(iDartImage.REPORTS));
@@ -1147,9 +1165,6 @@ iDARTChangeListener {
 
 	/**
 	 * Method populateTblLastPackage.
-	 * 
-	 * @param previousPack
-	 *            Packages
 	 */
 	private void populateTblLastPackage() {
 		if (tblLastPackage != null) {
@@ -1251,9 +1266,6 @@ iDARTChangeListener {
 	/**
 	 * This method updates the two lists: - packages waiting to be dispatched,
 	 * and - packages that have been scanned out of the pharmacy
-	 * 
-	 * @param index
-	 *            int
 	 */
 	private void updateLists() {
 
@@ -1669,6 +1681,18 @@ iDARTChangeListener {
 		}
 
 	}
+	
+	private void cmdAppointmentReminderWidgetSelected() {
+		if (scannedPack != null) {
+			Patient localPatient = scannedPack.getPrescription().getPatient();
+			if (localPatient.getAppointmentReminder() == null) {
+				localPatient.setAppointmentReminder(new AppointmentReminder());
+				localPatient.getAppointmentReminder().setPatient(localPatient);
+			}
+			AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder(), true);
+			ard.openAndWait();
+		}
+	}
 
 	/**
 	 * View the patient history report, or show a patient selection report
@@ -1859,11 +1883,10 @@ iDARTChangeListener {
 		if (fieldsOk()) {
 			Transaction tx = null;
 
-			Packages pack = null;
 			try {
 				tx = getHSession().beginTransaction();
 
-				pack = PackageManager.getPackage(getHSession(),
+				Packages pack = PackageManager.getPackage(getHSession(),
 						txtPackageIdScan.getText());
 
 				// Save dates associated with this package
@@ -1882,9 +1905,27 @@ iDARTChangeListener {
 				}
 
 				Patient aPatient = pack.getPrescription().getPatient();
-				PatientManager.setNextAppointmentDateAtVisit(getHSession(),
+				Date appointmentDate = btnCollectionDateForNextPackage.getDate();
+				Appointment appointment = PatientManager.setNextAppointmentDateAtVisit(getHSession(),
 						aPatient, btnCaptureDate.getDate(),
 						btnCollectionDateForNextPackage.getDate());
+				
+				// check if the appointment date was automatically changed and see if they wish to override
+				if (!appointment.getAppointmentDate().equals(appointmentDate)) {
+					MessageBox mbox = new MessageBox(getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
+					mbox.setText(Messages.getString("appointmentdate.question.title"));
+					SimpleDateFormat sdf2 = new SimpleDateFormat("EEE d MMM yyyy");
+					mbox.setMessage(MessageFormat.format(Messages.getString("appointmentdate.question.text"), 
+							sdf2.format(appointmentDate), 
+							sdf2.format(appointment.getAppointmentDate())));
+					switch (mbox.open()) {
+						case SWT.NO:
+							appointment.overrideAppointmentDate(appointmentDate);
+							break;
+					}
+				}
+				
+				PatientManager.scheduleApppointmentReminderMessages(aPatient, appointment);
 
 				Set<PillCount> pcs = getPillCountsForLastPackage();
 				if (pcs != null) {
@@ -1966,12 +2007,6 @@ iDARTChangeListener {
 				if (tx != null) {
 					tx.rollback();
 				}
-			} catch (IdartWebException e) {
-				getLog().error("Error while communicating with iDARTweb - couldn't save scanned out packages: "+pack, e);
-				if (tx != null) {
-					tx.rollback();
-				}
-				MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 			}
 
 			cmdClearWidgetSelected();

@@ -18,60 +18,35 @@
  */
 package model.manager;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.LocalObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.database.hibernate.AccumulatedDrugs;
-import org.celllife.idart.database.hibernate.Clinic;
-import org.celllife.idart.database.hibernate.Drug;
-import org.celllife.idart.database.hibernate.Form;
-import org.celllife.idart.database.hibernate.PackagedDrugs;
-import org.celllife.idart.database.hibernate.Packages;
-import org.celllife.idart.database.hibernate.Patient;
-import org.celllife.idart.database.hibernate.PillCount;
-import org.celllife.idart.database.hibernate.Prescription;
-import org.celllife.idart.database.hibernate.StockCenter;
-import org.celllife.idart.database.hibernate.User;
+import org.celllife.idart.database.hibernate.*;
 import org.celllife.idart.database.hibernate.tmp.PackageDrugInfo;
-import org.celllife.idart.integration.idartweb.IdartWebException;
-import org.celllife.idart.integration.idartweb.dispensation.IdartWebDispensationServiceFactory;
-import org.celllife.idart.integration.idartweb.prescription.IdartWebPrescriptionServiceFactory;
-import org.celllife.idart.misc.iDARTUtil;
-import org.celllife.idart.model.utils.PackageLifeStage;
 import org.celllife.idart.print.label.DrugLabel;
 import org.celllife.idart.print.label.PackageCoverLabel;
 import org.celllife.idart.print.label.PrintThread;
 import org.celllife.idart.print.label.ScriptSummaryLabel;
+import org.celllife.idart.utils.PackageLifeStage;
+import org.celllife.idart.utils.iDARTUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-/**
- */
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 public class PackageManager {
 
 	// --------- METHODS FOR PRESCRIPTION OBJECT MANAGER
-	// ---------------------------------
-	/**
-	 * Method checkStockLevels.
-	 * 
-	 * @param sess
-	 *            Session
-	 * @param d
-	 *            Drug
-	 * @param c
-	 *            Clinic
-	 * @return boolean
-	 * @throws HibernateException
-	 */
+    /**
+     * Method checkStockLevels.
+     * @param sess
+     * @param d
+     * @param stockCenter
+     * @return
+     * @throws HibernateException
+     */
 	public static boolean checkStockLevels(Session sess, Drug d,
 			StockCenter stockCenter) throws HibernateException {
 		boolean levelsFine = false;
@@ -234,7 +209,7 @@ public class PackageManager {
 	@SuppressWarnings("unchecked")
 	public static void saveNewPrescription(Session sess,
 			Prescription preToBeSaved, boolean previousPrescriptionDeleted)
-			throws HibernateException, IllegalArgumentException, IdartWebException {
+			throws HibernateException, IllegalArgumentException {
 
 		if (!previousPrescriptionDeleted) {
 			List<Prescription> updatedPrescriptions = sess
@@ -260,13 +235,8 @@ public class PackageManager {
 			}
 
 		}
-
 		sess.save(preToBeSaved);
-
-        if (iDartProperties.idartWebEnabled) {
-        	IdartWebPrescriptionServiceFactory.getInstance().savePrescription(preToBeSaved);
-        }
-    }
+	}
 
 	/**
 	 * Returns the Patients most recent Prescription, if it has no packageddrugs
@@ -872,7 +842,7 @@ public class PackageManager {
 		result = (Packages) session
 				.createQuery(
 						"select pack from Packages as pack where "
-								+ "pack.packageId = :packageId and pack.packageReturned = false")
+								+ "pack.packageId = :packageId")
 				.setString("packageId", packageId.toUpperCase()).uniqueResult();
 		return result;
 	}
@@ -887,20 +857,6 @@ public class PackageManager {
 	 * @throws HibernateException
 	 */
 	public static void savePackage(Session sess, Packages packageToSave)
-			throws HibernateException, IdartWebException {
-
-		savePackageOnly(sess, packageToSave);
-
-        if (iDartProperties.idartWebEnabled && packageToSave.getPickupDate() != null) {
-            IdartWebDispensationServiceFactory.getInstance().saveDispensation(packageToSave);
-        }
-
-	}
-
-	/**
-	 * Just saves the package to the database
-	 */
-	public static void savePackageOnly(Session sess, Packages packageToSave)
 			throws HibernateException {
 
 		Prescription pre = packageToSave.getPrescription();
@@ -935,19 +891,14 @@ public class PackageManager {
 
 	// ---------- METHODS FOR PATIENT PACKAGING MANAGER ---------------
 
-	/**
-	 * Method printLabels.
-	 * 
-	 * @param sess
-	 *            Session
-	 * @param pdisForLabels
-	 *            List<PackageDrugInfo>
-	 * @param qtysForLabels
-	 * @param pInfo
-	 *            PackageInfo
-	 * @return boolean
-	 * @throws HibernateException
-	 */
+    /**
+     * Method printLabels
+     * @param sess
+     * @param pdisForLabels
+     * @param qtysForLabels
+     * @return
+     * @throws HibernateException
+     */
 	public static boolean printLabels(Session sess,
 			List<PackageDrugInfo> pdisForLabels,
 			Map<Object, Integer> qtysForLabels) throws HibernateException {
@@ -1200,15 +1151,13 @@ public class PackageManager {
 		}
 	}
 
-	/**
-	 * @param pInfo
-	 * @param printPackageCover
-	 * @param leaveQuantitiesBlank
-	 * @param pdi
-	 * @param theForm
-	 * @param patientName
-	 * @return
-	 */
+    /**
+     * @param leaveQuantitiesBlank
+     * @param pdi
+     * @param theForm
+     * @param nextAppointmentDate
+     * @return
+     */
 	private static Object createLabel(boolean leaveQuantitiesBlank,
 			PackageDrugInfo pdi, Form theForm, String nextAppointmentDate) {
 

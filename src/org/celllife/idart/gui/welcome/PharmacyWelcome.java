@@ -1,6 +1,14 @@
 package org.celllife.idart.gui.welcome;
 
+import java.text.MessageFormat;
+import java.util.List;
+
+import model.manager.AlertManager;
+import model.manager.AppointmentReminderManager;
+
 import org.celllife.idart.commonobjects.iDartProperties;
+import org.celllife.idart.database.hibernate.Alerts;
+import org.celllife.idart.database.hibernate.MessageSchedule;
 import org.celllife.idart.gui.generalAdmin.GeneralAdmin;
 import org.celllife.idart.gui.patientAdmin.PatientAdmin;
 import org.celllife.idart.gui.reports.NewReports;
@@ -19,6 +27,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 
 /**
  */
@@ -26,6 +35,19 @@ public class PharmacyWelcome extends GenericWelcome {
 
 	public PharmacyWelcome() {
 		super();
+	}
+	
+	@Override
+	public void showAlerts() {
+		if (iDartProperties.appointmentReminders) {
+			boolean alerts = AlertManager.hasCurrentAlerts(Alerts.ALERT_TYPE_ARS_REMINDER);
+			if (alerts) {
+				MessageBox alert = new MessageBox(shell, SWT.ERROR | SWT.ICON_ERROR);
+				alert.setText(Messages.getString("appointmentreminders.title"));
+				alert.setMessage(Messages.getString("appointmentreminders.alerts.popup"));
+				alert.open();
+			}
+		}
 	}
 
 	@Override
@@ -35,6 +57,33 @@ public class PharmacyWelcome extends GenericWelcome {
 
 	@Override
 	protected void createCompOptions(Composite compOptions) {
+		
+		if (iDartProperties.appointmentReminders) {
+			overrideBtnLogLocation(compOptions, new Rectangle(360, 140, 50, 43) ,new Rectangle(320, 190, 130, 40));
+			// ARS button
+			Label lblAppointmentReminder = new Label(compOptions, SWT.NONE);
+			lblAppointmentReminder.setBounds(new Rectangle(200, 140, 50, 43));
+			lblAppointmentReminder.setImage(ResourceUtils.getImage(iDartImage.APPOINTMENTREMINDERS));
+			lblAppointmentReminder.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseUp(MouseEvent mu) {
+					sendAppointmentReminders();
+				}
+			});
+	
+			Button btnAppointmentReminder = new Button(compOptions, SWT.NONE);
+			btnAppointmentReminder.setBounds(new Rectangle(160, 190, 130, 40));
+			btnAppointmentReminder.setText(Messages.getString("pharmacywelcome.button.appointmentreminder.text"));
+			btnAppointmentReminder.setToolTipText(Messages.getString("pharmacywelcome.button.appointmentreminder.tooltip")); 
+			btnAppointmentReminder.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
+			btnAppointmentReminder.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+				@Override
+				public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
+					sendAppointmentReminders();
+				}
+			});
+		}
+		
 		// generalAdmin
 		Label lblPicGeneralAdmin = new Label(compOptions, SWT.NONE);
 		lblPicGeneralAdmin.setBounds(new Rectangle(40, 0, 50, 43));
@@ -90,9 +139,6 @@ public class PharmacyWelcome extends GenericWelcome {
 				new PatientAdmin(shell);
 			}
 		});
-		/*if (iDartProperties.prehmisIntegration) {
-			btnPatientAdmin.setEnabled(false);
-		}*/
 
 		// stockControl
 		Label lblPicStockControl = new Label(compOptions, SWT.NONE);
@@ -147,6 +193,35 @@ public class PharmacyWelcome extends GenericWelcome {
 				new NewReports(shell);
 			}
 		});
+	}
+	
+	private void sendAppointmentReminders() {
+		MessageBox mb = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+		mb.setText(Messages.getString("pharmacywelcome.button.appointmentreminder.popup.title"));
+		mb.setMessage(Messages.getString("pharmacywelcome.button.appointmentreminder.popup"));
+		switch (mb.open()) {
+		case SWT.YES:
+			// Process missed appointments
+			List<MessageSchedule> messages = AppointmentReminderManager.createAndSendMissedAppointmentMessages(true);
+			List<Alerts> alerts = AlertManager.getCurrentAlerts(Alerts.ALERT_TYPE_ARS_MISSED);
 
+			if (alerts == null || alerts.size() == 0) {
+				// on success
+				MessageBox m1 = new MessageBox(shell, SWT.OK | SWT.ICON_INFORMATION);
+				m1.setText(Messages.getString("pharmacywelcome.button.appointmentreminder.popup.title"));
+				m1.setMessage(MessageFormat.format(Messages.getString("pharmacywelcome.button.appointmentreminder.success"),messages.size()));
+				m1.open();
+			} else {
+				// on error
+				MessageBox m2 = new MessageBox(shell, SWT.ERROR | SWT.ICON_ERROR);
+				m2.setText(Messages.getString("pharmacywelcome.button.appointmentreminder.popup.title"));
+				m2.setMessage(MessageFormat.format(Messages.getString("pharmacywelcome.button.appointmentreminder.error"), messages.size(), alerts.size()));
+				m2.open();				
+			}
+			
+			break;
+		case SWT.NO:
+			break;
+		}
 	}
 }

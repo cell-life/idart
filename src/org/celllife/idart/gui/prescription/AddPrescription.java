@@ -19,38 +19,15 @@
 
 package org.celllife.idart.gui.prescription;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import model.manager.AdministrationManager;
-import model.manager.DeletionsManager;
-import model.manager.DrugManager;
-import model.manager.PackageManager;
-import model.manager.PatientManager;
+import model.manager.*;
 import model.manager.reports.PatientHistoryReport;
-
 import org.apache.log4j.Logger;
 import org.celllife.function.AndRule;
 import org.celllife.function.DateRuleFactory;
 import org.celllife.function.IRule;
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.database.hibernate.Doctor;
-import org.celllife.idart.database.hibernate.Drug;
-import org.celllife.idart.database.hibernate.Episode;
-import org.celllife.idart.database.hibernate.Form;
-import org.celllife.idart.database.hibernate.Patient;
-import org.celllife.idart.database.hibernate.PatientIdentifier;
-import org.celllife.idart.database.hibernate.PrescribedDrugs;
-import org.celllife.idart.database.hibernate.Prescription;
-import org.celllife.idart.database.hibernate.Regimen;
-import org.celllife.idart.database.hibernate.RegimenDrugs;
+import org.celllife.idart.database.hibernate.*;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.doctor.AddDoctor;
 import org.celllife.idart.gui.misc.iDARTChangeListener;
@@ -62,51 +39,28 @@ import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartColor;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
-import org.celllife.idart.gui.widget.DateButton;
-import org.celllife.idart.gui.widget.DateChangedEvent;
-import org.celllife.idart.gui.widget.DateChangedListener;
-import org.celllife.idart.gui.widget.DateException;
-import org.celllife.idart.gui.widget.DateInputValidator;
+import org.celllife.idart.gui.widget.*;
 import org.celllife.idart.integration.eKapa.gui.SearchPatientGui;
-import org.celllife.idart.integration.idartweb.IdartWebException;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.FloatValidator;
-import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 
-/**
- */
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
+
 public class AddPrescription extends GenericFormGui implements
 iDARTChangeListener {
 
@@ -583,8 +537,7 @@ iDARTChangeListener {
 				cmdAddDoctorWidgetSelected();
 			}
 		});
-		
-		btnAddDoctor.setToolTipText(Messages.getString("GeneralAdmin.doctors.button.tooltip"));
+		btnAddDoctor.setToolTipText("Press this button to add a new doctor");
 
 		// Duration
 		Label lblDuration = new Label(grpParticulars, SWT.NONE);
@@ -1236,11 +1189,8 @@ iDARTChangeListener {
 		}
 
 		try {
-			if (iDartProperties.prehmisIntegration) {
-				txtPatientId.setText(PatientManager.getPrehmisPatientId(thePatient));
-			} else {
-				txtPatientId.setText(thePatient.getPatientId());
-			}
+
+			txtPatientId.setText(thePatient.getPatientId());
 			txtName.setText(thePatient.getFirstNames());
 			txtSurname.setText(thePatient.getLastname());
 			txtClinic.setText(thePatient.getCurrentClinic().getClinicName());
@@ -1401,11 +1351,7 @@ iDARTChangeListener {
 		
 		if (identifier != null) {
 			thePatient = identifier.getPatient();
-			if (iDartProperties.prehmisIntegration) {
-				txtPatientId.setText(PatientManager.getPrehmisPatientId(thePatient));
-			} else {
-				txtPatientId.setText(thePatient.getPatientId());
-			}
+			txtPatientId.setText(thePatient.getPatientId());
 					
 			if (!thePatient.getAccountStatusWithCheck()) {
 				MessageBox noPatient = new MessageBox(getShell(),
@@ -1650,13 +1596,6 @@ iDARTChangeListener {
 					}
 					getLog().error(ie);
 					saveSuccessful = false;
-				} catch (IdartWebException e) {
-					if (tx != null) {
-						tx.rollback();
-					}
-					getLog().error("Error while communicating with iDARTweb - unable to save a new prescription: "+localPrescription, e);
-					saveSuccessful = false;
-					MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 				}
 
 				catch (HibernateException he) {
@@ -1964,11 +1903,7 @@ iDARTChangeListener {
 		btnPatientHistoryReport.setEnabled(enable);
 
 		cmbDoctor.setEnabled(enable);
-		if (iDartProperties.prehmisIntegration) {
-			btnAddDoctor.setEnabled(false);
-		} else {
-			btnAddDoctor.setEnabled(enable);
-		}
+		btnAddDoctor.setEnabled(enable);
 		btnMoveUp.setEnabled(enable);
 		btnMoveDown.setEnabled(enable);
 
@@ -2090,7 +2025,7 @@ iDARTChangeListener {
 	 * @param tx
 	 *            Transaction
 	 */
-	private void deleteScript(Prescription prescriptionToRemove, Transaction tx) throws IdartWebException {
+	private void deleteScript(Prescription prescriptionToRemove, Transaction tx) {
 		DeletionsManager.removeUndispensedPrescription(getHSession(),
 				prescriptionToRemove);
 		getHSession().flush();

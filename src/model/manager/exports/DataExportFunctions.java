@@ -1,33 +1,18 @@
 package model.manager.exports;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-
 import model.manager.PatientSetManager;
-import model.manager.exports.columns.AppointmentDetailsEnum;
-import model.manager.exports.columns.DrugDetailsEnum;
-import model.manager.exports.columns.EpisodeDetailsEnum;
-import model.manager.exports.columns.PackageDetailsEnum;
-import model.manager.exports.columns.PrescriptionDetailsEnum;
+import model.manager.exports.columns.*;
 import model.nonPersistent.EntitySet;
 import model.nonPersistent.ExportDrugInfo;
 import model.nonPersistent.ExportPackageInfo;
-
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.iDartProperties;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 import org.hibernate.Session;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class DataExportFunctions {
 
@@ -314,7 +299,7 @@ public class DataExportFunctions {
 	 * Returns a list of the episode details as specified for the oldest episode
 	 * of the current patient.
 	 * 
-	 * @see #getEpisodeDetails(List)
+	 * @see #getEpisodeDetails(java.util.List, java.util.Date, java.util.Date)
 	 * @param details
 	 *            The list of details required for each episode.
 	 * @return
@@ -329,7 +314,7 @@ public class DataExportFunctions {
 	 * Returns a list of the episode details as specified for the oldest episode
 	 * of the current patient.
 	 * 
-	 * @see #getEpisodeDetails(List)
+	 * @see #getEpisodeDetails(java.util.List, java.util.Date, java.util.Date)
 	 * @param details
 	 *            The list of details required for each episode.
 	 * @return
@@ -374,7 +359,7 @@ public class DataExportFunctions {
 	 * Returns a list of the episode details as specified for the newest episode
 	 * of the current patient.
 	 * 
-	 * @see #getEpisodeDetails(List)
+	 * @see #getEpisodeDetails(java.util.List, java.util.Date, java.util.Date)
 	 * @param details
 	 *            The list of details required for each episode.
 	 * @return
@@ -419,7 +404,7 @@ public class DataExportFunctions {
 	 * Returns a list of the episode details as specified for the newest N
 	 * episodes of the current patient.
 	 * 
-	 * @see #getEpisodeDetails(List)
+	 * @see #getEpisodeDetails(java.util.List, java.util.Date, java.util.Date)
 	 * @param n
 	 *            The number of episodes to fetch.
 	 * @param details
@@ -467,7 +452,7 @@ public class DataExportFunctions {
 	 * Returns a list of the episode details as specified for the oldest N
 	 * episodes of the current patient.
 	 * 
-	 * @see #getEpisodeDetails(List) *
+	 * @see #getEpisodeDetails(java.util.List, java.util.Date, java.util.Date)
 	 * @param n
 	 *            The number of episodes to fetch.
 	 * @param details
@@ -535,7 +520,7 @@ public class DataExportFunctions {
 	 * N episodes of the current patient. If the list of episodes is less than N
 	 * then it is expanded with empty rows unitl list.size == N;
 	 * 
-	 * @see #getEpisodeDetails(List)
+	 * @see #getEpisodeDetails(java.util.List, java.util.Date, java.util.Date)
 	 * @param n
 	 *            The number of episodes for which to return details
 	 * @param details
@@ -757,12 +742,8 @@ public class DataExportFunctions {
 	/**
 	 * Returns a list of the pregnancy details as specified for all the
 	 * pregnancies of the current patient.
-	 * 
-	 * Available details are values of the {@link PregnancyDetailsEnum} and can
-	 * be supplied in any order.
-	 * 
-	 * @param details
-	 *            The list of details required for each pregnancy.
+	 *
+	 * be supplied in any order
 	 * @return a list of the details for each pregnancy of the current patient
 	 *         or null if none exist.
 	 */
@@ -805,9 +786,6 @@ public class DataExportFunctions {
 	 * <td align=center>(times p/day * amount p/time)</td>
 	 * </tr>
 	 * </table>
-	 * 
-	 * @see getExpectedRunoutDates()
-	 * 
 	 * 
 	 */
 	protected void cacheCurrentExpectedRunoutDate() {
@@ -1080,8 +1058,6 @@ public class DataExportFunctions {
 	 * convenience.
 	 * 
 	 * @param str
-	 * @param oldStr
-	 * @param newStr
 	 * @return str.replaceAll(oldStr, newStr);
 	 */
 	public String replaceSeperator(String str) {

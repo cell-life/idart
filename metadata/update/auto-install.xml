@@ -11,8 +11,6 @@
     <com.izforge.izpack.panels.UserInputPanel>
         <userInput>
             <entry key="isEkapaVersion" value="false"/>
-            <entry key="prehmisIntegration" value="false"/>
-            <entry key="idartWebEnabled" value="false"/>
             <entry key="dbPassword" value="postgres"/>
             <entry key="dbName" value="pharm"/>
             <entry key="dbUser" value="postgres"/>

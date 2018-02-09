@@ -1,6 +1,9 @@
 package org.celllife.idart.database;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.CustomSqlRollback;
@@ -19,7 +22,6 @@ import org.celllife.idart.database.hibernate.ChemicalCompound;
 import org.celllife.idart.database.hibernate.ChemicalDrugStrength;
 import org.celllife.idart.database.hibernate.Drug;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
 public class LinkDrugsToAtcCodes_3_8_9 implements CustomSqlChange, CustomSqlRollback {
@@ -45,57 +47,35 @@ public class LinkDrugsToAtcCodes_3_8_9 implements CustomSqlChange, CustomSqlRoll
 	@Override
 	public liquibase.statement.SqlStatement[] generateStatements(Database arg0)
 			throws CustomChangeException {
-
-		Session session = HibernateUtil.getNewSession();
+		Session sess = HibernateUtil.getNewSession();
 		
 		List<SqlStatement> statements = new ArrayList<SqlStatement>();
-
-        String drugsSql =
-                "SELECT d.id, " +
-                        "cds.chemicalcompound " +
-                        "FROM drug d " +
-                        "JOIN chemicaldrugstrength cds " +
-                        "ON d.id = cds.drug";
-
-        String atcCodesSql =
-                "SELECT atc.id, atccc.chemicalcompound_id " +
-                        "FROM atccode atc " +
-                        "JOIN atccode_chemicalcompound atccc " +
-                        "ON atc.id = atccc.atccode_id";
-
-        Map<Integer, Set<Integer>> drugsMap = new HashMap<Integer, Set<Integer>>();
-
-        SQLQuery drugsQuery = session.createSQLQuery(drugsSql);
-        List<Object[]> drugs = drugsQuery.list();
-        for (Object[] drug : drugs) {
-            if (drugsMap.get(drug[0]) == null) {
-                drugsMap.put((Integer) drug[0], new HashSet<Integer>());
-            }
-            drugsMap.get(drug[0]).add((Integer) drug[1]);
-        }
-
-        Map<Integer, Set<Integer>> atcCodesMap = new HashMap<Integer, Set<Integer>>();
-        SQLQuery atcCodesQuery = session.createSQLQuery(atcCodesSql);
-        List<Object[]> atcCodes = atcCodesQuery.list();
-        for (Object[] atcCode : atcCodes) {
-            if (atcCodesMap.get(atcCode[0]) == null) {
-                atcCodesMap.put((Integer) atcCode[0], new HashSet<Integer>());
-            }
-            atcCodesMap.get(atcCode[0]).add((Integer) atcCode[1]);
-        }
-
-        for (Integer drugId : drugsMap.keySet()) {
-            Set<Integer> thisChemicalCompoundIds = drugsMap.get(drugId);
-            for (Integer atcCodeId : atcCodesMap.keySet()) {
-                Set<Integer> thatChemicalCompoundIds = atcCodesMap.get(atcCodeId);
-                if (thisChemicalCompoundIds.equals(thatChemicalCompoundIds)) {
-                    statements.add(new UpdateStatement(null, "drug")
-                            .addNewColumnValue("atccode_id", atcCodeId)
-                            .setWhereClause("id = " + drugId));
-                }
-            }
-        }
-
+		
+		@SuppressWarnings("unchecked")
+		List<Drug> drugs = sess.createQuery("from Drug").list();
+		for (Drug drug : drugs) {
+			if (drug.getAtccode() != null){
+				continue;
+			}
+			Set<ChemicalCompound> ccs = new HashSet<ChemicalCompound>();
+			Set<ChemicalDrugStrength> cds = drug.getChemicalDrugStrengths();
+			for (ChemicalDrugStrength cd : cds) {
+				ccs.add(cd.getChemicalCompound());
+			}
+			
+			Set<AtcCode> atccodes = drug.getAtccodes();
+			if (atccodes == null){
+				continue;
+			}
+			for (AtcCode atcCode : atccodes) {
+				if (atcCode.containsExactChemicalCompounds(ccs)){
+					statements.add(new UpdateStatement(null, "drug")
+							.addNewColumnValue("atccode_id", atcCode.getId())
+							.setWhereClause("id = " + drug.getId()));
+					break;
+				}
+			}
+		}
 		return statements.toArray(new SqlStatement[statements.size()]);
 	}
 

@@ -29,7 +29,7 @@ public class PatientIdentifier {
 	@OneToOne
 	@JoinColumn(name = "type_id")
 	private IdentifierType type;
-
+	
 	@Transient
 	private String valueEdit;
 
@@ -106,8 +106,8 @@ public class PatientIdentifier {
 	public void setType(IdentifierType type) {
 		this.type = type;
 	}
-
-    public String getValueEdit() {
+	
+	public String getValueEdit() {
 		return valueEdit;
 	}
 	

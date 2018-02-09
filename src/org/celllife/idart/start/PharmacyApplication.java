@@ -48,10 +48,12 @@ import org.celllife.idart.gui.welcome.ReportWorkerWelcome;
 import org.celllife.idart.gui.welcome.StudyWorkerWelcome;
 import org.celllife.idart.integration.eKapa.EkapaSubmitJob;
 import org.celllife.idart.integration.eKapa.JobScheduler;
-import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.task.TaskManager;
+import org.celllife.idart.sms.AppointmentReminderSchedulerJob;
+import org.celllife.idart.sms.MissedAppointmentReminderSchedulerJob;
 import org.celllife.idart.sms.SmsRetrySchedulerJob;
 import org.celllife.idart.sms.SmsSchedulerJob;
+import org.celllife.idart.utils.MessageUtil;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -219,7 +221,18 @@ public class PharmacyApplication {
 	}
 
 	private static void startSmsJobs(JobScheduler scheduler) {
-		if (iDartProperties.isCidaStudy) {
+		if (iDartProperties.appointmentReminders) {
+			String arsGroupName = "ars";
+			if (!scheduler.hasJob(arsGroupName, AppointmentReminderSchedulerJob.JOB_NAME)) {
+				// schedule once off missed appointment reminder job
+				scheduler.scheduleOnceOff(MissedAppointmentReminderSchedulerJob.JOB_NAME, arsGroupName, MissedAppointmentReminderSchedulerJob.class);
+				int mins = PropertiesManager.sms().appointmentReminderTaskMinutes();
+				// schedule with a delay to let the missed appointment reminder messages to go out first
+				scheduler.scheduleWithDelay(AppointmentReminderSchedulerJob.JOB_NAME, arsGroupName, AppointmentReminderSchedulerJob.class, mins, 10);
+			} else {
+				log.info("Already scheduled "+ AppointmentReminderSchedulerJob.JOB_NAME + " and " + MissedAppointmentReminderSchedulerJob.JOB_NAME);
+			}
+		} else if (iDartProperties.isCidaStudy) {
 			String cidaGroupName = "cida";
 			if (!scheduler.hasJob(cidaGroupName, SmsSchedulerJob.JOB_NAME)) {
 				scheduler.scheduleOnceOff(SmsSchedulerJob.JOB_NAME, cidaGroupName, SmsSchedulerJob.class);

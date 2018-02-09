@@ -46,8 +46,6 @@ public class Doctor {
 
 	private boolean active;
 
-    private String identifier;
-
 	public Doctor() {
 		super();
 
@@ -211,11 +209,4 @@ public class Doctor {
 		this.active = active;
 	}
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
 }

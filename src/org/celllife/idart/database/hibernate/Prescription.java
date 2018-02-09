@@ -452,16 +452,5 @@ public class Prescription {
 		this.drugTypes = drugTypes;
 	}
 
-    public PrescribedDrugs getPrescribedDrugs(Drug drug) {
-
-        for (PrescribedDrugs prescribedDrugs : this.prescribedDrugs) {
-
-            if (prescribedDrugs.getDrug().getId() == drug.getId()) {
-                return prescribedDrugs;
-            }
-
-        }
-
-        return null;
-    }
+	
 }

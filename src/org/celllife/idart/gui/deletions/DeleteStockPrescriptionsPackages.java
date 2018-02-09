@@ -19,35 +19,12 @@
 
 package org.celllife.idart.gui.deletions;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import model.manager.DeletionsManager;
-import model.manager.DrugManager;
-import model.manager.PackageManager;
-import model.manager.PatientManager;
-import model.manager.StockManager;
-
+import model.manager.*;
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.CommonObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.commonobjects.iDartProperties.LabelType;
-import org.celllife.idart.database.hibernate.AccumulatedDrugs;
-import org.celllife.idart.database.hibernate.Appointment;
-import org.celllife.idart.database.hibernate.Drug;
-import org.celllife.idart.database.hibernate.Form;
-import org.celllife.idart.database.hibernate.PackagedDrugs;
-import org.celllife.idart.database.hibernate.Packages;
-import org.celllife.idart.database.hibernate.Patient;
-import org.celllife.idart.database.hibernate.PatientAttribute;
-import org.celllife.idart.database.hibernate.PatientIdentifier;
-import org.celllife.idart.database.hibernate.PrescribedDrugs;
-import org.celllife.idart.database.hibernate.Prescription;
-import org.celllife.idart.database.hibernate.Stock;
-import org.celllife.idart.database.hibernate.StockCenter;
+import org.celllife.idart.database.hibernate.*;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.gui.platform.GenericOthersGui;
 import org.celllife.idart.gui.search.PatientSearch;
@@ -57,32 +34,26 @@ import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartColor;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
-import org.celllife.idart.integration.idartweb.IdartWebException;
 import org.celllife.idart.messages.Messages;
-import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.idart.print.label.PrintThread;
 import org.celllife.idart.print.label.ScriptSummaryLabel;
+import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Transaction;
 
-/**
- */
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 
 	private Group grpDeletionTypeSelection;
@@ -1328,13 +1299,6 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 							+ "\n\nTo re-package this set of drugs for this patient, go back to the Patient Packaging page.");
 			mb.open();
 
-		} catch (IdartWebException e) {
-			if (tx != null) {
-				tx.rollback();
-			}
-			getLog().error("Error while communicating with iDARTweb - unable to remove dispensation: "+packageToRemove, e);
-			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
-
 		} catch (HibernateException he) {
 
 			if (tx != null) {
@@ -1415,12 +1379,6 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 				}
 				getLog().error(he);
 
-			} catch (IdartWebException e) {
-				if (tx != null) {
-					tx.rollback();
-				}
-				getLog().error("Error while communicating with iDARTweb - unable to redo single item in package: "+selectedDrug, e);
-				MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 			}
 		} else {
 			MessageBox mb = new MessageBox(getShell());
@@ -1446,13 +1404,6 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 			mb
 			.setMessage("This prescription was successfully removed from the database.");
 			mb.open();
-			
-		} catch (IdartWebException e) {
-			if (tx != null) {
-				tx.rollback();
-			}
-			getLog().error("Error while communicating with iDARTweb - unable to remove prescription: "+prescriptionToRemove, e);
-			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 
 		} catch (HibernateException he) {
 

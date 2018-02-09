@@ -11,6 +11,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name="alerts")
 public class Alerts {
+	
+	public static final String ALERT_TYPE_ARS_SUBSCRIPTION = "Update Appointment Reminder subscription";
+	public static final String ALERT_TYPE_ARS_REMINDER = "Schedule Appointment Reminder message";
+	public static final String ALERT_TYPE_ARS_MISSED = "Schedule Appointment Reminder missed appointment message";
+	public static final String ALERT_TYPE_ARS_UPDATE = "Update Appointment";
+	public static final String ALERT_TYPE_ARS_DELETE = "Delete Appointment";
 
 	@Id
 	@GeneratedValue
@@ -28,6 +34,9 @@ public class Alerts {
 	
 	@Column(name="void", nullable=false)
 	private Boolean Void = false;
+	
+	@Column(name="retries")
+	private Integer retries = new Integer(0);
 	
 	public Alerts() {
 	}
@@ -97,18 +106,46 @@ public class Alerts {
 	}
 
 
+	/**
+	 * Indicates that the alert is not longer valid (it has been deleted)
+	 * @param _void
+	 */
 	public void setVoid(Boolean _void) {
 		Void = _void;
 	}
 
 
+	/**
+	 * See if the alert is currently an issue that needs to be attended to
+	 * @return
+	 */
 	public Boolean getVoid() {
 		return Void;
 	}
-	
-	
-	
-	
-	
 
+
+	/**
+	 * Determine how many retries have occurred as part of this alert
+	 * @return
+	 */
+	public Integer getRetries() {
+		return retries;
+	}
+
+
+	/**
+	 * Set the number of retries associated with the alert. This is used in order to avoid creating an
+	 * excessive number of alerts
+	 * @param retries
+	 */
+	public void setRetries(Integer retries) {
+		this.retries = retries;
+	}
+
+	/**
+	 * Adds one to the current retries number
+	 */
+	public void incrementRetries() {
+		this.retries++;
+	}
 }

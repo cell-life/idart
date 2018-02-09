@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.LocalObjects;
-import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AccumulatedDrugs;
 import org.celllife.idart.database.hibernate.Appointment;
 import org.celllife.idart.database.hibernate.Episode;
@@ -29,9 +28,6 @@ import org.celllife.idart.database.hibernate.tmp.DeletedItem;
 import org.celllife.idart.database.hibernate.tmp.PackageDrugInfo;
 import org.celllife.idart.database.hibernate.util.HibernateUtil;
 import org.celllife.idart.facade.PillCountFacade;
-import org.celllife.idart.integration.idartweb.IdartWebException;
-import org.celllife.idart.integration.idartweb.dispensation.IdartWebDispensationServiceFactory;
-import org.celllife.idart.integration.idartweb.prescription.IdartWebPrescriptionServiceFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
@@ -82,7 +78,7 @@ public class DeletionsManager {
 	 * @throws HibernateException
 	 */
 	public static void removePackage(Session session,
-			Packages packageToRemove) throws HibernateException, IdartWebException {
+			Packages packageToRemove) throws HibernateException {
 
 		int prescriptionId = packageToRemove.getPrescription().getId();
 		List<DeletedItem> delList = new ArrayList<DeletedItem>();
@@ -130,6 +126,9 @@ public class DeletionsManager {
 					appToUpdate.setVisitDate(null);
 				}
 				session.save(pat);
+				
+				// make a note of this deleted appointment so it can be sent to ARS later
+				AppointmentReminderManager.savedDeletedAppointment(session, appToDelete);
 			}
 		}
 
@@ -181,12 +180,8 @@ public class DeletionsManager {
 			}
 			StockManager.updateStockLevel(session, theStock);
 		}
-		
-		if (iDartProperties.idartWebEnabled) {
-			IdartWebDispensationServiceFactory.getInstance().deleteDispensation(packageToRemove);
-        }
 
-		// create a log entry
+		// create a log entry for deleted package
 		Logging logging = new Logging();
 		logging.setIDart_User(LocalObjects.getUser(session));
 		logging.setItemId(String.valueOf(packageToRemove.getId()));
@@ -236,12 +231,11 @@ public class DeletionsManager {
 	 * @param pdToRemove
 	 *            PackagedDrugs
 	 * @throws HibernateException
-	 * @throws IdartWebException 
 	 */
 	@SuppressWarnings( { "cast", "unchecked" })
 	public static void removePackagedDrug(Session session,
 			PackagedDrugs pdToRemove, Packages fromPackage)
-			throws HibernateException, IdartWebException {
+			throws HibernateException {
 
 		List<DeletedItem> delList = new ArrayList<DeletedItem>();
 		delList.add(new DeletedItem(pdToRemove.getId(), DeletedItem.ITEM_PACKAGE_DRUG));
@@ -303,10 +297,7 @@ public class DeletionsManager {
 
 		// store the DeletedItem to be deleted from eKapa later
 		TemporaryRecordsManager.saveDeletedItemsToDB(session, delList);
-		
-		if (iDartProperties.idartWebEnabled) {
-			IdartWebDispensationServiceFactory.getInstance().saveDispensation(fromPackage);
-        }
+
 	}
 
 	/**
@@ -377,7 +368,7 @@ public class DeletionsManager {
 	 * @throws HibernateException
 	 */
 	public static void removeUndispensedPrescription(Session session,
-			Prescription thePrescription) throws HibernateException, IdartWebException {
+			Prescription thePrescription) throws HibernateException {
 
 		// first need to delete the prescription from the patient's
 		// Set<Prescriptions>
@@ -389,10 +380,6 @@ public class DeletionsManager {
 		// relevant PrescribedDrug deletes
 		session.delete(thePrescription);
 		session.flush();
-		
-		if (iDartProperties.idartWebEnabled) {
-			IdartWebPrescriptionServiceFactory.getInstance().deletePrescription(thePrescription);
-        }
 
 		// log the transaction
 		Logging logging = new Logging();

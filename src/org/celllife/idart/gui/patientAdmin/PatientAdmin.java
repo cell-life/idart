@@ -157,9 +157,6 @@ public class PatientAdmin extends GenericAdminGui {
 				cmdAddPatientWidgetSelected();
 			}
 		});
-		if (iDartProperties.prehmisIntegration) {
-			btnPatientAdd.setEnabled(false);
-		}
 
 		// lblPicPatientUpdate
 		lblPicPatientUpdate = new Label(compOptionsInner, SWT.NONE);
@@ -279,9 +276,6 @@ public class PatientAdmin extends GenericAdminGui {
 				cmdMergePatientsWidgetSelected();
 			}
 		});
-		if (iDartProperties.prehmisIntegration) {
-			btnMergePatients.setEnabled(false);
-		}
 
 		// lblPicPatientVisitsandStats
 		lblPicPatientVisitsandStats = new Label(compOptionsInner, SWT.NONE);

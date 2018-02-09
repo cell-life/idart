@@ -4,10 +4,6 @@
         <name>isEkapaVersion</name>
         <value>true</value>
     </condition>
-    <panelcondition panelid="path.panel2" conditionid="showEkapaPanel"/>
-    <condition type="variable" id="showIdartWebPanel">
-        <name>idartWebEnabled</name>
-        <value>true</value>
-    </condition>
-    <panelcondition panelid="path.panel6" conditionid="showIdartWebPanel"/>
+    <panelcondition panelid="path.panel2"  
+    conditionid="showEkapaPanel"/>
 </conditions>

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.celllife.idart.commonobjects.CommonObjects;
-import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.Patient;
 import org.celllife.idart.gui.misc.GenericTab;
 import org.celllife.idart.gui.utils.ResourceUtils;
@@ -210,15 +209,6 @@ public class AddressTab extends GenericTab implements IPatientTab {
 		txtPhoneWork.setEnabled(enable);
 
 		cmbProvince.setBackground(color);
-		
-		if (iDartProperties.prehmisIntegration) {
-			txtAddress1.setEnabled(false);
-			txtAddress2.setEnabled(false);
-			txtAddress3.setEnabled(false);
-			cmbProvince.setEnabled(false);
-			txtPhoneHome.setEnabled(false);
-			txtPhoneWork.setEnabled(false);
-		}
 	}
 
 	/*

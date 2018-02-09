@@ -1,13 +1,9 @@
 package org.celllife.idart.gui.widget;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.celllife.function.DateRule;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -17,6 +13,10 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.vafada.swtcalendar.SWTCalendarDialog;
 import org.vafada.swtcalendar.SWTCalendarEvent;
 import org.vafada.swtcalendar.SWTCalendarListener;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * DateButton is an extension of {@link Button} that displays a date as the text
@@ -60,7 +60,7 @@ public class DateButton extends Button {
 		listeners = new HashSet<DateChangedListener>();
 		this.setText(DATE);
 		this.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-		final DateButton thisButton = this;
+		DateButton thisButton = this;
 
 		this.addSelectionListener(new SelectionAdapter() {
 
@@ -81,9 +81,8 @@ public class DateButton extends Button {
 						if (calendarEvent.type == SWTCalendarEvent.DAY) {
 							cal.close();
 							try {
-								Date selectedDate = calendarEvent.getCalendar()
-								.getTime();
-								thisButton.setDate(selectedDate);
+								Date selectedDate = calendarEvent.getCalendar().getTime();
+								setDate(selectedDate);
 							} catch (RuntimeException e) {
 								displayFailureMessage();
 							}
@@ -187,7 +186,7 @@ public class DateButton extends Button {
 	 * whenever the date changes.
 	 * </p>
 	 * 
-	 * @param newDate
+	 * @param selectedDate
 	 *            the date to be validated
 	 * @return true if the date is valid
 	 */

@@ -49,6 +49,7 @@ import org.celllife.idart.commonobjects.LocalObjects;
 import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AccumulatedDrugs;
 import org.celllife.idart.database.hibernate.Appointment;
+import org.celllife.idart.database.hibernate.AppointmentReminder;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Drug;
 import org.celllife.idart.database.hibernate.Episode;
@@ -72,6 +73,7 @@ import org.celllife.idart.gui.composite.PillCountTable;
 import org.celllife.idart.gui.deletions.DeleteStockPrescriptionsPackages;
 import org.celllife.idart.gui.label.PrintEmergencyLabel;
 import org.celllife.idart.gui.misc.iDARTChangeListener;
+import org.celllife.idart.gui.patient.AppointmentReminderDialog;
 import org.celllife.idart.gui.platform.GenericFormGui;
 import org.celllife.idart.gui.prescription.AddPrescription;
 import org.celllife.idart.gui.reportParameters.PatientHistory;
@@ -83,14 +85,12 @@ import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.gui.widget.DateButton;
 import org.celllife.idart.gui.widget.DateInputValidator;
-import org.celllife.idart.integration.idartweb.IdartWebException;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.DateFieldComparator;
-import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.idart.print.label.PackageCoverLabel;
 import org.celllife.idart.print.label.ScriptSummaryLabel;
+import org.celllife.idart.utils.iDARTUtil;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -137,8 +137,6 @@ import org.hibernate.Transaction;
 
 import com.adamtaft.eb.EventBusService;
 
-/**
- */
 public class NewPatientPackaging extends GenericFormGui implements
 		iDARTChangeListener {
 
@@ -180,6 +178,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 	private Label lblDateOfLastPickupContents;
 	private DateButton btnCaptureDate;
 	private DateButton btnNextAppDate;
+	private Button btnAppointmentReminder;
 	private PillCountTable pillCountTable;
 	private PillCountFacade pillFacade; // facade classes
 	private StockCenter localPharmacy; // local persistent objects
@@ -230,7 +229,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 	 * the user changes the dispense date
 	 * 
 	 * @param theDispDate
-	 * @param theNextAppDate
 	 */
 	private void adjustForNewDispDate(Date theDispDate) {
 		if (previousPack != null && theDispDate != null) {
@@ -493,7 +491,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 				String msg = "Patient \"{0}\" collected their last package on {1,date,medium}. "
 						+ "\n\nThe Date Packed for the new package you are trying to create must be after this date.";
 				showMessage(MessageDialog.ERROR, "Date Packed Error",
-						MessageFormat.format(msg, txtPatientId.getText(),
+						MessageFormat.format(msg, localPatient.getPatientId(),
 								pickupDate));
 
 				btnCaptureDate.setDate(today);
@@ -507,40 +505,27 @@ public class NewPatientPackaging extends GenericFormGui implements
 		}
 
 		if (fieldsEnabled) {
-			Clinic clinic = localPatient.getClinicAtDate(chosenDate);
-			if (clinic == null) {
+			String clinicName = localPatient.getClinicAtDate(chosenDate)
+					.getClinicName();
+			// Check if clinic has changed. If so, show message
+			if (!lblClinic.getText().equalsIgnoreCase(clinicName)) {
 				MessageBox m = new MessageBox(getShell(), SWT.OK
 						| SWT.ICON_INFORMATION);
-				m.setText("No Record of Patient on Date Packed");
-				m.setMessage("On "
+				m.setText("Patient's Clinic Has Changed");
+				m.setMessage("Note that on "
 						+ sdf.format(btnCaptureDate.getDate()) + ", patient '"
-						+ txtPatientId.getText()
-						+ "' was not registered at a clinic.");
+						+ localPatient.getPatientId()
+						+ "' was collecting their drugs at " + clinicName
+						+ ".\n\n Any packages you create for this patient "
+						+ "on this day will be destined for this clinic, "
+						+ "not the patient's current clinic.");
 				m.open();
-				btnCaptureDate.setDate(today);
-				chosenDate = today;
-			} else {
-				String clinicName = clinic.getClinicName();
-				// Check if clinic has changed. If so, show message
-				if (!lblClinic.getText().equalsIgnoreCase(clinicName)) {
-					MessageBox m = new MessageBox(getShell(), SWT.OK
-							| SWT.ICON_INFORMATION);
-					m.setText("Patient's Clinic Has Changed");
-					m.setMessage("Note that on "
-							+ sdf.format(btnCaptureDate.getDate()) + ", patient '"
-							+ txtPatientId.getText()
-							+ "' was collecting their drugs at " + clinicName
-							+ ".\n\n Any packages you create for this patient "
-							+ "on this day will be destined for this clinic, "
-							+ "not the patient's current clinic.");
-					m.open();
-				}
-	
-				lblClinic.setText(clinicName);
-				setDateExpectedFields();
-				populatePrescriptionDetails();
-				updateDateOfLastPickup();
 			}
+
+			lblClinic.setText(clinicName);
+			setDateExpectedFields();
+			populatePrescriptionDetails();
+			updateDateOfLastPickup();
 		}
 		if (newPack != null) {
 			newPack.setPackDate(chosenDate);
@@ -747,6 +732,15 @@ public class NewPatientPackaging extends GenericFormGui implements
 			PatientHistory patHistory = new PatientHistory(getShell(), true);
 			patHistory.openShell();
 		}
+	}
+	
+	private void cmdAppointmentReminderWidgetSelected() {
+		if (localPatient.getAppointmentReminder() == null) {
+			localPatient.setAppointmentReminder(new AppointmentReminder());
+			localPatient.getAppointmentReminder().setPatient(localPatient);
+		}
+		AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder());
+		ard.openAndWait();
 	}
 
 	private void cmdPrintEmergencyLabelSelected() {
@@ -1383,9 +1377,14 @@ public class NewPatientPackaging extends GenericFormGui implements
 		lblPatientId.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtPatientId = new Text(grpPatientInfo, SWT.BORDER);
-		txtPatientId.setBounds(new Rectangle(135, 30, 160, 20));
+		txtPatientId.setBounds(new Rectangle(126, 30, 150, 20));
 		txtPatientId.setEnabled(false);
 		txtPatientId.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
+		
+		lblPicChild = new Label(grpPatientInfo, SWT.NONE);
+		lblPicChild.setBounds(new Rectangle(294, 30, 30, 26));
+		lblPicChild.setImage(ResourceUtils.getImage(iDartImage.CHILD_30X26));
+		lblPicChild.setVisible(false);
 
 		Label lblPatientName = new Label(grpPatientInfo, SWT.NONE);
 		lblPatientName.setBounds(new org.eclipse.swt.graphics.Rectangle(10, 55,
@@ -1394,7 +1393,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 		lblPatientName.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtPatientName = new Text(grpPatientInfo, SWT.BORDER);
-		txtPatientName.setBounds(new Rectangle(135, 55, 160, 20));
+		txtPatientName.setBounds(new Rectangle(125, 55, 150, 20));
 		txtPatientName.setEnabled(false);
 		txtPatientName.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
@@ -1405,31 +1404,39 @@ public class NewPatientPackaging extends GenericFormGui implements
 		lblPatientAge.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtPatientAge = new Text(grpPatientInfo, SWT.BORDER);
-		txtPatientAge.setBounds(new Rectangle(135, 80, 40, 20));
+		txtPatientAge.setBounds(new Rectangle(125, 80, 40, 20));
 		txtPatientAge.setEnabled(false);
 		txtPatientAge.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtPatientDOB = new Text(grpPatientInfo, SWT.BORDER);
 		txtPatientDOB.setBounds(new org.eclipse.swt.graphics.Rectangle(180, 80,
-				114, 20));
+				95, 20));
 		txtPatientDOB.setEnabled(false);
 		txtPatientDOB.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
-		lblPicChild = new Label(grpPatientInfo, SWT.NONE);
-		lblPicChild.setBounds(new Rectangle(300, 75, 30, 26));
-		lblPicChild.setImage(ResourceUtils.getImage(iDartImage.CHILD_30X26));
-		lblPicChild.setVisible(false);
+		btnAppointmentReminder = new Button(grpPatientInfo, SWT.NONE);
+		btnAppointmentReminder.setBounds(new Rectangle(294, 80, 40, 40));
+		btnAppointmentReminder.setToolTipText(Messages.getString("appointmentreminders.title"));
+		btnAppointmentReminder.setImage(ResourceUtils.getImage(iDartImage.APPOINTMENTREMINDERS_30X26));
+
+		btnAppointmentReminder.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent mu) {
+				cmdAppointmentReminderWidgetSelected();
+			}
+		});
+		btnAppointmentReminder.setEnabled(iDartProperties.appointmentReminders);
 
 		// next appointment date
 		lblNextAppointment = new Label(grpPatientInfo, SWT.NONE);
-		lblNextAppointment.setBounds(new Rectangle(10, 107, 120, 20));
+		lblNextAppointment.setBounds(new Rectangle(10, 105, 110, 20));
 		lblNextAppointment
 				.setText(iDartProperties.dispenseDirectlyDefault == true ? "Next Appointment:"
 						: "Current Appointment:");
 		lblNextAppointment.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 
 		txtNextAppDate = new Text(grpPatientInfo, SWT.BORDER);
-		txtNextAppDate.setBounds(new Rectangle(135, 105, 160, 20));
+		txtNextAppDate.setBounds(new Rectangle(125, 105, 150, 20));
 		txtNextAppDate.setEnabled(false);
 		txtNextAppDate.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		txtNextAppDate.setVisible(false);
@@ -1437,7 +1444,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 		btnNextAppDate = new DateButton(grpPatientInfo,
 				DateButton.ZERO_TIMESTAMP, null);
 		btnNextAppDate.snapToControl(false);
-		btnNextAppDate.setBounds(new Rectangle(135, 105, 160, 25));
+		btnNextAppDate.setBounds(new Rectangle(125, 105, 150, 25));
 		btnNextAppDate.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
 		btnNextAppDate.setVisible(false);
 	}
@@ -1704,8 +1711,8 @@ public class NewPatientPackaging extends GenericFormGui implements
 							+ sdf.format(newPack.getPrescription().getDate())
 							+ " ");
 			return false;
-		} 
-		
+		}
+
 		if (btnNextAppDate.getDate() != null
 				&& btnNextAppDate.getDate().before(btnCaptureDate.getDate())
 				&& !(sdf.format(btnCaptureDate.getDate()).equals(sdf
@@ -1714,7 +1721,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 					"Next Appointment Date is before Date Packed",
 					"The next appointment date cannot be before the date packed for this package.");
 			return false;
-		} 
+		}
 
 		if (PackageManager
 				.patientHasUncollectedPackages(
@@ -1931,9 +1938,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 
 	/**
 	 * Method getPossibleInHandOnExitValues.
-	 * 
-	 * @param ti
-	 *            TableItem
 	 * @return java.util.List<String>
 	 */
 	private void savePillCounts() {
@@ -2043,8 +2047,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 	/**
 	 * Checks to see the paitent belonging to the prescription has a package
 	 * that has not yet been collected.
-	 * 
-	 * @param prescription
+	 *
 	 * @return true if patient has package awaiting collection
 	 */
 	private boolean patientHasPackageAwaitingPickup() {
@@ -2068,22 +2071,12 @@ public class NewPatientPackaging extends GenericFormGui implements
 	private void populatePatientDetails(int patientID) {
 		localPatient = PatientManager.getPatient(getHSession(), patientID);
 		previousPack = null;
-		if (iDartProperties.prehmisIntegration) {
-			// display PREHMIS patient id
-			String id = PatientManager.getPrehmisPatientId(localPatient);
-			searchBar.setText(id);
-			searchBar.setSelection(0, id.length());
-			lstWaitingPatients.setSelection(new StructuredSelection(
-					new PatientIdAndName(localPatient.getId(), id, localPatient.getFirstNames() + ","
-							+ localPatient.getLastname())));
-		} else {
-			searchBar.setText(localPatient.getPatientId());
-			searchBar.setSelection(0, localPatient.getPatientId().length());
-			lstWaitingPatients.setSelection(new StructuredSelection(
-					new PatientIdAndName(localPatient.getId(), localPatient
-							.getPatientId(), localPatient.getFirstNames() + ","
-							+ localPatient.getLastname())));
-		}
+		searchBar.setText(localPatient.getPatientId());
+		searchBar.setSelection(0, localPatient.getPatientId().length());
+		lstWaitingPatients.setSelection(new StructuredSelection(
+				new PatientIdAndName(localPatient.getId(), localPatient
+						.getPatientId(), localPatient.getFirstNames() + ","
+						+ localPatient.getLastname())));
 		if (!localPatient.getAccountStatusWithCheck()
 				|| localPatient.getCurrentPrescription() == null) {
 			showMessage(MessageDialog.ERROR,
@@ -2097,13 +2090,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 		Clinic clinic = localPatient.getCurrentClinic();
 		setDispenseTypeFromClinic();
 		lblClinic.setText(clinic.getClinicName());
-
-		if (iDartProperties.prehmisIntegration) {
-			// display PREHMIS patient id
-			txtPatientId.setText(PatientManager.getPrehmisPatientId(localPatient));
-		} else {
-			txtPatientId.setText(localPatient.getPatientId());
-		}
+		txtPatientId.setText(localPatient.getPatientId());
 		txtPatientName.setText(localPatient.getFirstNames() + " "
 				+ localPatient.getLastname());
 		txtPatientAge.setText("" + localPatient.getAge());
@@ -2131,7 +2118,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 					| SWT.ICON_INFORMATION);
 			noScript.setText("Patient Does not Have a Vaild Prescription");
 			noScript.setMessage("Patient '".concat(
-					txtPatientId.getText()).concat(
+					localPatient.getPatientId()).concat(
 					"' does not have a vaild prescription."));
 			noScript.open();
 			initialiseSearchList();
@@ -2240,8 +2227,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 
 	/**
 	 * Populates the prescription details on the form. This includes notes.
-	 * 
-	 * @param prescription
 	 */
 	private void populatePrescriptionDetails() {
 
@@ -2381,9 +2366,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 
 	}
 
-	/**
-	 * @param prescription
-	 */
 	private void populatePresciptionTable() {
 		tblPrescriptionInfo.removeAll();
 		String tempAmtPerTime = "";
@@ -2623,7 +2605,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 						theDrug.getName(),
 						theSock.getExpiryDate(),
 						theClinic.getNotes(),
-						localPatient.getPatientId(),
+						txtPatientId.getText(),
 						localPatient.getFirstNames(),
 						localPatient.getLastname(),
 						theDrug.getDispensingInstructions1(),
@@ -2683,9 +2665,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 
 	/**
 	 * Method resetGUIforDispensingType.
-	 * 
-	 * @param isDispenseNow
-	 *            boolean
 	 */
 	private void resetGUIforDispensingType() {
 		if (!rdBtnDispenseNow.getSelection()) {
@@ -2733,7 +2712,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 	 *            java.util.List<PackageDrugInfo>
 	 */
 	private void savePackageAndPackagedDrugs(boolean dispenseNow,
-			java.util.List<PackageDrugInfo> allPackageDrugsList) throws IdartWebException {
+			java.util.List<PackageDrugInfo> allPackageDrugsList) {
 
 		// if pack date is today, store the time too, else store 12am
 		Date today = new Date();
@@ -2790,14 +2769,15 @@ public class NewPatientPackaging extends GenericFormGui implements
 			if (rdBtnDispenseNow.getSelection()) {
 				pdi.setDateExpectedString(sdf.format(btnNextAppDate.getDate()));
 			} else {
-				
+
 				Appointment nextApp = PatientManager
 				.getLatestAppointmentForPatient(newPack
 						.getPrescription().getPatient(), true);
 				
-				if(nextApp != null)
+				if(nextApp != null) {
 					pdi.setDateExpectedString(sdf.format(nextApp.getAppointmentDate()));
-			}
+			    }
+            }
 			pdi.setPackagedDrug(pd);
 			pdi.setNotes(localPatient.getCurrentClinic().getNotes());
 			pdi.setPackageId(newPack.getPackageId());
@@ -2938,8 +2918,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 	/**
 	 * 
 	 * Clears the in hand on exit column in the current package table.
-	 * 
-	 * @param pc
 	 */
 	public void clearInHandOnExit() {
 
@@ -2963,7 +2941,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 		setLog(Logger.getLogger(this.getClass()));
 	}
 
-	public void setNextAppointmentDate() {
+	private void setNextAppointmentDate() {
 		Date theNextAppDate = btnNextAppDate.getDate();
 		Date captureDate = btnCaptureDate.getDate();
 
@@ -2976,8 +2954,22 @@ public class NewPatientPackaging extends GenericFormGui implements
 		 */
 		if (rdBtnDispenseNow.getSelection()) {
 			// if the next appointment is in the future, set it to the disp date
-			PatientManager.setNextAppointmentDateAtVisit(getHSession(), pat,
-					captureDate, theNextAppDate);
+			Appointment appointment = PatientManager.setNextAppointmentDateAtVisit(getHSession(), pat, captureDate, theNextAppDate);
+			// check if the appointment date was automatically changed and see if they wish to override
+			if (!appointment.getAppointmentDate().equals(theNextAppDate)) {
+				MessageBox mbox = new MessageBox(getShell(), SWT.YES | SWT.NO | SWT.ICON_QUESTION);
+				mbox.setText(Messages.getString("appointmentdate.question.title"));
+				SimpleDateFormat sdf2 = new SimpleDateFormat("EEE d MMM yyyy");
+				mbox.setMessage(MessageFormat.format(Messages.getString("appointmentdate.question.text"), 
+						sdf2.format(theNextAppDate), 
+						sdf2.format(appointment.getAppointmentDate())));
+				switch (mbox.open()) {
+					case SWT.NO:
+						appointment.overrideAppointmentDate(theNextAppDate);
+						break;
+				}
+			}
+			PatientManager.scheduleApppointmentReminderMessages(pat, appointment);
 		}
 	}
 
@@ -3127,12 +3119,6 @@ public class NewPatientPackaging extends GenericFormGui implements
 			m.setMessage("There was a problem saving this package of drugs.");
 
 			m.open();
-		} catch (IdartWebException e) {
-			getLog().error("Error while communicating with iDARTweb - couldn't save this package of drugs: "+allPackagedDrugsList, e);
-			if (tx != null) {
-				tx.rollback();
-			}
-			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 		}
 
 		setScreenToInitialState();

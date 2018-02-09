@@ -276,6 +276,10 @@ public class StockArrives extends GenericFormGui implements iDARTChangeListener{
 					Stock newStock = (Stock) ti.getData();
 					getHSession().save(newStock);
 					StockManager.updateStockLevel(getHSession(), newStock);
+					if (newStock.getManufacturer() != null && !newStock.getManufacturer().trim().isEmpty()) {
+						// check and add manufacturer if it doesn't already exist in the stockmanufacturer table
+						StockManager.addManufacturer(getHSession(), newStock.getManufacturer());
+					}
 				}
 			}
 

@@ -1,35 +1,23 @@
 package model.manager.exports;
 
-import static org.junit.Assert.assertTrue;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import model.manager.DrugManager;
-import model.manager.PackageManager;
 import model.manager.PatientManager;
 import model.manager.exports.columns.PackageDetailsEnum;
 import model.nonPersistent.ExportDrugInfo;
 import model.nonPersistent.ExportPackageInfo;
-
-import org.celllife.idart.database.hibernate.AccumulatedDrugs;
-import org.celllife.idart.database.hibernate.Drug;
-import org.celllife.idart.database.hibernate.Episode;
-import org.celllife.idart.database.hibernate.Packages;
-import org.celllife.idart.database.hibernate.Patient;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.database.hibernate.*;
 import org.celllife.idart.test.HibernateTest;
+import org.celllife.idart.utils.iDARTUtil;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.junit.Assert.assertTrue;
 
 public class DataExportFunctionsTest extends HibernateTest {
 

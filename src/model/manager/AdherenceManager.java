@@ -34,12 +34,10 @@ import org.celllife.idart.database.hibernate.Packages;
 import org.celllife.idart.database.hibernate.PillCount;
 import org.celllife.idart.database.hibernate.PrescribedDrugs;
 import org.celllife.idart.database.hibernate.tmp.AdherenceRecord;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
-/**
- */
 public class AdherenceManager {
 
 	private static Log log = LogFactory.getLog(AdherenceManager.class);

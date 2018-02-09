@@ -47,10 +47,10 @@ import org.celllife.idart.integration.mobilisr.MobilisrManager;
 import org.celllife.idart.messages.Messages;
 import org.celllife.idart.misc.DateFieldComparator;
 import org.celllife.idart.misc.PatientBarcodeParser;
-import org.celllife.idart.misc.iDARTUtil;
 import org.celllife.idart.print.barcode.Barcode;
 import org.celllife.idart.print.label.PatientInfoLabel;
 import org.celllife.idart.print.label.PrintLabel;
+import org.celllife.idart.utils.iDARTUtil;
 import org.celllife.mobilisr.api.validation.MsisdnValidator;
 import org.celllife.mobilisr.api.validation.MsisdnValidator.ValidationError;
 import org.celllife.mobilisr.client.exception.RestCommandException;
@@ -64,7 +64,6 @@ import org.eclipse.swt.widgets.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.jfree.util.Log;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -183,6 +182,8 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 	private Button btnDownRefer;
 
 	private Text txtCellphone;
+	
+	private Button btnAppointmentReminder;
 
 	private DateButton btnARVStart;
 
@@ -506,7 +507,8 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				e.doit = false;
-				Character keyPressed = new Character(Character.toLowerCase(e.character));
+				Character keyPressed = new Character(Character
+						.toLowerCase(e.character));
 				getLog().debug("The char pressed in cmbSex: " + keyPressed); //$NON-NLS-1$
 				if (Character.isLetter(keyPressed)) {
 					if (keyPressed.equals('f')) {
@@ -598,6 +600,19 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 				cmdPatientHistoryWidgetSelected();
 			}
 		});
+
+		btnAppointmentReminder = new Button(grpParticulars, SWT.NONE);
+		btnAppointmentReminder.setBounds(new Rectangle(255, 207, 40, 40));
+		btnAppointmentReminder.setToolTipText(Messages.getString("appointmentreminders.title"));
+		btnAppointmentReminder.setImage(ResourceUtils.getImage(iDartImage.APPOINTMENTREMINDERS_30X26));
+
+		btnAppointmentReminder.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent mu) {
+				cmdAppointmentReminderWidgetSelected();
+			}
+		});
+		btnAppointmentReminder.setEnabled(iDartProperties.appointmentReminders);
 	}
 
 	private void updateClinicInfoTab() {
@@ -778,7 +793,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 						MessageBox mbox = new MessageBox(getShell(), SWT.ICON_WARNING | SWT.YES | SWT.NO);
 						mbox.setText(Messages.getString("patient.error.episode.close.uncollected.package.title")); //$NON-NLS-1$
 						mbox.setMessage(MessageFormat.format(Messages.getString("patient.error.episode.close.uncollected.package"), //$NON-NLS-1$
-								txtPatientId.getText(), iDARTUtil.format(uncollectedPackage.getPackDate())));
+								localPatient.getPatientId(), iDARTUtil.format(uncollectedPackage.getPackDate())));
 						// reset episode fields
 						if (mbox.open() == SWT.NO) {
 							btnEpisodeStopDate.clearDate();
@@ -1001,7 +1016,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			if (iDARTUtil.before(episodeStopDate, currentPrescription.getDate())) {
 				title = Messages.getString("patient.error.invalidfield.title"); //$NON-NLS-1$
 				message = MessageFormat.format(Messages.getString("patient.error.episodeStopBeforePrescription"), //$NON-NLS-1$
-					txtPatientId.getText(), iDARTUtil.format(currentPrescription.getDate()));
+					localPatient.getPatientId(), iDARTUtil.format(currentPrescription.getDate()));
 				btnEpisodeStopDate.setFocus();
 				result = false;
 			}
@@ -1092,7 +1107,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			if (d != null) {
 				title = Messages.getString("patient.error.episodeStopReasonInvalid.title"); //$NON-NLS-1$
 				message = MessageFormat.format(Messages.getString("patient.error.episodeDuplicateDeceasedReason"), //$NON-NLS-1$
-						txtPatientId.getText(), iDARTUtil.format(d));
+						localPatient.getPatientId(), iDARTUtil.format(d));
 				result = false;
 			}else if (currEpisode.getStartReason().equalsIgnoreCase(Episode.REASON_NEW_PATIENT)) {
 				d = PatientManager.getLastReasonOccurrence(localPatient, Episode.REASON_NEW_PATIENT, true);
@@ -1151,7 +1166,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 		if (localPatient.getPatientId() == null || localPatient.getPatientId().isEmpty()){
 			cmdClearWidgetSelected();
 		} else {
-			Log.info("Replacing currently displayed patientId '"+txtPatientId.getText()+"' with '"+localPatient.getPatientId()+"'");
 			txtPatientId.setText(localPatient.getPatientId());
 		}
 	}
@@ -1166,7 +1180,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 	}
 
 	private void cmdSearchWidgetSelected() {
-		
 		String patientId = PatientBarcodeParser.getPatientId(txtPatientId.getText());
 		
 		if (isAddnotUpdate) {
@@ -1271,8 +1284,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 
 			MessageBox m = new MessageBox(getShell(), SWT.OK | SWT.ICON_INFORMATION);
 			m.setText(Messages.getString("patient.save.confirmation.title")); //$NON-NLS-1$
-			m.setMessage(MessageFormat.format(Messages.getString("patient.save.confirmation"),
-					txtPatientId.getText())); //$NON-NLS-1$
+			m.setMessage(MessageFormat.format(Messages.getString("patient.save.confirmation"),localPatient.getPatientId())); //$NON-NLS-1$
 			m.open();
 
 			if (isAddnotUpdate || offerToPrintLabel) {
@@ -1306,11 +1318,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 		localPatient.setFirstNames(txtFirstNames.getText());
 		localPatient.setLastname(txtSurname.getText());
 		localPatient.setModified('T');
-		String patientId = txtPatientId.getText().toUpperCase();
-		if (iDartProperties.prehmisIntegration) {
-			patientId = originalPatientId;
-		}
-		localPatient.setPatientId(patientId);
+		localPatient.setPatientId(txtPatientId.getText().toUpperCase());
 		localPatient.setCellphone(txtCellphone.getText().trim());
 
 		if (cmbSex.getText().equals(Messages.getString("patient.sex.female"))) { //$NON-NLS-1$
@@ -1469,12 +1477,7 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 
 			txtCellphone.setText(localPatient.getCellphone());
 			originalPatientId = localPatient.getPatientId();
-			String displayPatientId = originalPatientId;
-			if (iDartProperties.prehmisIntegration) {
-				// display PREHMIS patient id
-				displayPatientId = PatientManager.getPrehmisPatientId(localPatient);
-			}
-			txtPatientId.setText(displayPatientId);
+			txtPatientId.setText(originalPatientId);
 			Calendar theDOB = Calendar.getInstance();
 			theDOB.setTime(localPatient.getDateOfBirth());
 			cmbDOBDay.setText(String.valueOf(theDOB.get(Calendar.DAY_OF_MONTH)));
@@ -1693,6 +1696,9 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 		cmbDOBMonth.setEnabled(enable);
 		cmbDOBYear.setEnabled(enable);
 		txtCellphone.setEnabled(enable);
+		if (iDartProperties.appointmentReminders) {
+			btnAppointmentReminder.setEnabled(enable);
+		}
 		cmbSex.setEnabled(enable);
 		// cmbRace.setEnabled(enable);
 
@@ -1764,18 +1770,6 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			groupTabs[2].enable(true, null);
 		}
 
-		// ignore the specified requests to enable if this is a prehmis integration
-		if (iDartProperties.prehmisIntegration) {
-			txtFirstNames.setEnabled(false);
-			txtSurname.setEnabled(false);
-			cmbDOBDay.setEnabled(false);
-			cmbDOBMonth.setEnabled(false);
-			cmbDOBYear.setEnabled(false);
-			cmbSex.setEnabled(false);
-			txtAge.setEnabled(false);
-			txtCellphone.setEnabled(false);
-			txtCellphone.setEnabled(false);
-		}
 	}
 
 	private void setEpisodeFields() {
@@ -1920,11 +1914,9 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 		if (!theNewDate.equals(iDARTUtil.format(localPatient.getDateOfBirth())))
 			return true;
 
-		if (!iDartProperties.prehmisIntegration) {
-			if (!(localPatient.getPatientId().trim().toUpperCase()
-					.equals(txtPatientId.getText().trim().toUpperCase())))
-				return true;
-		}
+		if (!(localPatient.getPatientId().trim().toUpperCase()
+				.equals(txtPatientId.getText().trim().toUpperCase())))
+			return true;
 		if (!(localPatient.getFirstNames().trim().toUpperCase().equals(txtFirstNames
 						.getText().trim().toUpperCase())))
 			return true;
@@ -2083,6 +2075,22 @@ public class AddPatient extends GenericFormGui implements iDARTChangeListener {
 			PatientHistory patHistory = new PatientHistory(getShell(), true);
 			patHistory.openShell();
 		}
+	}
+	
+	private void cmdAppointmentReminderWidgetSelected() {
+		if (localPatient.getAppointmentReminder() == null) {
+			localPatient.setAppointmentReminder(new AppointmentReminder());
+			localPatient.getAppointmentReminder().setPatient(localPatient);
+		}
+		localPatient.setCellphone(txtCellphone.getText());
+		if (isAddnotUpdate) {
+			AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder(), false);
+			ard.openAndWait();
+		} else {
+			AppointmentReminderDialog ard = new AppointmentReminderDialog(getShell(), getHSession(), localPatient.getAppointmentReminder(), true);
+			ard.openAndWait();
+		}
+		txtCellphone.setText(localPatient.getCellphone());
 	}
 
 	private void createCmpTabbedInfo() {

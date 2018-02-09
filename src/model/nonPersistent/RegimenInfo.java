@@ -3,7 +3,7 @@ package model.nonPersistent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 
 public class RegimenInfo {
 

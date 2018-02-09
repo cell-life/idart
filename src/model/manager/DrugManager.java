@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.ChemicalCompound;
 import org.celllife.idart.database.hibernate.ChemicalDrugStrength;
 import org.celllife.idart.database.hibernate.Drug;
@@ -20,8 +19,6 @@ import org.celllife.idart.database.hibernate.PrescribedDrugs;
 import org.celllife.idart.database.hibernate.Prescription;
 import org.celllife.idart.database.hibernate.Regimen;
 import org.celllife.idart.database.hibernate.RegimenDrugs;
-import org.celllife.idart.integration.idartweb.doctor.IdartWebDoctorServiceFactory;
-import org.celllife.idart.integration.idartweb.medication.IdartWebMedicationServiceFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -260,7 +257,6 @@ public class DrugManager {
 	 */
 	public static void saveDrug(Session s, Drug theDrug)
 			throws HibernateException {
-
 		s.save(theDrug);
 
 	}

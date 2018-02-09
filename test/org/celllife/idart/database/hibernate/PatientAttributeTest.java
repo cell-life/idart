@@ -1,20 +1,17 @@
 package org.celllife.idart.database.hibernate;
-import static org.junit.Assert.assertEquals;
+
+import model.manager.PatientManager;
+import org.celllife.idart.test.HibernateTest;
+import org.celllife.idart.utils.iDARTUtil;
+import org.hibernate.criterion.Restrictions;
+import org.testng.annotations.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import model.manager.PatientManager;
+import static org.junit.Assert.assertEquals;
 
-import org.celllife.idart.misc.iDARTUtil;
-import org.celllife.idart.test.HibernateTest;
-import org.hibernate.criterion.Restrictions;
-import org.testng.annotations.Test;
-
-/**
- * 
- */
 public class PatientAttributeTest extends HibernateTest{
 
 	private static final String ATTRIB_TEST = "attribTest";

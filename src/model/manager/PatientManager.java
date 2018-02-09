@@ -36,8 +36,10 @@ import model.nonPersistent.PatientIdAndName;
 
 import org.apache.log4j.Logger;
 import org.celllife.idart.commonobjects.LocalObjects;
+import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.AccumulatedDrugs;
 import org.celllife.idart.database.hibernate.Appointment;
+import org.celllife.idart.database.hibernate.AppointmentReminder;
 import org.celllife.idart.database.hibernate.AttributeType;
 import org.celllife.idart.database.hibernate.Clinic;
 import org.celllife.idart.database.hibernate.Episode;
@@ -47,7 +49,6 @@ import org.celllife.idart.database.hibernate.PackagedDrugs;
 import org.celllife.idart.database.hibernate.Packages;
 import org.celllife.idart.database.hibernate.Patient;
 import org.celllife.idart.database.hibernate.PatientAttribute;
-import org.celllife.idart.database.hibernate.PatientIdentifier;
 import org.celllife.idart.database.hibernate.Pregnancy;
 import org.celllife.idart.database.hibernate.Prescription;
 import org.hibernate.HibernateException;
@@ -61,16 +62,6 @@ import org.hibernate.transform.AliasToBeanResultTransformer;
 public class PatientManager {
 
 	private static Logger log = Logger.getLogger(PatientManager.class);
-	
-	public static String getPrehmisPatientId(Patient patient) {
-		Set<PatientIdentifier> ids = patient.getPatientIdentifiers();
-		for (PatientIdentifier id: ids) {
-			if (id.getType().getSystem().equals("PGWC")) {
-				return id.getValue();
-			}
-		}
-		return patient.getPatientId();
-	}
 
 	/**
 	 * Method addAttributeTypeToDatabase.
@@ -163,21 +154,20 @@ public class PatientManager {
 	 * @param appointmentDate
 	 * @throws HibernateException
 	 */
-	public static void setNextAppointmentDate(Session session,
+	public static Appointment setNextAppointmentDate(Session session,
 			Patient thePatient, Date appointmentDate) throws HibernateException {
 		
-		Appointment lastestApp = getLatestAppointmentForPatient(thePatient, true);
-
-		if (lastestApp != null) {
+		Appointment appointment = getLatestAppointmentForPatient(thePatient, true);
+		if (appointment != null) {
 			// appointment date was changed
-			lastestApp.setAppointmentDate(appointmentDate);
-		
+			appointment.setAppointmentDate(appointmentDate);
 		}
 		else {
-			thePatient.getAppointments().add(
-					getNewAppointmentForPatient(session, thePatient, appointmentDate));
+			appointment = getNewAppointmentForPatient(session, thePatient, appointmentDate);
+			thePatient.getAppointments().add(appointment);
 		}
 		
+		return appointment;
 	}
 
 	/**
@@ -192,7 +182,7 @@ public class PatientManager {
 	 *            the date of the next appointment
 	 * @throws HibernateException
 	 */
-	public static void setNextAppointmentDateAtVisit(Session session,
+	public static Appointment setNextAppointmentDateAtVisit(Session session,
 			Patient thePatient, Date visitDate, Date theAppDate)
 			throws HibernateException {
 		
@@ -201,11 +191,21 @@ public class PatientManager {
 		if (lastestApp != null) {
 			// Patient visited clinic
 			lastestApp.setVisitDate(visitDate);
-			
 		}
 
-		thePatient.getAppointments().add(
-				getNewAppointmentForPatient(session, thePatient, theAppDate));
+		// create new appointment
+		Appointment newApp = getNewAppointmentForPatient(session, thePatient, theAppDate);
+		thePatient.getAppointments().add(newApp);
+
+		return newApp;
+	}
+	
+	public static void scheduleApppointmentReminderMessages(Patient thePatient, Appointment newApp) {
+		// schedule appointment reminder messages
+		if (iDartProperties.appointmentReminders 
+				&& thePatient.getAppointmentReminder() != null && thePatient.getAppointmentReminder().isSubscribed()) {
+			AppointmentReminderManager.createAppointmentReminderMessage(newApp);
+		}
 	}
 	
 	public static void setVisitDateOnly(Patient patient, Date visitDate) throws HibernateException {
@@ -810,7 +810,7 @@ public class PatientManager {
 		}
 		// else, this patient needs to be updated
 		else {
-			if (!thePatient.getAccountStatusWithCheck()) {
+			if (thePatient.getAccountStatusWithCheck() == false) {
 				Prescription pre = thePatient.getCurrentPrescription();
 				if (pre != null) {
 					pre.setEndDate(getMostRecentEpisode(thePatient)
@@ -821,37 +821,9 @@ public class PatientManager {
 							+ pre.getPrescriptionId());
 				}
 			}
+
 		}
 	}
-
-    public static IdentifierType findIdentifierTypeBySystem(Session session, String system) {
-
-        Query query = session.createQuery("select identifierType " +
-                "from IdentifierType identifierType " +
-                "where identifierType.system = :identifierTypeSystem");
-
-        query.setParameter("identifierTypeSystem", system);
-
-        return (IdentifierType) query.uniqueResult();
-    }
-
-    public static Patient findPatientByIdentifierValueAndType(Session session, String value, String system) {
-
-        Query query = session.createQuery("select patientIdentifier " +
-                "from PatientIdentifier patientIdentifier " +
-                "where patientIdentifier.value = :patientIdentifierValue " +
-                "and patientIdentifier.type.system = :patientIdentifierSystem");
-
-        query.setParameter("patientIdentifierValue", value);
-        query.setParameter("patientIdentifierSystem", system);
-
-        PatientIdentifier patientIdentifier = (PatientIdentifier) query.uniqueResult();
-        if (patientIdentifier == null) {
-            return null;
-        }
-
-        return patientIdentifier.getPatient();
-    }
 
 	public static void deleteSecondaryPatient(Session session,
 			Patient thePatient) {
@@ -1152,5 +1124,16 @@ public class PatientManager {
 		List<ArtDto> list = query.list();
 		
 		return list;
+	}
+	
+	public static AppointmentReminder getAppointmentReminder(Session session, Patient patient) {
+		AppointmentReminder result = (AppointmentReminder) session.createQuery(
+						"from AppointmentReminder as ar where ar.patient.id=:patid")
+						.setInteger("patid", patient.getId()).uniqueResult();
+		return result;
+	}
+
+	public static void saveAppointmentReminder(Session session, AppointmentReminder appointmentReminder) {
+		session.saveOrUpdate(appointmentReminder);
 	}
 }

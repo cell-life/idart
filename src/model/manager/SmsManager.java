@@ -39,34 +39,6 @@ public class SmsManager {
 		return participants;
 	}
 
-    protected static List<StudyParticipant> getActiveParticipants(Session session, Date appDate) {
-
-        return session.createQuery(
-                        "select sp from StudyParticipant sp, Patient p, Appointment a "
-                                + "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
-                                + "and  date(a.appointmentDate) = :appDate "
-                                + "and a.visitDate is null "
-                                + "and sp.studyGroup = :activeGroup "
-                                + "and sp.endDate is null")
-                .setDate("appDate", appDate)
-                .setString("activeGroup", StudyParticipant.GP_ACTIVE)
-                .list();
-
-    }
-
-    protected static List<StudyParticipant> getAllParticipants(Session session, Date appDate) {
-
-        return session.createQuery(
-                        "select sp from StudyParticipant sp, Patient p, Appointment a "
-                                + "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
-                                + "and  date(a.appointmentDate) = :appDate "
-                                + "and a.visitDate is null "
-                                + "and sp.studyGroup = :activeGroup "
-                                + "and sp.endDate is null")
-                .setDate("appDate", appDate)
-                .list();
-    }
-
 	/**
 	 * * This method gets the active patients on a campaign who
 	 * missed an appointment a number of days ago 
@@ -155,6 +127,33 @@ public class SmsManager {
 	public static void updateMessageSchedule(Session session, MessageSchedule messageSchedule) {
 		messageSchedule.setScheduledSuccessfully(true);
 		session.save(messageSchedule);
+	}
+
+    protected static List<StudyParticipant> getActiveParticipants(Session session, Date appDate) {
+
+        return session.createQuery(
+                "select sp from StudyParticipant sp, Patient p, Appointment a "
+                        + "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
+                        + "and  date(a.appointmentDate) = :appDate "
+                        + "and a.visitDate is null "
+                        + "and sp.studyGroup = :activeGroup "
+                        + "and sp.endDate is null")
+                .setDate("appDate", appDate)
+                .setString("activeGroup", StudyParticipant.GP_ACTIVE)
+                .list();
+
+    }
+
+    protected static List<StudyParticipant> getAllParticipants(Session session, Date appDate) {
+
+        return session.createQuery(
+                "select sp from StudyParticipant sp, Patient p, Appointment a "
+                        + "where p.id = sp.patient and p.id = a.patient and p.accountStatus = true "
+                        + "and  date(a.appointmentDate) = :appDate "
+                        + "and a.visitDate is null "
+                        + "and sp.endDate is null")
+                .setDate("appDate", appDate)
+                .list();
 	}
 	
 }

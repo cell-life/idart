@@ -19,7 +19,6 @@ public class IdentifierType {
 	@GeneratedValue
 	private Integer id;
 	private String name;
-	private String system;
 	private int index;
 	private boolean voided = false;
 	
@@ -59,15 +58,7 @@ public class IdentifierType {
 		this.name = name;
 	}
 
-    public String getSystem() {
-        return system;
-    }
-
-    public void setSystem(String system) {
-        this.system = system;
-    }
-
-    @Override
+	@Override
 	public String toString() {
 		return name;
 	}

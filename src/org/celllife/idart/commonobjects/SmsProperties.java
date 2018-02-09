@@ -79,7 +79,7 @@ import com.pholser.util.properties.ValuesSeparatedBy;
  *  missedAppointmentSms2_message_French=Vous avez rat� votre rendez-vous il ya 7 jours
  * </pre>
  * 
- * @see sms.properties file
+ * see sms.properties file
  */
 public interface SmsProperties {
 
@@ -125,6 +125,22 @@ public interface SmsProperties {
 
 	@BoundProperty("communicatePassword")
 	public String mobilisrpassword();
+
+    @BoundProperty("appointmentRemindersUrl")
+    public String appointmentRemindersUrl();
+
+    @BoundProperty("appointmentRemindersUsername")
+    public String appointmentRemindersUsername();
+
+    @BoundProperty("appointmentRemindersPassword")
+    public String appointmentRemindersPassword();
+    
+    /**
+     * The background task to communicate with the ARS is run every x number of minutes.
+     */
+    @DefaultsTo("10")
+    @BoundProperty("appointmentReminderTaskMinutes")
+    public int appointmentReminderTaskMinutes();
 
 	/**
 	 * All participants in the control group are added to this campaign. Leave

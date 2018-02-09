@@ -19,46 +19,21 @@
 
 package org.celllife.idart.gui.reports;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import model.manager.exports.iedea.IedeaExporter;
-
 import org.apache.log4j.Logger;
 import org.celllife.idart.gui.dataExports.DataExport;
 import org.celllife.idart.gui.dataQuality.DataQuality;
 import org.celllife.idart.gui.platform.GenericAdminGui;
 import org.celllife.idart.gui.platform.GenericReportGui;
 import org.celllife.idart.gui.platform.GenericReportGuiInterface;
-import org.celllife.idart.gui.reportParameters.ARVDrugUsage;
-import org.celllife.idart.gui.reportParameters.ClinicIndicators;
-import org.celllife.idart.gui.reportParameters.CohortDrugCollections;
-import org.celllife.idart.gui.reportParameters.DailyDispensingTotals;
-import org.celllife.idart.gui.reportParameters.DrugCombinations;
-import org.celllife.idart.gui.reportParameters.DrugsDispensed;
-import org.celllife.idart.gui.reportParameters.EpisodeStats;
-import org.celllife.idart.gui.reportParameters.EpisodesStartedOrEndedReportGUI;
-import org.celllife.idart.gui.reportParameters.MissedAppointments;
-import org.celllife.idart.gui.reportParameters.MonthlyReceiptsAndIssues;
-import org.celllife.idart.gui.reportParameters.MonthlyStockReceipt;
-import org.celllife.idart.gui.reportParameters.PackageProcessingReportGUI;
-import org.celllife.idart.gui.reportParameters.PackageTracking;
-import org.celllife.idart.gui.reportParameters.PackagesAwaiting;
-import org.celllife.idart.gui.reportParameters.PatientHistory;
-import org.celllife.idart.gui.reportParameters.PatientsExpected;
-import org.celllife.idart.gui.reportParameters.PepfarReportGUI;
-import org.celllife.idart.gui.reportParameters.PrescribingDoctors;
-import org.celllife.idart.gui.reportParameters.StockTakeReportGUI;
-import org.celllife.idart.gui.reportParameters.TransactionLog;
+import org.celllife.idart.gui.reportParameters.*;
 import org.celllife.idart.gui.utils.ResourceUtils;
 import org.celllife.idart.gui.utils.iDartFont;
 import org.celllife.idart.gui.utils.iDartImage;
 import org.celllife.idart.messages.Messages;
-import org.celllife.idart.misc.MessageUtil;
 import org.celllife.idart.misc.task.TaskException;
-import org.celllife.idart.model.utils.PackageLifeStage;
+import org.celllife.idart.utils.MessageUtil;
+import org.celllife.idart.utils.PackageLifeStage;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -70,18 +45,13 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.*;
 
-/**
- */
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class NewReports extends GenericAdminGui {
 
 	private Group grpPatientReports;

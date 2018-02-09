@@ -21,12 +21,10 @@ package model.manager;
 
 import model.nonPersistent.PatientIdAndName;
 import org.celllife.idart.commonobjects.CommonObjects;
-import org.celllife.idart.commonobjects.iDartProperties;
 import org.celllife.idart.database.hibernate.*;
 import org.celllife.idart.gui.search.Search;
 import org.celllife.idart.gui.search.SearchEntry;
 import org.celllife.idart.gui.search.TableComparator;
-import org.celllife.idart.integration.idartweb.patient.IdartWebPatientServiceFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -50,7 +48,7 @@ public class SearchManager {
 
 	private static java.util.List<SearchEntry> listTableEntries;
 
-    /**
+	/**
 	 * 
 	 */
 	public SearchManager() {
@@ -890,12 +888,9 @@ public class SearchManager {
 	public static List<PatientIdentifier> getPatientIdentifiers(Session session, String patientId,
 			boolean includeInactivePatients)
 			throws HibernateException {
-
-        if (iDartProperties.idartWebEnabled && patientId != null && !patientId.isEmpty()) {
-            IdartWebPatientServiceFactory.getInstance().updatePatients(patientId);
-        }
-
-        String queryString = "select id from PatientIdentifier as id where " +
+		patientId = patientId == null ? "" : patientId.trim();
+		
+		String queryString = "select id from PatientIdentifier as id where " +
 				"upper(id.value) like :patientId " +
 				"or upper(id.patient.lastname) like :patientId " +
 				"or upper(id.patient.firstNames) like :patientId";
@@ -1026,25 +1021,13 @@ public class SearchManager {
 	public static List<PatientIdAndName> getActivePatientWithValidPrescriptionIDsAndNames(
 			Session sess) throws HibernateException {
 		List<PatientIdAndName> returnList = new ArrayList<PatientIdAndName>();
-		
-		List<Object[]> result = null;
-		if (iDartProperties.prehmisIntegration) {
-			result = sess.createQuery(
-					"select distinct pat.id, patId.value, pat.firstNames, pat.lastname, pat.clinic.clinicName "
-					+ "from Patient pat,  Prescription pre, PatientIdentifier patId, IdentifierType idType "
-					+ "where pre.endDate is null "
-					+ "and pat.id = patId.patient and patId.type = idType.id and idType.system = 'PGWC' "
-					+ "and pat.id = pre.patient and pat.accountStatus = true order by "
-					+ "pat.clinic.clinicName, patId.value")
-					.list();			
-		} else {
-			result = sess.createQuery(
-					"select distinct pat.id, pat.patientId, pat.firstNames, pat.lastname, pat.clinic.clinicName "
-					+ "from Patient pat,  Prescription pre where pre.endDate is null "
-					+ "and pat.id = pre.patient and pat.accountStatus = true order by "
-					+ "pat.clinic.clinicName, pat.patientId")
-					.list();
-		}
+		List<Object[]> result = sess
+		.createQuery(
+				"select distinct pat.id, pat.patientId, pat.firstNames, pat.lastname, pat.clinic.clinicName "
+				+ "from Patient pat,  Prescription pre where pre.endDate is null "
+				+ "and pat.id = pre.patient and pat.accountStatus = true order by "
+				+ "pat.clinic.clinicName, pat.patientId")
+				.list();
 
 		if (result != null) {
 			for (Object[] obj : result) {

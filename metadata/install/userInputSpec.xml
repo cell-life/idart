@@ -21,24 +21,9 @@
 		</field>
 		<space></space>
 		<field type="divider" align="center"/>
-	    <space></space>
+	<space></space>
 		<field type="radio" variable="isEkapaVersion">
 			<description align="left" txt="Connecting to Ekapa?" />
-			<spec>
-				<choice txt="Yes" value="true" />
-				<choice txt="No" value="false" set="true"  />
-			</spec>
-		</field>
-	    <space></space>
-		<field type="radio" variable="prehmisIntegration">
-			<description align="left" txt="Connecting to PREHMIS?" />
-			<spec>
-				<choice txt="Yes" value="true" />
-				<choice txt="No" value="false" set="true"  />
-			</spec>
-		</field>
-		<field type="radio" variable="idartWebEnabled">
-			<description align="left" txt="Connecting to iDART Web?" />
 			<spec>
 				<choice txt="Yes" value="true" />
 				<choice txt="No" value="false" set="true"  />
@@ -164,24 +149,4 @@
 			<spec txt="Time for automatic logout (in seconds):" size="10" set="600" />
 		</field>
       </panel>
-    <panel order="5" id="path.panel6">
-        <field
-                type="staticText"
-                align="left"
-                txt="Before Installation, could you please complete the following fields."/>
-        <field type="text" variable="idartWebUrl">
-            <spec txt="iDART Web Server Url:" size="24" set="http://www.cell-life.org/idart" />
-        </field>
-        <space></space>
-        <field type="text" variable="idartWebSystemId">
-            <spec txt="iDART Web System Id:" size="24" set="99999999" />
-        </field>
-        <space></space>
-        <field type="text" variable="idartWebApplicationKey">
-            <spec txt="iDART Web Application Key:" size="24" set="E8246BF1-B058-440D-A3E4-783F1B983722" />
-        </field>
-        <space></space>
-        <field type="divider" align="center"/>
-        <space></space>
-    </panel>
 </userInput>

@@ -69,6 +69,9 @@
 		<mkdir dir="${stats.dir}" />
 
 		<!-- Discover code and database versions via regular expressions -->
+        <!-- SVN post 1.7 uses this -->
+        <exec executable="svnversion" outputproperty="svnversion" />
+        <propertyregex property="idart.version.build" input="${svnversion}" regexp="^([^:]+)" select="\1" defaultValue="unknown" />
 		<loadfile srcfile="${idart.version.revision.filename}" property="repositoryFileInput" failonerror="false" />
 		<if>
 			<contains string="${repositoryFileInput}" substring="&lt;?xml" casesensitive="false" />
@@ -122,31 +125,11 @@
 				<property name="database.url.build" value="${database.url}" />
 			</else>
 		</if>
-		<if>
-			<isset property="useTestIdartWeb" />
-			<then>
-				<property name="idart_web_system_id" value="99999999" />
-				<property name="idart_web_enabled" value="true" />
-				<property name="prehmis_integration" value="false" />
-				<property name="idart_web_url" value="http://www.cell-life.org/idart" />
-				<property name="idart_web_application_key" value="E8246BF1-B058-440D-A3E4-783F1B983722" />
-			</then>
-			<else>
-				<property name="database.username.build" value="${database.username}" />
-				<property name="database.password.build" value="${database.password}" />
-				<property name="database.url.build" value="${database.url}" />
-			</else>
-		</if>
 		<echo message="${database.url.build}" />
 		<replaceregexp file="unencrypted_idart.properties" match="\$hibernate_username" replace="${database.username.build}" byline="false" />
 		<replaceregexp file="unencrypted_idart.properties" match="\$hibernate_password" replace="${database.password.build}" byline="false" />
 		<replaceregexp file="unencrypted_idart.properties" match="\$hibernate_url" replace="${database.url.build}" byline="false" />
 		<replaceregexp file="unencrypted_idart.properties" match="\$update_script_dir" replace="${update.script.dir}" byline="false" />
-		<replaceregexp file="unencrypted_idart.properties" match="\$idart_web_system_id" replace="${idart_web_system_id}" byline="false" />
-		<replaceregexp file="unencrypted_idart.properties" match="\$idart_web_enabled" replace="${idart_web_enabled}" byline="false" />
-		<replaceregexp file="unencrypted_idart.properties" match="\$prehmis_integration" replace="${prehmis_integration}" byline="false" />
-		<replaceregexp file="unencrypted_idart.properties" match="\$idart_web_url" replace="${idart_web_url}" byline="false" />
-		<replaceregexp file="unencrypted_idart.properties" match="\$idart_web_application_key" replace="${idart_web_application_key}" byline="false" />
 		<javac destdir="${build.dir}" classpathref="Large.ClassPath" debug="off" deprecation="on" optimize="off" target="1.5">
 			<src path="src" />
 			<include name="**/PropertiesEncrypter.java" />
@@ -354,7 +337,6 @@
 	
 	<target name="generate-test-properties">
 			<property name="useTestDatabase" value="true" />
-			<property name="useTestIdartWeb" value="true" />
 			<antcall target="generateProperties" />
 	</target>
 

@@ -31,9 +31,7 @@ public class Form {
 
 	private String dispInstructions2;
 
-    private String code;
-
-    public Form() {
+	public Form() {
 		super();
 
 	}
@@ -241,12 +239,4 @@ public class Form {
 	public void setDispInstructions2(String dispInstructions2) {
 		this.dispInstructions2 = dispInstructions2;
 	}
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 }

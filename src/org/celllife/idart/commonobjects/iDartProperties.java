@@ -10,9 +10,11 @@ import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Properties;
 
-/**
- */
 public class iDartProperties {
+
+    public enum LabelType {
+        EKAPA, IDART
+    }
 
 	public static final String SWTBOT_KEY = "org.eclipse.swtbot.widget.key";
 
@@ -32,14 +34,14 @@ public class iDartProperties {
 
 	public static String roundUpForms = "";
 
-	public static String hibernateConnectionUrl = "jdbc:postgresql://localhost:5432/test";
+	public static String hibernateConnectionUrl = "http://localhost:5432/idart";
 
-	public static String hibernatePassword = "postgres";
+	public static String hibernatePassword = "";
 
-	public static String hibernateUsername = "postgres";
+	public static String hibernateUsername = "";
 
 	public static String hibernateDriver = "org.postgresql.Driver";
-	
+
 	public static String hibernateDialect = "org.hibernate.dialect.PostgreSQLDialect";
 
 	public static String updateScriptDir = "scripts";
@@ -79,16 +81,6 @@ public class iDartProperties {
 	public static String eKapa_dbtype = "oracle";
 
 	public static String eKapa_dbname = "idart";
-	
-	public static boolean prehmisIntegration = false;
-
-    public static boolean idartWebEnabled = false;
-
-    public static String idartWebUrl = "http://www.cell-life.org/idart";
-
-    public static String idartWebSystemId = "99999999";
-
-    public static String idartWebApplicationKey = "E8246BF1-B058-440D-A3E4-783F1B983722";
 
 	public static String patientBarcodeRegex = "\\w+";
 
@@ -103,28 +95,28 @@ public class iDartProperties {
 	public static boolean nextAppointmentDateOnLabels = true;
 
 	public static boolean showBatchInfoOnSummaryLabels = false;
+
 	public static boolean showBatchInfoOnDrugLabels = false;
-	
+
 	public static String country = "South Africa";
 
 	public static Locale currentLocale = new Locale("en", "ZA");
 
 	public static String importDateFormat = "dd/MM/yyyy";
-	
+
 	public static boolean enableDrugGroupEditor = true;
-	
+
 	public static boolean enableDrugEditor = true;
-	
+
 	public static boolean isCidaStudy = false;
 	
-	public static String illegalPatientIdChars = "'`^";
-	public static String illegalPatientIdRegex = "["+illegalPatientIdChars+"]+";
+	public static String clinicCode = "0000";
 	
-	/**
-	 */
-	public enum LabelType {
-		EKAPA, IDART
-	}
+	public static boolean appointmentReminders = false;
+
+	public static String illegalPatientIdChars = "'`^";
+
+	public static String illegalPatientIdRegex = "["+illegalPatientIdChars+"]+";
 
 	public static LabelType labelType = LabelType.IDART;
 
@@ -141,6 +133,7 @@ public class iDartProperties {
 	}
 
 	public static void setiDartProperties() {
+
 		log = Logger.getLogger(iDartProperties.class);
 		log.info("Loading Encrypted System Properties");
 
@@ -183,13 +176,6 @@ public class iDartProperties {
 		patientBarcodeRegex = setStringProperty("patientBarcodeRegex");
 
 		exportDir = setStringProperty("export_dir");
-
-		prehmisIntegration = setBooleanProperty("prehmis_integration");
-        idartWebEnabled = setBooleanProperty("idart_web_enabled");
-        idartWebUrl = setStringProperty("idart_web_url");
-        idartWebApplicationKey = setStringProperty("encrypted_idart_web_application_key");
-        idartWebSystemId = setStringProperty("idart_web_system_id");
-
 		hibernateConnectionUrl = setStringProperty("encrypted_hibernate_url");
 		hibernatePassword = setStringProperty("encrypted_hibernate_password");
 		hibernateUsername = setStringProperty("encrypted_hibernate_username");
@@ -204,11 +190,15 @@ public class iDartProperties {
 		eKapa_user = setStringProperty("eKapa_user");
 
 		intValueOfAlternativeBarcodeEndChar = setIntegerProperty("intValueOfAlternativeBarcodeEndChar");
-		
+
 		isCidaStudy = setBooleanProperty("cidaStudy");
+		
+		clinicCode = setStringProperty("clinicCode");
+		
+		appointmentReminders = setBooleanProperty("appointmentReminders");
 
 		String labelTypeString = setStringProperty("labelType");
-		// Should paeds labels have quantities blank by default?
+		// FIXME: Should paeds labels have quantities blank by default?
 		if (labelTypeString != null) {
 			if (labelTypeString.equalsIgnoreCase("idart")) {
 				labelType = LabelType.IDART;
@@ -271,25 +261,11 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("encrypted_hibernate_url="+hibernateConnectionUrl);
 		sb.append("\n");
-		sb.append("hibernate_dialect="+hibernateDialect);
-		sb.append("\n");
-		sb.append("hibernate_driver="+hibernateDriver);
-		sb.append("\n");
 		sb.append("encrypted_hibernate_password="+hibernatePassword);
 		sb.append("\n");
 		sb.append("encrypted_hibernate_username="+hibernateUsername);
 		sb.append("\n");
 		sb.append("update_script_dir="+updateScriptDir);
-		sb.append("\n");
-		sb.append("prehmis_integration="+prehmisIntegration);
-		sb.append("\n");
-		sb.append("idart_web_enabled="+idartWebEnabled);
-		sb.append("\n");
-		sb.append("idart_web_url="+idartWebUrl);
-		sb.append("\n");
-		sb.append("encrypted_idart_web_application_key="+idartWebApplicationKey);
-		sb.append("\n");
-		sb.append("idart_web_system_id="+idartWebSystemId);		
 		sb.append("\n");
 		sb.append("importDateFormat="+importDateFormat);
 		sb.append("\n");
@@ -310,6 +286,10 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("cidaStudy=" + isCidaStudy);
 		sb.append("\n");
+		sb.append("clinicCode=" + clinicCode);
+		sb.append("\n");
+		sb.append("appointmentReminders=" + appointmentReminders);
+		sb.append("\n");
 
 		switch (labelType) {
 		case EKAPA:
@@ -324,7 +304,7 @@ public class iDartProperties {
 
 	/**
 	 * Method setIntegerProperty.
-	 * 
+	 *
 	 * @param propertyName
 	 *            String
 	 * @return int
@@ -344,7 +324,7 @@ public class iDartProperties {
 
 	/**
 	 * Method setBooleanProperty.
-	 * 
+	 *
 	 * @param propertyName
 	 *            String
 	 * @return boolean
@@ -360,7 +340,7 @@ public class iDartProperties {
 
 	/**
 	 * Method setStringProperty.
-	 * 
+	 *
 	 * @param propertyName
 	 *            String
 	 * @return String
@@ -377,7 +357,7 @@ public class iDartProperties {
 
 	/**
 	 * Set the current locale from the country and language codes
-	 * 
+	 *
 	 * @param propertyNameLanguage
 	 * @param propertyNameCountry
 	 */
@@ -406,7 +386,7 @@ public class iDartProperties {
 
 	/**
 	 * Generates a string of name value pairs for the fields in this class.
-	 * 
+	 *
 	 * @return String listing all the values of the properties in this class.
 	 * @throws ClassNotFoundException
 	 * @throws IllegalAccessException

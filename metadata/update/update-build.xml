@@ -81,7 +81,7 @@
 			<include name="**/UpdateUtil.java" />
 		</javac>
 
-		<java classname="org.celllife.idart.misc.UpdateUtil" failonerror="true">
+		<java classname="org.celllife.idart.utils.UpdateUtil" failonerror="true">
 			<classpath>
 				<pathelement location="${build.dir}" />
 				<path>

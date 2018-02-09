@@ -19,24 +19,16 @@
 // Created 15/03/2006
 package model.manager.excel.download;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-
-import jxl.Cell;
-import jxl.CellType;
-import jxl.DateCell;
-import jxl.Sheet;
-import jxl.Workbook;
+import jxl.*;
 import jxl.read.biff.BiffException;
 import jxl.read.biff.PasswordException;
 import model.manager.excel.conversion.exceptions.ReportException;
-
 import org.apache.log4j.Logger;
-import org.celllife.idart.misc.iDARTUtil;
+import org.celllife.idart.utils.iDARTUtil;
 
-/**
- */
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 
 public class XLReadManager {
 
@@ -54,12 +46,12 @@ public class XLReadManager {
 		log = Logger.getLogger(XLReadManager.class);
 	}
 
-	/**
-	 * Constructor for XLReadManager.
-	 * @param stream byte[]
-	 * @param sheetName String
-	 * @throws ReportException 
-	 */
+    /**
+     * Constructor for XLReadManager.
+     * @param file
+     * @param sheetName
+     * @throws ReportException
+     */
 	public XLReadManager(File file, String sheetName) throws ReportException {
 		super();
 		// Create a workbook
