@@ -12,23 +12,11 @@ import org.celllife.idart.commonobjects.iDartProperties;
 public final class IdartWebPrescriptionServiceFactory {
 
     public synchronized static IdartWebPrescriptionService getInstance() {
-        IdartClient idartClient = null;
-        if (iDartProperties.proxyBypass) {
-        	idartClient = IdartClientSingleton.getInstance(
-                    iDartProperties.idartWebUrl,
-                    iDartProperties.idartWebSystemId,
-                    iDartProperties.idartWebApplicationKey);
-        } else {
-        	idartClient = IdartClientSingleton.getInstance(
-                    iDartProperties.idartWebUrl,
-                    iDartProperties.idartWebSystemId,
-                    iDartProperties.idartWebApplicationKey,
-                    iDartProperties.proxyUrl,
-                    iDartProperties.proxyPort,
-                    iDartProperties.proxyUser,
-                    iDartProperties.proxyPassword,
-                    iDartProperties.proxyUserDomain);
-        }
+        IdartClient idartClient = IdartClientSingleton.getInstance(
+                iDartProperties.idartWebUrl,
+                iDartProperties.idartWebSystemId,
+                iDartProperties.idartWebApplicationKey
+        );
         return new IdartWebPrescriptionServiceImpl(idartClient);
     }
 }

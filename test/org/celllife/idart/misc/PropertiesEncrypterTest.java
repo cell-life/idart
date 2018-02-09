@@ -98,9 +98,13 @@ public class PropertiesEncrypterTest {
 
 	}
 
-	public static void main(String[] args) throws Exception {
-		String str = "110F26F0-84AB-C89-0CBA-4450EE16D7FB6";
-		PropertiesEncrypter pe = new PropertiesEncrypter();
-		System.out.println(pe.encrypt(str));
+	public static void main(String[] args) {
+		String string = "#\r\n#Wed Mar 24 17:41:43 CAT 2010\r\na=1\r\na3=j\r\nb=2\r\nencryptedkey1=0NKSkvGY9DU\\=\r\nencryptedkey2=c2LV2yYm2he0wR+B2q1sRA\\=\\=\r\nplainkey1=3.1.7.3633-\r\nplainkey2=test\r\nplainkey3=long string   with  spaces\r\n";
+		String[] split = string.split("[\n\r]+");
+		for (String string1 : split) {
+			System.out.println("--" + string1 + "--");
+		}
+
+		System.out.println("++" + string.replaceAll("#.*[\n\r]*", "") + "++");
 	}
 }

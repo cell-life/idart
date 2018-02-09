@@ -221,7 +221,7 @@ public class PropertiesEncrypter {
 	 * @return <code>String</code> Encrypted version of the provided String
 	 * @throws EncryptionException
 	 */
-	String encrypt(String str) throws EncryptionException {
+	private String encrypt(String str) throws EncryptionException {
 		assert ecipher != null : "SystemPropertiesEncyrpter not initialised.";
 		try {
 			// Encode the string into bytes using utf-8

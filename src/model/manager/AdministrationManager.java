@@ -55,7 +55,7 @@ public class AdministrationManager {
 	private static Log log = LogFactory.getLog(AdministrationManager.class);
 
 	// ------- METHODS FOR DOCTOR MANAGER --------------------------------
-	
+
 	/**
 	 * Method getAllDoctors.
 	 * 

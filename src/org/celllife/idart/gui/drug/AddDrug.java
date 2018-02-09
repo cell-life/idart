@@ -567,7 +567,7 @@ public class AddDrug extends GenericFormGui {
 							tx.rollback();
 						}
 						getLog().error("Error while communicating with iDARTweb - couldn't save drug: "+localDrug, e);
-						MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+						MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 					}
 					cmdCancelWidgetSelected(); // go back to previous screen
 					break;

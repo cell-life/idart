@@ -164,58 +164,24 @@
 			<spec txt="Time for automatic logout (in seconds):" size="10" set="600" />
 		</field>
       </panel>
-    <!-- 
-    Note: idartweb/prehmis variables are set in install.xml. 
-    This is so that they have defaults if the panel is never shown 
-    -->
     <panel order="5" id="path.panel6">
         <field
                 type="staticText"
                 align="left"
                 txt="Before Installation, could you please complete the following fields."/>
         <field type="text" variable="idartWebUrl">
-            <spec txt="iDART Web Server Url:" size="24" />
+            <spec txt="iDART Web Server Url:" size="24" set="http://www.cell-life.org/idart" />
         </field>
         <space></space>
         <field type="text" variable="idartWebSystemId">
-            <spec txt="iDART Web System Id:" size="24" />
+            <spec txt="iDART Web System Id:" size="24" set="99999999" />
         </field>
         <space></space>
         <field type="text" variable="idartWebApplicationKey">
-            <spec txt="iDART Web Application Key:" size="24" />
+            <spec txt="iDART Web Application Key:" size="24" set="E8246BF1-B058-440D-A3E4-783F1B983722" />
         </field>
         <space></space>
         <field type="divider" align="center"/>
-        <space></space>
-		<field type="radio" variable="proxyBypass">
-			<description align="left" txt="Do you access the internet directly or through a proxy server?" />
-			<spec>
-				<choice txt="Directly" value="true" />
-				<choice txt="Proxy" value="false" />
-			</spec>
-		</field>
-        <space></space>
-        <field type="text" variable="proxyUrl">
-            <spec txt="Proxy Url:" size="24" />
-        </field>
-        <space></space>
-        <field type="text" variable="proxyPort">
-            <spec txt="Proxy Port: " size="3" />
-        </field>
-        <space></space>
-        <field type="text" variable="proxyUser">
-            <spec txt="Proxy User: " size="24" />
-        </field>
-        <space></space>
-        <field type="password" variable="proxyPassword">
-            <spec>
-                <pwd txt="Proxy Password: " size="24" />
-            </spec>
-        </field>
-        <space></space>
-        <field type="text" variable="proxyUserDomain">
-            <spec txt="Proxy Domain: " size="24" />
-        </field>
         <space></space>
     </panel>
 </userInput>

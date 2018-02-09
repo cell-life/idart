@@ -52,10 +52,6 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
@@ -85,37 +81,16 @@ public class Login implements GenericGuiInterface {
 	private CCombo cmbUsers;
 
 	private CCombo cmbClinics;
-	
-	private Button btnProxyBypass;
-	
-	private Text txtProxyUser;
-
-	private Text txtProxyPassword;
-	
-	private Text txtProxyUrl;
-	
-	private Text txtProxyPort;
-	
-	private Text txtProxyDomain;
 
 	private Button btnLogin;
 
 	private Button btnCancel;
 
 	private boolean successfulLogin;
-	
-	private String proxyUser;
-	private String proxyPassword;
-	private String proxyUrl;
-	private int proxyPort;
-	private String proxyDomain;
-	private boolean proxyBypass;
 
 	private Session hSession;
 
 	private final boolean limitClinic;
-	
-	private int proxyOffset = 0;
 
 	public Login() {
 		super();
@@ -166,14 +141,10 @@ public class Login implements GenericGuiInterface {
 		display = Display.getCurrent();
 		if (display == null)
 			throw new GUIException("Display is null."); //$NON-NLS-1$
-		
-		if (iDartProperties.proxyUrl != null && !iDartProperties.proxyUrl.trim().isEmpty()) {
-			proxyOffset = 150;
-		}
 
 		loginShell = new Shell();
 		loginShell.setText(Messages.getString("login.screen.title")); //$NON-NLS-1$
-		loginShell.setBounds(new Rectangle(130, 170, 420, 300+proxyOffset));
+		loginShell.setBounds(new Rectangle(130, 170, 420, 300));
 
 		Image i = ResourceUtils.getImage(iDartImage.LOGO_GRAPHIC);
 		loginShell.setImage(i);
@@ -186,11 +157,11 @@ public class Login implements GenericGuiInterface {
 		});
 
 		Label lblPicLogo = new Label(loginShell, SWT.NONE);
-		lblPicLogo.setBounds(new Rectangle(130, 180+proxyOffset, 142, 67));
+		lblPicLogo.setBounds(new Rectangle(130, 180, 142, 67));
 		lblPicLogo.setImage(ResourceUtils.getImage(iDartImage.FINAL_LOGO));
 
 		Label lblVersionNumbers = new Label(loginShell, SWT.CENTER);
-		lblVersionNumbers.setBounds(new Rectangle(0, 247+proxyOffset, 420, 30));
+		lblVersionNumbers.setBounds(new Rectangle(0, 247, 420, 30));
 		String message = Messages.getString("common.label.version");
 		lblVersionNumbers.setText(MessageFormat.format(message,
 				iDartProperties.idartVersionNumber)); //$NON-NLS-1$
@@ -212,7 +183,7 @@ public class Login implements GenericGuiInterface {
 
 		// compLoginInfo
 		compLoginInfo = new Composite(loginShell, SWT.NONE);
-		compLoginInfo.setBounds(new Rectangle(20, 10 + kernel, 395, 100 + proxyOffset));
+		compLoginInfo.setBounds(new Rectangle(20, 10 + kernel, 395, 100));
 
 		// lblUsername & cmbUsers
 		Label lblUsername = new Label(compLoginInfo, SWT.NONE);
@@ -305,89 +276,6 @@ public class Login implements GenericGuiInterface {
 				.equalsIgnoreCase(iDartProperties.OFFLINE_DOWNREFERRAL_MODE)) {
 			cmbClinics.setEnabled(false);
 		}
-		
-		// proxy fields
-		if (proxyOffset > 0) {
-			btnProxyBypass = new Button(compLoginInfo, SWT.CHECK);
-			btnProxyBypass.setBounds(new Rectangle(10, 100 + kernel, 355, 20));
-			btnProxyBypass.setText(Messages.getString("login.label.proxyBypass"));
-			btnProxyBypass.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			btnProxyBypass.setSelection(iDartProperties.proxyBypass);
-			btnProxyBypass.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseDown(MouseEvent e) {
-					toggleProxyFields(btnProxyBypass.getSelection());
-				}
-			});
-			
-			Label lblProxyUser = new Label(compLoginInfo, SWT.NONE);
-			lblProxyUser.setBounds(new Rectangle(10, 130 + kernel, 95, 20));
-			lblProxyUser.setText(Messages.getString("login.label.proxyUser"));
-			lblProxyUser.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			txtProxyUser = new Text(compLoginInfo, SWT.BORDER);
-			txtProxyUser.setText(iDartProperties.proxyUser);
-			txtProxyUser.setBounds(new Rectangle(125, 130 + kernel, 240, 20));
-			txtProxyUser.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			
-			Label lblProxyPassword = new Label(compLoginInfo, SWT.NONE);
-			lblProxyPassword.setBounds(new Rectangle(10, 160 + kernel, 95, 20));
-			lblProxyPassword.setText(Messages.getString("login.label.proxyPassword"));
-			lblProxyPassword.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			txtProxyPassword = new Text(compLoginInfo, SWT.BORDER | SWT.PASSWORD);
-			txtProxyPassword.setText(iDartProperties.proxyPassword);
-			txtProxyPassword.setBounds(new Rectangle(125, 160 + kernel, 240, 20));
-			txtProxyPassword.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			txtProxyPassword.addKeyListener(new KeyAdapter() {
-				@Override
-				public void keyReleased(KeyEvent e) {
-					if (e.character == SWT.CR) {
-						cmdLoginSelected();
-					}
-				}
-			});
-			
-			Label lblProxyDomain = new Label(compLoginInfo, SWT.NONE);
-			lblProxyDomain.setBounds(new Rectangle(10, 190 + kernel, 95, 20));
-			lblProxyDomain.setText(Messages.getString("login.label.proxyDomain"));
-			lblProxyDomain.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			txtProxyDomain = new Text(compLoginInfo, SWT.BORDER);
-			txtProxyDomain.setText(iDartProperties.proxyUserDomain);
-			txtProxyDomain.setBounds(new Rectangle(125, 190 + kernel, 240, 20));
-			txtProxyDomain.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-
-			Label lblProxyUrl = new Label(compLoginInfo, SWT.NONE);
-			lblProxyUrl.setBounds(new Rectangle(10, 220 + kernel, 95, 20));
-			lblProxyUrl.setText(Messages.getString("login.label.proxyUrl"));
-			lblProxyUrl.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			txtProxyUrl = new Text(compLoginInfo, SWT.BORDER);
-			txtProxyUrl.setText(iDartProperties.proxyUrl);
-			txtProxyUrl.setBounds(new Rectangle(125, 220 + kernel, 180, 20));
-			txtProxyUrl.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			txtProxyPort = new Text(compLoginInfo, SWT.BORDER);
-			txtProxyPort.setText(String.valueOf(iDartProperties.proxyPort));
-			txtProxyPort.setBounds(new Rectangle(315, 220 + kernel, 50, 20));
-			txtProxyPort.setFont(ResourceUtils.getFont(iDartFont.VERASANS_8));
-			
-			txtProxyPort.addVerifyListener(new VerifyListener() {  
-			    @Override  
-				public void verifyText(VerifyEvent e) {
-					// ensure that they don't enter numbers
-					String currentText = ((Text) e.widget).getText();
-					String port = currentText.substring(0, e.start) + e.text + currentText.substring(e.end);
-					try {
-						int portNum = Integer.valueOf(port);
-						if (portNum < 0 || portNum > 65535) {
-							e.doit = false;
-						}
-					} catch (NumberFormatException ex) {
-						if (!port.equals(""))
-							e.doit = false;
-					}
-				}
-			});
-			
-			toggleProxyFields(!iDartProperties.proxyBypass);
-		}
 	}
 
 	/**
@@ -396,7 +284,7 @@ public class Login implements GenericGuiInterface {
 	 */
 	private void createCompButtons() {
 		compButtons = new Composite(loginShell, SWT.NONE);
-		compButtons.setBounds(new Rectangle(100, 140+proxyOffset, 215, 35));
+		compButtons.setBounds(new Rectangle(100, 140, 215, 35));
 
 		btnLogin = new Button(compButtons, SWT.NONE);
 		btnLogin.setBounds(new Rectangle(5, 5, 85, 27));
@@ -428,14 +316,6 @@ public class Login implements GenericGuiInterface {
 				cmdCancelSelected();
 			}
 		});
-	}
-	
-	private void toggleProxyFields(boolean enable) {
-		txtProxyUser.setEnabled(enable);
-		txtProxyPassword.setEnabled(enable);
-		txtProxyDomain.setEnabled(enable);
-		txtProxyPort.setEnabled(enable);
-		txtProxyUrl.setEnabled(enable);
 	}
 
 	/**
@@ -547,48 +427,6 @@ public class Login implements GenericGuiInterface {
 	public boolean isSuccessfulLogin() {
 		return successfulLogin;
 	}
-	
-	/**
-	 * Get the entered proxy username
-	 */
-	public String getProxyUser() {
-		return proxyUser;
-	}
-	
-	/**
-	 * Get the entered proxy password
-	 */
-	public String getProxyPassword() {
-		return proxyPassword;
-	}
-
-	/**
-	 * Gets the entered proxy URL
-	 */
-	public String getProxyUrl() {
-		return proxyUrl;
-	}
-
-	/**
-	 * Gets the entered proxy port
-	 */
-	public int getProxyPort() {
-		return proxyPort;
-	}
-
-	/**
-	 * Gets the entered proxy domain
-	 */
-	public String getProxyDomain() {
-		return proxyDomain;
-	}
-
-	/**
-	 * Indicates if the user wishes to bypass the proxy
-	 */
-	public boolean isProxyBypass() {
-		return proxyBypass;
-	}
 
 	private void cmdCancelSelected() {
 		// If the user presses the cancel button, then exit the program
@@ -652,26 +490,6 @@ public class Login implements GenericGuiInterface {
 			} else {
 
 				successfulLogin = true;
-
-				// set the data entered for proxy user and password
-				if (txtProxyPassword != null) {
-					proxyPassword = txtProxyPassword.getText();
-				}
-				if (txtProxyUser != null) {
-					proxyUser = txtProxyUser.getText();
-				}
-				if (txtProxyDomain != null) {
-					proxyDomain = txtProxyDomain.getText();
-				}
-				if (txtProxyUrl != null) {
-					proxyUrl = txtProxyUrl.getText();
-				}
-				if (txtProxyPort != null) {
-					proxyPort = Integer.parseInt(txtProxyPort.getText());
-				}
-				if (btnProxyBypass != null) {
-					proxyBypass = btnProxyBypass.getSelection();
-				}
 
 				LocalObjects.setUser(theUser);
 				LocalObjects.currentClinic = theClinic.getClinicName()

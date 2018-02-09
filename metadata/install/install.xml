@@ -3,7 +3,7 @@
 	<native type="izpack" name="ShellLink.dll" />
 	<info>
 		<appname>iDART</appname>
-		<appversion>3.9.0</appversion>
+		<appversion>3.8.1</appversion>
 		<authors>
 			<author name="Samir Anand" email="samir@cell-life.org" />
 			<author name="Sarah Brown" email="sarah@cell-life.org" />
@@ -38,20 +38,6 @@
 	</dynamicvariables>
 	<variables>
 		<variable name="DesktopShortcutCheckboxEnabled" value="true" />
-        <variable name="dbAddressEkapa" value="" />
-        <variable name="dbNameEkapa" value="" />
-        <variable name="dbUserEkapa" value="" />
-        <variable name="dbPasswordEkapa" value="" />
-        <variable name="dbPortEkapa" value="" />
-        <variable name="idartWebUrl" value="http://idartweb.cell-life.org/idart" />
-        <variable name="idartWebSystemId" value="" />
-        <variable name="idartWebApplicationKey" value="" />
-        <variable name="proxyUser" value="" />
-        <variable name="proxyPassword" value="" />
-        <variable name="proxyUserDomain" value="" />
-        <variable name="proxyUrl" value="" />
-        <variable name="proxyPort" value="8080" />
-        <variable name="proxyBypass" value="true" />
 	</variables>
 
 	<locale>

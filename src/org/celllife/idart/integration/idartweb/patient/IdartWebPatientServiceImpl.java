@@ -52,7 +52,7 @@ final class IdartWebPatientServiceImpl implements IdartWebPatientService {
         } catch (Exception e) {
             transaction.rollback();
             LOGGER.error("Error while communicating with iDARTweb - unable to update patient with identifier '"+identifier+"'", e);
-            MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+            MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
         }
     }
 

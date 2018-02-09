@@ -69,9 +69,6 @@
 		<mkdir dir="${stats.dir}" />
 
 		<!-- Discover code and database versions via regular expressions -->
-        <!-- SVN post 1.7 uses this -->
-        <exec executable="svnversion" outputproperty="svnversion" />
-        <propertyregex property="idart.version.build" input="${svnversion}" regexp="^([^:]+)" select="\1" defaultValue="unknown" />
 		<loadfile srcfile="${idart.version.revision.filename}" property="repositoryFileInput" failonerror="false" />
 		<if>
 			<contains string="${repositoryFileInput}" substring="&lt;?xml" casesensitive="false" />

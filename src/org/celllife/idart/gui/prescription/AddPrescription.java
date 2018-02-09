@@ -1656,7 +1656,7 @@ iDARTChangeListener {
 					}
 					getLog().error("Error while communicating with iDARTweb - unable to save a new prescription: "+localPrescription, e);
 					saveSuccessful = false;
-					MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+					MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 				}
 
 				catch (HibernateException he) {

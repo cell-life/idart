@@ -1,14 +1,14 @@
 package org.celllife.idart.commonobjects;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Locale;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
 import org.celllife.idart.misc.PatientBarcodeParser;
 import org.celllife.idart.misc.PropertiesEncrypter;
 import org.celllife.idart.misc.iDARTRuntimeException;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Locale;
+import java.util.Properties;
 
 /**
  */
@@ -89,18 +89,6 @@ public class iDartProperties {
     public static String idartWebSystemId = "99999999";
 
     public static String idartWebApplicationKey = "E8246BF1-B058-440D-A3E4-783F1B983722";
-    
-    public static boolean proxyBypass = true;
-    
-    public static String proxyUrl = "";
-    
-    public static int proxyPort = 0;
-    
-    public static String proxyUser = "";
-    
-    public static String proxyPassword = "";
-    
-    public static String proxyUserDomain = "";
 
 	public static String patientBarcodeRegex = "\\w+";
 
@@ -201,13 +189,6 @@ public class iDartProperties {
         idartWebUrl = setStringProperty("idart_web_url");
         idartWebApplicationKey = setStringProperty("encrypted_idart_web_application_key");
         idartWebSystemId = setStringProperty("idart_web_system_id");
-        
-        proxyUrl = setStringProperty("proxy_url");
-        proxyPort = setIntegerProperty("proxy_port");
-        proxyUser = setStringProperty("proxy_user");
-        proxyPassword = setStringProperty("encrypted_proxy_password");
-        proxyUserDomain = setStringProperty("proxy_user_domain");
-        proxyBypass = setBooleanProperty("proxy_bypass");
 
 		hibernateConnectionUrl = setStringProperty("encrypted_hibernate_url");
 		hibernatePassword = setStringProperty("encrypted_hibernate_password");
@@ -217,7 +198,6 @@ public class iDartProperties {
 		updateUrl = setStringProperty("updateUrl");
 
 		eKapa_dbname = setStringProperty("eKapa_dbname");
-		eKapa_dbtype = setStringProperty("eKapa_dbtype");
 		eKapa_dbport = setStringProperty("eKapa_dbport");
 		eKapa_dburl = setStringProperty("eKapa_dburl");
 		eKapa_password = setStringProperty("eKapa_password");
@@ -244,63 +224,16 @@ public class iDartProperties {
 	public static String getPropertiesString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
-
-		// general/locale
-		sb.append("country="+country);
-		sb.append("\n");
-		sb.append("localeCountry="+currentLocale.getCountry());
-		sb.append("\n");
-		sb.append("localeLanguage="+currentLocale.getLanguage());
-		sb.append("\n");
-		
-		// application settings
-		sb.append("logoutTime="+logoutTime);
-		sb.append("\n");
-		sb.append("accumByDefault="+accumByDefault);
-		sb.append("\n");
-		sb.append("allowMultipleUncollectedPackages=" + allowMultipleUncollectedPackages);
-		sb.append("\n");
-		sb.append("dispenseDirectlyDefault=" + dispenseDirectlyDefault);
+		sb.append("allowMultipleUncollectedPackages="
+				+ allowMultipleUncollectedPackages);
 		sb.append("\n");
 		sb.append("downReferralMode=" + downReferralMode);
 		sb.append("\n");
-		sb.append("enableDrugEditor="+enableDrugEditor);
-		sb.append("\n");
-		sb.append("enableDrugGroupEditor="+enableDrugGroupEditor);
-		sb.append("\n");
-		sb.append("cidaStudy=" + isCidaStudy);
-		sb.append("\n");
 		sb.append("showDownReferButton=" + showDownReferButton);
 		sb.append("\n");
-		sb.append("roundUpForms="+roundUpForms);
+		sb.append("summaryLabelDefault=" + summaryLabelDefault);
 		sb.append("\n");
-		sb.append("patientNameOnReports="+patientNameOnReports);
-		sb.append("\n");
-		
-		// barcodes
-		sb.append("patientBarcodeRegex="+patientBarcodeRegex);
-		sb.append("\n");
-		sb.append("intValueOfAlternativeBarcodeEndChar=" + intValueOfAlternativeBarcodeEndChar);
-		sb.append("\n");
-		
-		// importing/exporting
-		sb.append("importDateFormat="+importDateFormat);
-		sb.append("\n");
-		sb.append("export_dir="+exportDir);
-		sb.append("\n");
-		// database update scripts
-		sb.append("update_script_dir="+updateScriptDir);
-		sb.append("\n");
-		// application update url
-		sb.append("updateUrl="+updateUrl);
-		sb.append("\n");
-		
-		// label settings
-		sb.append("showPatientNameOnPackageLabel=" + patientNameOnPackageLabel);
-		sb.append("\n");
-		sb.append("showBatchInfoOnSummaryLabels=" + showBatchInfoOnSummaryLabels);
-		sb.append("\n");
-		sb.append("showBatchInfoOnDrugLabels=" + showBatchInfoOnDrugLabels);
+		sb.append("dispenseDirectlyDefault=" + dispenseDirectlyDefault);
 		sb.append("\n");
 		sb.append("printSideTreatmentLabels=" + printSideTreatmentLabels);
 		sb.append("\n");
@@ -308,19 +241,13 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("patientNameOnDrugLabel="+patientNameOnDrugLabel);
 		sb.append("\n");
-		sb.append("nextAppointmentDateOnLabels="+nextAppointmentDateOnLabels);
+		sb.append("patientNameOnReports="+patientNameOnReports);
 		sb.append("\n");
-		switch (labelType) {
-		case EKAPA:
-			sb.append("labelType=eKAPA");
-			sb.append("\n");
-			break;
-		case IDART:
-			sb.append("labelType=iDART");
-			sb.append("\n");
-			break;
-		}
-		sb.append("summaryLabelDefault=" + summaryLabelDefault);
+		sb.append("isEkapaVersion="+isEkapaVersion);
+		sb.append("\n");
+		sb.append("accumByDefault="+accumByDefault);
+		sb.append("\n");
+		sb.append("country="+country);
 		sb.append("\n");
 		sb.append("timesPerDayLanguage1="+timesPerDayLanguage1);
 		sb.append("\n");
@@ -328,36 +255,32 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("timesPerDayLanguage3="+timesPerDayLanguage3);
 		sb.append("\n");
-		
-		// ekapa
-		sb.append("isEkapaVersion="+isEkapaVersion);
+		sb.append("logoutTime="+logoutTime);
 		sb.append("\n");
-		sb.append("eKapa_dbname=" + eKapa_dbname);
+		sb.append("roundUpForms="+roundUpForms);
 		sb.append("\n");
-		sb.append("eKapa_dbport=" + eKapa_dbport);
+		sb.append("nextAppointmentDateOnLabels="+nextAppointmentDateOnLabels);
 		sb.append("\n");
-		sb.append("eKapa_dbtype=" + eKapa_dbtype);
+		sb.append("enableDrugEditor="+enableDrugEditor);
 		sb.append("\n");
-		sb.append("eKapa_dburl=" + eKapa_dburl);
+		sb.append("enableDrugGroupEditor="+enableDrugGroupEditor);
 		sb.append("\n");
-		sb.append("eKapa_password=" + eKapa_password);
+		sb.append("patientBarcodeRegex="+patientBarcodeRegex);
 		sb.append("\n");
-		sb.append("eKapa_user=" + eKapa_user);
-		sb.append("\n");
-		
-		// hibernate
-		sb.append("encrypted_hibernate_password="+hibernatePassword);
+		sb.append("export_dir="+exportDir);
 		sb.append("\n");
 		sb.append("encrypted_hibernate_url="+hibernateConnectionUrl);
-		sb.append("\n");
-		sb.append("encrypted_hibernate_username="+hibernateUsername);
 		sb.append("\n");
 		sb.append("hibernate_dialect="+hibernateDialect);
 		sb.append("\n");
 		sb.append("hibernate_driver="+hibernateDriver);
 		sb.append("\n");
-		
-		// prehmis + idartweb
+		sb.append("encrypted_hibernate_password="+hibernatePassword);
+		sb.append("\n");
+		sb.append("encrypted_hibernate_username="+hibernateUsername);
+		sb.append("\n");
+		sb.append("update_script_dir="+updateScriptDir);
+		sb.append("\n");
 		sb.append("prehmis_integration="+prehmisIntegration);
 		sb.append("\n");
 		sb.append("idart_web_enabled="+idartWebEnabled);
@@ -368,34 +291,35 @@ public class iDartProperties {
 		sb.append("\n");
 		sb.append("idart_web_system_id="+idartWebSystemId);		
 		sb.append("\n");
-		
-		// proxy
-		sb.append("proxy_url="+proxyUrl);		
+		sb.append("importDateFormat="+importDateFormat);
 		sb.append("\n");
-		sb.append("proxy_port="+proxyPort);		
+		sb.append("updateUrl="+updateUrl);
 		sb.append("\n");
-		sb.append("proxy_user="+proxyUser);		
+		sb.append("eKapa_dbname=" + eKapa_dbname);
 		sb.append("\n");
-		sb.append("encrypted_proxy_password="+proxyPassword);		
+		sb.append("eKapa_dbport=" + eKapa_dbport);
 		sb.append("\n");
-		sb.append("proxy_user_domain="+proxyUserDomain);		
+		sb.append("eKapa_dburl=" + eKapa_dburl);
 		sb.append("\n");
-		sb.append("proxy_bypass="+proxyBypass);		
+		sb.append("eKapa_password=" + eKapa_password);
 		sb.append("\n");
-		
-		return sb.toString();
-	}
+		sb.append("eKapa_user=" + eKapa_user);
+		sb.append("\n");
+		sb.append("intValueOfAlternativeBarcodeEndChar="
+				+ intValueOfAlternativeBarcodeEndChar);
+		sb.append("\n");
+		sb.append("cidaStudy=" + isCidaStudy);
+		sb.append("\n");
 
-	/**
-	 * Saves the current iDartProperties to the properties file (in case of changes during running the application)
-	 * @throws IOException
-	 */
-	public static void saveiDartProperties() throws IOException {
-		log.info("Writing updated properties to file.");
-		PropertiesEncrypter pe = new PropertiesEncrypter();
-		pe.loadPropertiesFromString(iDartProperties.getPropertiesString());
-		pe.encryptProperties();
-		pe.savePropertiesToFile(iDartProperties.FILE);
+		switch (labelType) {
+		case EKAPA:
+			sb.append("labelType=ekapa");
+			break;
+		case IDART:
+			sb.append("labelType=idart");
+			break;
+		}
+		return sb.toString();
 	}
 
 	/**

@@ -19,7 +19,6 @@
 
 package org.celllife.idart.start;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import model.manager.AdministrationManager;
@@ -173,7 +172,6 @@ public class PharmacyApplication {
 			if (loginScreen.isSuccessfulLogin()) {
 				startEkapaJob(scheduler);
 				startSmsJobs(scheduler);
-				setupIDartWebProxy(loginScreen);
 				
 				try {
 					String role = LocalObjects.getUser(HibernateUtil.getNewSession()).getRole();
@@ -239,63 +237,7 @@ public class PharmacyApplication {
 			}
 		}
 	}
-	
-	private static void setupIDartWebProxy(Login loginScreen) {
-		if (iDartProperties.idartWebEnabled) {
-			// PROXY
-			System.setProperty("java.net.useSystemProxies", "true");
-			
-			iDartProperties.proxyUser = loginScreen.getProxyUser();
-			iDartProperties.proxyPassword = loginScreen.getProxyPassword();
-			iDartProperties.proxyBypass = loginScreen.isProxyBypass();
-			iDartProperties.proxyUserDomain = loginScreen.getProxyDomain();
-			iDartProperties.proxyUrl = loginScreen.getProxyUrl();
-			iDartProperties.proxyPort = loginScreen.getProxyPort();
-			
-			try {
-				iDartProperties.saveiDartProperties();
-			} catch (IOException e) {
-				log.error("Could not save properties file (with updated proxy login details", e);
-			}
-			
-			// NOTE: the authentication code below did not work for PREHMIS (got 407 from the proxy server)
-			/*final String proxyUser = System.getProperty("http.proxyUser");
-			final String proxyPassword = System.getProperty("http.proxyPassword");
-			Authenticator.setDefault(new Authenticator() {
-				@Override
-				public PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
-				}
-			});*/
-			
-			// NOTE: the default proxy selector does not pick up the system proxy. The properties need
-			// to be set when running the Java application in order to pick up a proxy. Otherwise
-			// it says proxy: DIRECT.
-			// E.g. -Dhttp.proxyHost=196.201.217.49 -Dhttp.proxyPort=80 -Dhttp.proxyUser=blah -Dhttp.proxyPassword=blah
-			/*List<Proxy> proxies = null;
-			try {
-				proxies = ProxySelector.getDefault().select(new URI(iDartProperties.idartWebUrl));
-			} catch (URISyntaxException e) {
-				log.error("Could not get System Proxy for " + iDartProperties.idartWebUrl, e);
-			}
 
-			if (proxies != null) {
-				for (Proxy proxy : proxies) {
-					log.info("proxy hostname : " + proxy.type());
-					InetSocketAddress addr = (InetSocketAddress) proxy.address();
-					if (addr == null) {
-						log.info("No Proxy");
-					} else {
-						log.info("Proxy hostname : " + addr.getHostName());
-						log.info("Proxy port : " + addr.getPort());
-						log.info("Proxy user : " + System.getProperty("http.proxyUser"));
-					}
-					
-				}
-			}*/
-		}
-	}
-	
 	private static void closeAllShells() {
 		Display display = Display.getCurrent();
 

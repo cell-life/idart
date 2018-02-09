@@ -1333,7 +1333,7 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 				tx.rollback();
 			}
 			getLog().error("Error while communicating with iDARTweb - unable to remove dispensation: "+packageToRemove, e);
-			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 
 		} catch (HibernateException he) {
 
@@ -1420,7 +1420,7 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 					tx.rollback();
 				}
 				getLog().error("Error while communicating with iDARTweb - unable to redo single item in package: "+selectedDrug, e);
-				MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+				MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 			}
 		} else {
 			MessageBox mb = new MessageBox(getShell());
@@ -1452,7 +1452,7 @@ public class DeleteStockPrescriptionsPackages extends GenericOthersGui {
 				tx.rollback();
 			}
 			getLog().error("Error while communicating with iDARTweb - unable to remove prescription: "+prescriptionToRemove, e);
-			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 
 		} catch (HibernateException he) {
 

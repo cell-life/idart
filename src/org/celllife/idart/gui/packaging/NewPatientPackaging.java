@@ -3132,7 +3132,7 @@ public class NewPatientPackaging extends GenericFormGui implements
 			if (tx != null) {
 				tx.rollback();
 			}
-			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage(e));
+			MessageUtil.showError(e, "iDART Error",	MessageUtil.getIDARTWebCrashMessage());
 		}
 
 		setScreenToInitialState();
