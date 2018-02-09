@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+	<changeSet author="simon@cell-life.org" id="3.8.1">
+		<comment>add atccode table</comment>
+		<createTable tableName="atccode">
+			<column name="id" type="int">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="code" type="varchar(255)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="mims" type="varchar(255)">
+				<constraints nullable="true" unique="true" />
+			</column>
+		</createTable>
+		<addColumn tableName="drug">
+			<column name="atccode_id" type="int" />
+		</addColumn>
+		<dropColumn tableName="drug" columnName="nsncode" />
+		<addColumn tableName="chemicalcompound">
+			<column name="atccode_id" type="int" />
+		</addColumn>
+		<addForeignKeyConstraint constraintName="fk_drug_atccode"
+			referencedTableName="atccode" baseColumnNames="atccode_id"
+			baseTableName="drug" referencedColumnNames="id" />
+		<addForeignKeyConstraint constraintName="fk_chemicalcompound_atccode"
+			referencedTableName="atccode" baseColumnNames="atccode_id"
+			baseTableName="chemicalcompound" referencedColumnNames="id" />
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.2">
+		<comment>improvement to add_sched_visit trigger</comment>
+		<sqlFile splitStatements="false" stripComments="false"
+			path="org/celllife/idart/database/3_8_2-add_sched_visit.sql" />
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.3">
+		<comment>drop unique constraint on atccode.mims</comment>
+		<dropUniqueConstraint tableName="atccode" constraintName="atccode_mims_key"/>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.4">
+		<comment>load atc codes</comment>
+		<loadData tableName="atccode" file="org/celllife/idart/database/3_8_4-atc_codes.csv">
+    		<column name="id" type="NUMERIC" index="0"/>
+    		<column name="code" type="STRING" index="1"/>
+    		<column name="name" type="STRING" index="2"/>
+    		<column name="mims" type="STRING" index="3"/>
+    	</loadData>
+    	<update tableName="atccode">
+    		<column name="mims" value="NULL"/>
+    		<where>mims = ''</where>
+    	</update>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.5">
+		<comment>change atccode chemicalcompound relationship to many to many</comment>
+		<dropColumn tableName="chemicalcompound" columnName="atccode_id"/>
+		<createTable tableName="atccode_chemicalcompound">
+			<column name="atccode_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="chemicalcompound_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="fk_atccode_chemicalcompound" 
+			baseTableName="atccode_chemicalcompound" 
+			baseColumnNames="atccode_id" 
+			referencedTableName="atccode" 
+			referencedColumnNames="id"/>
+		<addForeignKeyConstraint constraintName="fk_chemicalcompound_atccode" 
+			baseTableName="atccode_chemicalcompound" 
+			baseColumnNames="chemicalcompound_id" 
+			referencedTableName="chemicalcompound" 
+			referencedColumnNames="id"/>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.6">
+		<comment>add constraints to chemical compound</comment>
+		<addNotNullConstraint tableName="chemicalcompound" columnName="name"/>
+		<addUniqueConstraint tableName="chemicalcompound" columnNames="name"/>
+		<addUniqueConstraint tableName="chemicalcompound" columnNames="acronym"/>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.7">
+		<comment>link atc codes to chemical compounds</comment>
+		<customChange class="org.celllife.idart.database.LinkChemcialCompundsToAtcCodes_3_8_7"/>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.8">
+		<comment>remove didanosine link from tenofovir</comment>
+		<delete tableName="chemicaldrugstrength">
+			<where>drug = 3 and chemicalcompound = 2</where>
+		</delete>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.9">
+		<comment>link atc codes to drugs</comment>
+		<customChange class="org.celllife.idart.database.LinkDrugsToAtcCodes_3_8_9"/>
+	</changeSet>
+	<changeSet author="simon@cell-life.org" id="3.8.10">
+		<comment>add pickupdate to packagedruginfotmp</comment>
+		<addColumn tableName="packagedruginfotmp">
+			<column name="pickupdate" type="TIMESTAMP WITH TIME ZONE"/>
+		</addColumn>
+	</changeSet>
+		<changeSet author="simon@cell-life.org" id="3.8.11">
+		<comment>remove invalid columns from adherencerecordtmp and deleteditem</comment>
+		<dropColumn tableName="adherencerecordtmp" columnName="invalid"/>
+		<dropColumn tableName="deleteditem" columnName="invalid"/>
+	</changeSet>
+    <changeSet author="kevin@cell-life.org" id="3.8.12">
+		<comment>Add PREHMIS and PGWC Identifier Types</comment>
+		<insert tableName="identifiertype">
+            <column name="id">6</column>
+            <column name="name">PGWC Patient Number</column>
+            <column name="index">6</column>
+            <column name="voided">f</column>
+		</insert>
+		<insert tableName="identifiertype">
+            <column name="id">7</column>
+            <column name="name">PREHMIS ID</column>
+            <column name="index">7</column>
+            <column name="voided">f</column>
+		</insert>
+		<insert tableName="identifiertype">
+            <column name="id">8</column>
+            <column name="name">iDART Patient Number</column>
+            <column name="index">8</column>
+            <column name="voided">f</column>
+		</insert>
+	</changeSet>
+    <changeSet author="kevin@cell-life.org" id="3.8.13">
+		<comment>Add identifier column to Doctor</comment>
+		<addColumn tableName="doctor">
+            <column name="identifier" type="VARCHAR(255)"/>
+		</addColumn>
+	</changeSet>
+    <changeSet author="kevin@cell-life.org" id="3.8.14">
+        <addColumn tableName="identifiertype">
+            <column name="system" type="varchar(255)"/>
+        </addColumn>
+        <update tableName="identifiertype">
+            <column name="system">SA_IDENTITY_NUMER</column>
+            <where>id = 3</where>
+        </update>
+        <update tableName="identifiertype">
+            <column name="system">SA_PASSPORT_NUMBER</column>
+            <where>id = 4</where>
+        </update>
+        <update tableName="identifiertype">
+            <column name="name">PGWC Patient Number</column>
+            <column name="system">PGWC</column>
+            <where>id = 6</where>
+        </update>
+        <update tableName="identifiertype">
+            <column name="name">PREHMIS Patient Identifier</column>
+            <column name="system">PREHMIS</column>
+            <where>id = 7</where>
+        </update>
+        <update tableName="identifiertype">
+            <column name="name">iDART Patient Number</column>
+            <column name="system">IDART_WEB</column>
+            <where>id = 8</where>
+        </update>
+    </changeSet>
+    <changeSet author="kevin@cell-life.org" id="3.8.15">
+        <addColumn tableName="form">
+            <column name="code" type="varchar(255)"/>
+        </addColumn>
+        <!-- Lozenges -->
+        <update tableName="form">
+            <column name="code">ORTROCHE</column>
+            <where>id = 1</where>
+        </update>
+        <!-- Cream -->
+        <update tableName="form">
+            <column name="code">CRM</column>
+            <where>id = 2</where>
+        </update>
+        <!-- Ointment -->
+        <update tableName="form">
+            <column name="code">OINT</column>
+            <where>id = 3</where>
+        </update>
+        <!-- Gel -->
+        <update tableName="form">
+            <column name="code">GEL</column>
+            <where>id = 4</where>
+        </update>
+        <!-- Oral Gel -->
+        <update tableName="form">
+            <column name="code">OGEL</column>
+            <where>id = 5</where>
+        </update>
+        <!-- Lotion -->
+        <update tableName="form">
+            <column name="code">LTN</column>
+            <where>id = 6</where>
+        </update>
+        <!-- Vaginal Cream -->
+        <update tableName="form">
+            <column name="code">VAGCRM</column>
+            <where>id = 7</where>
+        </update>
+        <!-- Eye Ointment -->
+        <update tableName="form">
+            <column name="code">OPOINT</column>
+            <where>id = 8</where>
+        </update>
+        <!-- Suppository -->
+        <update tableName="form">
+            <column name="code">SUPP</column>
+            <where>id = 9</where>
+        </update>
+        <!-- Nose drops -->
+        <update tableName="form">
+            <column name="code">NDROP</column>
+            <where>id = 10</where>
+        </update>
+        <!-- Eye drops -->
+        <update tableName="form">
+            <column name="code">OPDROP</column>
+            <where>id = 11</where>
+        </update>
+        <!-- Ear drops -->
+        <update tableName="form">
+            <column name="code">ORDROP</column>
+            <where>id = 12</where>
+        </update>
+        <!-- Soap -->
+        <update tableName="form">
+            <column name="code">BARSOAP</column>
+            <where>id = 13</where>
+        </update>
+        <!-- Tablets -->
+        <update tableName="form">
+            <column name="code">TAB</column>
+            <where>id = 14</where>
+        </update>
+        <!-- Suspension -->
+        <update tableName="form">
+            <column name="code">SUSP</column>
+            <where>id = 15</where>
+        </update>
+        <!-- Syrup -->
+        <update tableName="form">
+            <column name="code">SYRUP</column>
+            <where>id = 16</where>
+        </update>
+        <!-- Capsules -->
+        <update tableName="form">
+            <column name="code">CAP</column>
+            <where>id = 17</where>
+        </update>
+    </changeSet>
+    <changeSet author="dagmar@cell-life.org" id="3.8.16">
+        <!-- add the missing ATC code -->
+        <insert tableName="atccode">
+            <column name="id">59</column>
+            <column name="name">Lopinavir and Ritonavir</column>
+            <column name="code">J05AR10</column>
+        </insert>
+        <!-- link the new ATC code to the correct chemical compounds -->
+        <insert tableName="atccode_chemicalcompound">
+            <column name="atccode_id">59</column>
+            <column name="chemicalcompound_id">9</column>
+        </insert>
+        <insert tableName="atccode_chemicalcompound">
+            <column name="atccode_id">59</column>
+            <column name="chemicalcompound_id">6</column>
+        </insert>
+        <!-- link the existing drugs to the correct atccode and indicate the strengths -->
+        <!-- [LPV/RTV] Kaletra 133.3/33.3 mg -->
+        <update tableName="drug">
+            <column name="atccode_id">59</column>
+            <where>id = 21</where>
+        </update>
+        <insert tableName="chemicaldrugstrength">
+            <column name="id">32</column>
+            <column name="chemicalcompound">9</column>
+            <column name="strength">133</column>
+            <column name="drug">21</column>
+        </insert>
+        <insert tableName="chemicaldrugstrength">
+            <column name="id">33</column>
+            <column name="chemicalcompound">6</column>
+            <column name="strength">33</column>
+            <column name="drug">21</column>
+        </insert>
+        <!-- [LPV/RTV] Kaletra 80/20 mg/ml -->
+        <update tableName="drug">
+            <column name="atccode_id">59</column>
+            <where>id = 22</where>
+        </update>
+        <insert tableName="chemicaldrugstrength">
+            <column name="id">34</column>
+            <column name="chemicalcompound">9</column>
+            <column name="strength">80</column>
+            <column name="drug">22</column>
+        </insert>
+        <insert tableName="chemicaldrugstrength">
+            <column name="id">35</column>
+            <column name="chemicalcompound">6</column>
+            <column name="strength">20</column>
+            <column name="drug">22</column>
+        </insert>
+        <!-- [LPV/RTV] Aluvia 200/50mg  -->
+        <update tableName="drug">
+            <column name="name">[LPV/RTV] Aluvia 200/50mg</column>
+            <column name="atccode_id">59</column>
+            <where>id = 26</where>
+        </update>
+        <insert tableName="chemicaldrugstrength">
+            <column name="id">36</column>
+            <column name="chemicalcompound">9</column>
+            <column name="strength">200</column>
+            <column name="drug">26</column>
+        </insert>
+        <insert tableName="chemicaldrugstrength">
+            <column name="id">37</column>
+            <column name="chemicalcompound">6</column>
+            <column name="strength">50</column>
+            <column name="drug">26</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

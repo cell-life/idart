@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<conditions>
+    <condition type="variable" id="showEkapaPanel">
+        <name>isEkapaVersion</name>
+        <value>true</value>
+    </condition>
+    <panelcondition panelid="path.panel2" conditionid="showEkapaPanel"/>
+    <condition type="variable" id="showIdartWebPanel">
+        <name>idartWebEnabled</name>
+        <value>true</value>
+    </condition>
+    <panelcondition panelid="path.panel6" conditionid="showIdartWebPanel"/>
+</conditions>

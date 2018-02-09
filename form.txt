@@ -1,0 +1,159 @@
+Code System:	HL7v3 MaterialForm
+OID:	2.16.840.1.113883.19.5.3
+Maintainer:	Health Level Seven
+
+Mnemonic	Concept	Description
+AER	Aerosol
+BAINHL	Breath Activated Inhaler
+INHLSOL	Inhalant Solution
+MDINHL	Metered Dose Inhaler
+NASSPRY	Nasal Spray
+APPFUL	applicatorful
+BAR	Bar
+BARSOAP	Bar Soap
+MEDBAR	Medicated Bar Soap
+CHEWBAR	Chewable Bar	A solid dosage form usually in the form of a rectangle that is meant to be chewed.
+BEAD	Beads	A solid dosage form in the shape of a small ball.
+CAKE	Cake
+CEMENT	Cement	A substance that serves to produce solid union between two surfaces.
+CRM	Cream	A semisolid dosage form containing one or more drug substances dissolved or dispersed in a suitable base; more recently, the term has been restricted to products consisting of oil-in-water emulsions or aqueous microcrystalline dispersions of long chain fatty acids or alcohols that are water washable and more cosmetically and aesthetically acceptable.
+NASCRM	Nasal Cream
+OPCRM	Ophthalmic Cream
+ORCRM	Oral Cream
+OTCRM	Otic Cream
+RECCRM	Rectal Cream
+TOPCRM	Topical Cream
+VAGCRM	Vaginal Cream
+VAGCRMAPL	Vaginal Cream with Applicator
+CRYS	Crystals	A naturally produced angular solid of definite form in which the ultimate units from which it is built up are systematically arranged; they are usually evenly spaced on a regular space lattice.
+DERMSPRY	Dermal Spray
+DISK	Disk	A circular plate-like organ or structure.
+FLAKE	Flakes
+FOAM	Foam
+FOAMAPL	Foam with Applicator
+RECFORM	Rectal foam
+VAGFOAM	Vaginal foam
+VAGFOAMAPL	Vaginal foam with applicator
+GASINHL	Gas for Inhalation
+GEL	Gel	A semisolid system consisting of either suspensions made up of small inorganic particles or large organic molecules interpenetrated by a liquid.
+GELAPL	Gel with Applicator
+NASGEL	Nasal Gel
+OPGEL	Ophthalmic Gel
+OTGEL	Otic Gel
+TOPGEL	Topical Gel
+URETHGEL	Urethral Gel
+VAGGEL	Vaginal Gel
+VGELAPL	Vaginal Gel with Applicator
+GRAN	Granules	A small particle or grain.
+GUM	ChewingGum	A sweetened and flavored insoluble plastic material of various shapes which when chewed, releases a drug substance into the oral cavity.
+INHL	Inhalant
+BAINHLPWD	Breath Activated Powder Inhaler
+INHLPWD	Inhalant Powder
+MDINHLPWD	Metered Dose Powder Inhaler
+NASINHL	Nasal Inhalant
+ORINHL	Oral Inhalant
+LIQCLN	Liquid Cleanser
+LIQSOAP	Medicated Liquid Soap
+SHMP	Shampoo	A liquid soap or detergent used to clean the hair and scalp and is often used as a vehicle for dermatologic agents.
+LTN	Lotion	The term "lotion" has been used to categorize many topical suspensions, solutions and emulsions intended for application to the skin.
+TOPLTN	Topical Lotion
+OIL	Oil	An unctuous, combustible substance which is liquid, or easily liquefiable, on warming, and is soluble in ether but insoluble in water. Such substances, depending on their origin, are classified as animal, mineral, or vegetable oils.
+TOPOIL	Topical Oil
+OINT	Ointment	A semisolid preparation intended for external application to the skin or mucous membranes.
+NASOINT	Nasal Ointment
+OINTAPL	Ointment with Applicator
+OPOINT	Ophthalmic Ointment
+OTOINT	Otic Ointment
+RECOINT	Rectal Ointment
+TOPOINT	Topical Ointment
+VAGOINT	Vaginal Ointment
+VAGOINTAPL	Vaginal Ointment with Applicator
+PAD	Pad
+MEDPAD	Medicated Pad
+PASTE	Paste	A semisolid dosage form that contains one or more drug substances intended for topical application.
+PUD	Pudding
+TPASTE	Toothpaste	A paste formulation intended to clean and/or polish the teeth, and which may contain certain additional agents.
+PATCH	Patch	A drug delivery system that contains an adhesived backing and that permits its ingredients to diffuse from some portion of it (e.g., the backing itself, a reservoir, the adhesive, or some other component) into the body from the external site where it is applied.
+TPATCH	Transdermal Patch
+TPATH16	16 Hour Transdermal Patch
+TPATH24	24 Hour Transdermal Patch
+TPATH2WK	Biweekly Transdermal Patch
+TPATH72	72 Hour Transdermal Patch
+TPATHWK	Weekly Transdermal Patch
+PELLET	Pellet	A small sterile solid mass consisting of a highly purified drug (with or without excipients) made by the formation of granules, or by compression and molding.
+PILL	Pill	A small, round solid dosage form containing a medicinal agent intended for oral administration.
+CAP	Capsule	A solid dosage form in which the drug is enclosed within either a hard or soft soluble container or "shell" made from a suitable form of gelatin.
+ORCAP	Oral Capsule
+ENTCAP	Enteric Coated Capsule
+ERENTCAP	Extended Release Enteric Coated Capsule
+ERCAP	Extended Release Capsule	A solid dosage form in which the drug is enclosed within either a hard or soft soluble container made from a suitable form of gelatin, and which releases a drug (or drugs) in such a manner to allow a reduction in dosing frequency as compared to that drug (or drugs) presented as a conventional dosage form.
+ERCAP12	12 Hour Extended Release Capsule
+ERCAP24	24 Hour Extended Release Capsule
+ERECCAP	Extended Release Enteric Coated Capsule
+TAB	Tablet	A solid dosage form containing medicinal substances with or without suitable diluents.
+ORTAB	Oral Tablet
+BUCTAB	Buccal Tablet
+SRBUCTAB	Sustained Release Buccal Tablet
+CAPLET	Caplet
+CHEWTAB	Chewable Tablet	A solid dosage form containing medicinal substances with or without suitable diluents that is intended to be chewed, producing a pleasant tasting residue in the oral cavity that is easily swallowed and does not leave a bitter or unpleasant after-taste.
+CPTAB	Coated Particles Tablet
+DISINTAB	Disintegrating Tablet	A solid dosage form containing medicinal substances which disintegrates rapidly, usually within a matter of seconds, when placed upon the tongue.
+DRTAB	Delayed Release Tablet
+ECTAB	Enteric Coated Tablet
+ERECTAB	Extended Release Enteric Coated Tablet
+ERTAB	Extended Release Tablet	A solid dosage form containing a drug which allows at least a reduction in dosing frequency as compared to that drug presented in conventional dosage form.
+ERECTAB	Extended Release Enteric Coated Tablet
+ERTAB12	12 Hour Extended Release Tablet
+ERTAB24	24 Hour Extended Release Tablet
+ORTROCHE	Lozenge/Oral Troche	A solid preparation containing one or more medicaments, usually in a flavored, sweetened base which is intended to dissolve or disintegrate slowly in the mouth.
+SLTAB	Sublingual Tablet
+VAGTAB	Vaginal Tablet
+POWD	Powder	An intimate mixture of dry, finely divided drugs and/or chemicals that may be intended for internal or external use.
+TOPPWD	Topical Powder
+RECPWD	Rectal Powder
+VAGPWD	Vaginal Powder
+PUFF	puff
+PWDSPRY	Powder Spray
+RECSPRY	Rectal Spray
+SCOOP	scoops
+SOL	Solution	A liquid preparation that contains one or more chemical substances dissolved, i.e., molecularly dispersed, in a suitable solvent or mixture of mutually miscible solvents.
+DROP	Drops
+NDROP	Nasal Drops
+OPDROP	Ophthalmic Drops
+ORDROP	Oral Drops
+OTDROP	Otic Drops
+IPSOL	Intraperitoneal Solution
+IRSOL	Irrigation Solution	A sterile solution intended to bathe or flush open wounds or body cavities; they're used topically, never parenterally.
+DOUCHE	Douche	A liquid preparation, intended for the irrigative cleansing of the vagina, that is prepared from powders, liquid solutions, or liquid concentrates and contains one or more chemical substances dissolved in a suitable solvent or mutually miscible solvents.
+ENEMA	Enema	A rectal preparation for therapeutic, diagnostic, or nutritive purposes.
+OPIRSOL	Ophthalmic Irrigation Solution
+IVSOL	Intravenous Solution
+ORALSOL	Oral Solution
+ELIXIR	Elixir	A clear, pleasantly flavored, sweetened hydroalcoholic liquid containing dissolved medicinal agents; it is intended for oral use.
+ORDROP	Oral Drops
+RINSE	Mouthwash/Rinse	An aqueous solution which is most often used for its deodorant, refreshing, or antiseptic effect.
+SYRUP	Syrup	An oral solution containing high concentrations of sucrose or other sugars; the term has also been used to include any other liquid dosage form prepared in a sweet and viscid vehicle, including oral suspensions.
+RECSOL	Rectal Solution
+TOPSOL	Topical Solution
+LIN	Liniment	A solution or mixture of various substances in oil, alcoholic solutions of soap, or emulsions intended for external application.
+MUCTOPSOL	Mucous Membrane Topical Solution
+TINC	Tincture
+SPRY	sprays
+SPRYADAPT	Spray with Adaptor
+SUPP	Suppository	A solid body of various weights and shapes, adapted for introduction into the rectal, vaginal, or urethral orifice of the human body; they usually melt, soften, or dissolve at body temperature.
+RECSUPP	Rectal Suppository
+URETHSUPP	Urethral suppository
+VAGSUPP	Vaginal Suppository
+SUSP	Suspension
+ITSUSP	Intrathecal Suspension
+OPSUSP	Ophthalmic Suspension
+ORSUSP	Oral Suspension
+ERSUSP	Extended-Release Suspension
+ERSUSP12	12 Hour Extended-Release Suspension
+ERSUSP24	24 Hour Extended Release Suspension
+OTSUSP	Otic Suspension
+RECSUSP	Rectal Suspension
+SWAB	Swab	A wad of absorbent material usually wound around one end of a small stick and used for applying medication or for removing material from an area.
+MEDSWAB	Medicated swab
+VAGSPRY	Vaginal Spray
+WAFER	Wafer	A thin slice of material containing a medicinal agent.
